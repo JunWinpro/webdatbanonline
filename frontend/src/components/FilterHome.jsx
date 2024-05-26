@@ -45,16 +45,24 @@ const PlacesItems = [
   { label: "Nhà Bè", link: "nha-be" },
 ];
 
-const TypeItems = [
-    { label: "Restaurant", link: "restaurant" },
-  ];
+const TypeItems = [{ label: "Restaurant", link: "restaurant" }];
+
+const CostsItems = [
+  { label: "< 150K", link: "150" },
+  { label: "150 - 250", link: "250" },
+  { label: "250 - 500", link: "500" },
+  { label: "500 - 1000", link: "1000" },
+  { label: "> 1000", link: "uppercost" },
+];
 
 const FilterHome = () => {
   return (
     <>
-      <Carousel>
-        <CarouselContent>
-          <CarouselItem className="md:basis-1/2 lg:basis-1/5">
+      <Carousel className="w-full justify-center relative">
+        <CarouselNext className="absolute top-1/2 right-10 -translate-y-1/2"></CarouselNext>
+        <CarouselPrevious className="absolute top-1/2 left-10 -translate-y-1/2"></CarouselPrevious>
+        <CarouselContent className="w-4/5 mx-auto">
+          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
             <Select>
               <SelectTrigger>
                 <SelectValue placeholder="Select a places" />
@@ -69,60 +77,117 @@ const FilterHome = () => {
               </SelectContent>
             </Select>
           </CarouselItem>
-          <CarouselItem className="md:basis-1/2 lg:basis-1/5">
-          <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Restaurant" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Type</SelectLabel>
-              {TypeItems.map((item) => (
-                <SelectItem value={item.link}>{item.label}</SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Restaurant" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Type</SelectLabel>
+                  {TypeItems.map((item) => (
+                    <SelectItem value={item.link}>{item.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </CarouselItem>
-          <CarouselItem className="md:basis-1/2 lg:basis-1/5">
-          <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a places" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Places</SelectLabel>
-              {PlacesItems.map((item) => (
-                <SelectItem value={item.link}>{item.label}</SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-
+          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select average prices" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Prices</SelectLabel>
+                  {CostsItems.map((item) => (
+                    <SelectItem value={item.link}>{item.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </CarouselItem>
 
-          <CarouselItem className="md:basis-1/2 lg:basis-1/5">
-          <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a places" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Places</SelectLabel>
-              {PlacesItems.map((item) => (
-                <SelectItem value={item.link}>{item.label}</SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a places" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Places</SelectLabel>
+                  {PlacesItems.map((item) => (
+                    <SelectItem value={item.link}>{item.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </CarouselItem>
+          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a places" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Places</SelectLabel>
+                  {PlacesItems.map((item) => (
+                    <SelectItem value={item.link}>{item.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </CarouselItem>
+          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a places" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Places</SelectLabel>
+                  {PlacesItems.map((item) => (
+                    <SelectItem value={item.link}>{item.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </CarouselItem>
+          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a places" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Places</SelectLabel>
+                  {PlacesItems.map((item) => (
+                    <SelectItem value={item.link}>{item.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </CarouselItem>
+          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a places" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Places</SelectLabel>
+                  {PlacesItems.map((item) => (
+                    <SelectItem value={item.link}>{item.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </CarouselItem>
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
-      <div className="flex justify-around">
 
-      </div>
+      </Carousel>
+
+      <div className="flex justify-around"></div>
     </>
   );
 };
