@@ -19,6 +19,7 @@ const foodAndDrinkItems = [
 ];
 
 const Navbar = () => {
+  
   return (
     <NavigationMenu>
       <NavigationMenuList>
@@ -40,7 +41,7 @@ const Navbar = () => {
           <NavigationMenuTrigger>Food & Drink</NavigationMenuTrigger>
           <NavigationMenuContent>
             {foodAndDrinkItems.map((item) => (
-              <NavigationMenuLink  >
+              <NavigationMenuLink >
                 <Button >
                   <Link to={item.link}>{item.label}</Link>
                 </Button>

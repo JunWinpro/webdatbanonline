@@ -61,9 +61,9 @@ const FilterHome = () => {
       <Carousel className="w-3/4 relative ">
         <CarouselNext className="absolute top-1/2 -right-10 -translate-y-1/2"></CarouselNext>
         <CarouselPrevious className="absolute top-1/2 -left-10 -translate-y-1/2"></CarouselPrevious>
-        <CarouselContent className="w-4/5">
-          <CarouselItem className="md:basis-1/3 lg:basis-1/6">
-            <Select>
+        <CarouselContent className="w-full flex-nowrap">
+          <CarouselItem className="ml-10 md:basis-1/3 lg:basis-1/6">
+            <Select >
               <SelectTrigger>
                 <SelectValue placeholder="Select a places" />
               </SelectTrigger>
