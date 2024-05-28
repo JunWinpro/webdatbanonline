@@ -58,7 +58,7 @@ const CostsItems = [
 const FilterHome = () => {
   return (
     <>
-      <Carousel className="w-3/4 relative ">
+      <Carousel className="w-3/4 relative my-5">
         <CarouselNext className="absolute top-1/2 -right-10 -translate-y-1/2"></CarouselNext>
         <CarouselPrevious className="absolute top-1/2 -left-10 -translate-y-1/2"></CarouselPrevious>
         <CarouselContent className="w-full flex-nowrap">
