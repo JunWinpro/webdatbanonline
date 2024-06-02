@@ -29,18 +29,8 @@ const userSchema = new mongoose.Schema(
             required: true
         },
         dateOfBirth: {
-            day: {
-                type: Number,
-                default: null
-            },
-            month: {
-                type: Number,
-                default: null
-            },
-            year: {
-                type: Number,
-                default: null
-            }
+            type: Date,
+            default: null
         },
         gender: {
             type: String,
@@ -50,11 +40,11 @@ const userSchema = new mongoose.Schema(
         address: {
             streetAddress: {
                 type: String,
-                default: ""
+                default: null
             },
             city: {
                 type: String,
-                default: ""
+                default: null
             },
         },
         role: {
