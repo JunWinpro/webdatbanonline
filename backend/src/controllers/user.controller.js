@@ -33,12 +33,14 @@ const userController = {
                 gender,
             })
 
-            delete newUser.role
-            delete newUser.password
+            const returnUser = { ...newUser.toObject() }
+
+            delete returnUser.role
+            delete returnUser.password
 
             res.status(201).json({
                 message: "User created successfully",
-                data: newUser,
+                data: returnUser,
                 success: true
             })
         }
@@ -51,95 +53,39 @@ const userController = {
             })
         }
     },
-    // employee: async (req, res) => {
-    //     try {
-    //         const { username, phone, password, firstName, lastName, gender, employeeId } = req.body;
 
-    //         const employeeExist = await ModelDb.EmployeeModel.findOne({
-    //             $or: [
-    //                 { username },
-    //                 { phone }
-    //             ]
-    //         })
-
-    //         if (employeeExist?.username === username) throw new Error("Username already exists")
-    //         if (employeeExist?.phone === phone) throw new Error("Phone already exists")
-
-    //         const userExist = await ModelDb.UserModel.findOne({
-    //             phone
-    //         })
-    //         if (userExist) throw new Error("Phone already exists")
-
-    //         const hashPassword = bcryptPassword.hashPassword(password)
-
-    //         const newUser = await ModelDb.EmployeeModel.create({
-    //             username,
-    //             phone,
-    //             password: hashPassword,
-    //             employeeId,
-    //             firstName,
-    //             lastName,
-    //             gender,
-    //         })
-
-    //         delete newUser.role
-    //         delete newUser.password
-
-    //         res.status(201).json({
-    //             message: "User created successfully",
-    //             data: newUser,
-    //             success: true
-    //         })
-    //     }
-    //     catch (err) {
-    //         console.log("user register err: ", err)
-    //         res.status(403).json({
-    //             message: err.message,
-    //             success: false,
-    //             data: null
-
-    //         })
-    //     }
-    // }
     login: async (req, res) => {
         try {
-            const { email, phone, username, password } = req.body
+            const { email, password } = req.body
 
-            let user;
-            if (username || phone) {
-                user = await ModelDb.EmployeeModel.findOne({
-                    $or: [
-                        { phone },
-                        { username }
-                    ]
-                })
-                if (!user) throw new Error("Username/Phone or password is wrong")
-            }
-            else if (email) {
-                user = await ModelDb.UserModel.findOne({ email })
-                if (!user) throw new Error("Email or password is wrong")
-            }
+            const user = await ModelDb.UserModel.findOne({ email })
+            if (!user) throw new Error("Email or password is wrong")
 
             const checkPassword = bcryptPassword.comparePassword(password, user.password)
             if (!checkPassword) throw new Error("Password is wrong")
 
-            const userInfo = { ...user.toObject() }
+            const returnUser = { ...user.toObject() }
+
+            delete returnUser.password
+            delete returnUser.createdAt
+            delete returnUser.updatedAt
+            delete returnUser.isDeleted
+            delete returnUser.isVerified
 
             const accessToken = jwtToken.createToken({
-                userId: userInfo._id,
-                phone: userInfo.phone
+                userId: returnUser._id,
+                email: returnUser.email
             }, "AT")
             const refreshToken = jwtToken.createToken({
-                userId: userInfo._id,
-                phone: userInfo.phone
+                userId: returnUser._id,
+                email: returnUser.email
             }, "RT")
 
-            delete userInfo.password
 
             res.status(201).json({
                 message: "Login success",
                 data: {
-                    userInfo,
+                    userInfo: returnUser,
                     accessToken,
                     refreshToken
                 },
@@ -164,14 +110,14 @@ const userController = {
             })
             if (!allUsers) throw new Error("User not found")
 
-            const usersWithoutPassword = allUsers.map(user => {
-                const { password, ...userWithoutPassword } = user.toObject();
-                return userWithoutPassword;
+            const returnUser = allUsers.map(user => {
+                const { password, role, createdAt, updatedAt, isDeleted, isVerified, ...returnUser } = user.toObject();
+                return returnUser;
             });
 
             res.status(200).json({
                 message: "Get all users success",
-                data: usersWithoutPassword,
+                data: returnUser,
                 success: true
             })
         }
@@ -189,17 +135,24 @@ const userController = {
     getUserById: async (req, res) => {
         try {
             const { id } = req.params
-            const user = await ModelDb.UserModel.findById(id)
+            const user = await ModelDb.UserModel.findOne({
+                _id: id,
+                isDeleted: false
+            })
             if (!user) throw new Error("User not found")
 
-            delete user.password
-            delete user.role
-            delete user.createdAt
-            delete user.updatedAt
+            const returnUser = { ...user.toObject() }
+
+            delete returnUser.password
+            delete returnUser.role
+            delete returnUser.createdAt
+            delete returnUser.updatedAt
+            delete returnUser.isDeleted
+            delete returnUser.isVerified
 
             res.status(200).json({
                 message: "Get user success",
-                data: user,
+                data: returnUser,
                 success: true
             })
         }
@@ -215,7 +168,9 @@ const userController = {
     updateUserById: async (req, res) => {
         try {
             const { id } = req.params
-            const { firstName, lastName, gender, password, newPassword, dateOfBirth } = req.body
+            const { password, newPassword } = req.body
+
+
 
             const user = req.user
             if (user.userId !== id) throw new Error("You don't have permission for this user")
@@ -260,6 +215,33 @@ const userController = {
                 message: "Update user success",
                 data: updatedUser,
                 success: true
+            })
+        }
+        catch (err) {
+            console.log("update user by id err: ", err)
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null
+            })
+        }
+    },
+    deleteUserById: async (_, res) => {
+        try {
+            const { id } = req.params
+
+            const user = req.user
+            if (user.userId !== id) throw new Error("You don't have permission for this user")
+
+            const currentUser = await ModelDb.UserModel.findById(id)
+            if (!currentUser) throw new Error("User not found")
+
+            currentUser.isDeleted = true
+            currentUser.save()
+            res.status(201).json({
+                success: true,
+                data: {},
+                message: "Delete user success"
             })
         }
         catch (err) {

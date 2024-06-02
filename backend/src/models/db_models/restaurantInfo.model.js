@@ -13,16 +13,16 @@ const restaurantInfo = new mongoose.Schema(
         }],
         maxim: {
             type: String,
-            default: ""
+            default: null
         },
         description: [{
             title: {
                 type: String,
-                default: ""
+                default: null
             },
             content: {
                 type: String,
-                default: ""
+                default: null
             },
         }],
         schedule: [{
@@ -45,15 +45,15 @@ const restaurantInfo = new mongoose.Schema(
         }],
         foodImageUrls: [{
             type: String,
-            default: ""
+            default: null
         }],
         menuImageUrls: [{
             type: String,
-            default: ""
+            default: null
         }],
         restaurantImageUrls: [{
             type: String,
-            default: ""
+            default: null
         }],
         isDeleted: {
             type: Boolean,

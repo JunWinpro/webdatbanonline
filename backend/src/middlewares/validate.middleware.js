@@ -1,11 +1,11 @@
 import joi from 'joi';
-import userSchema from '../validateSchema/user.schema.js';
+import userValidate from '../validateSchema/user.validate.js';
 const validateData = {
     user: {
         register: (req, res, next) => {
             try {
-
-
+                const { error, value } = userValidate.register.validate(req.body)
+                if (error) throw new Error(error.details[0].message)
                 next()
             }
             catch (err) {
@@ -18,15 +18,17 @@ const validateData = {
                     success: false,
                 })
             }
-
         },
 
         login: (req, res, next) => {
             try {
-                const { email, phone } = req.body
+                const { email } = req.body
 
-                if (email.length >= 0 && phone >= 0) throw new Error("Please enter only valid email or phone number")
+                const { error, value } = userValidate.login.validate(req.body)
 
+                if (error) throw new Error(error.details[0].message)
+
+                next()
             }
             catch (err) {
                 console.log("Validate login err: ", err)
@@ -44,9 +46,31 @@ const validateData = {
         update: (req, res, next) => {
             try {
                 const file = req.file
-                if (file && file.length <= 0)
 
-                    next()
+                if (file && file.length === 0) throw new Error("File not found")
+
+                // const acceptKey = ["password", "newPassword", "firstName", "lastName", "dateOfBirth", "gender", "address"]
+                // let filterData = {}
+                // acceptKey.forEach(data => {
+                //     if (req.body[data]) {
+                //         filterData[data] = req.body[data]
+                //     }
+                // })
+                // req.body = filterData
+                // console.log("2", req.body)
+                const { password, newPassword } = req.body
+
+                if (password && !newPassword) throw new Error("Please provide your new password")
+                else if (!password && newPassword) throw new Error("Please provide your current password")
+                else if (password && newPassword) {
+                    if (password === newPassword) throw new Error("New password must be different from old password")
+                }
+
+                const { error, value } = userValidate.update.validate(req.body)
+                console.log(value)
+                if (error) throw new Error(error.details[0].message)
+
+                next()
             }
             catch (err) {
                 console.log("Validate update user err: ", err)
@@ -58,7 +82,6 @@ const validateData = {
                     success: false,
                 })
             }
-
         },
     }
 
