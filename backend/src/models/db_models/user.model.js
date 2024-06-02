@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
             required: true
         },
         phone: {
-            type: Number,
+            type: String,
             unique: true,
             required: true
         },
@@ -16,7 +16,10 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        avatar: String,
+        avatar: {
+            type: String,
+            default: "https://med.virginia.edu/diabetes-technology/wp-content/uploads/sites/265/2020/10/Blank-Avatar.png"
+        },
         firstName: {
             type: String,
             required: true
@@ -26,9 +29,18 @@ const userSchema = new mongoose.Schema(
             required: true
         },
         dateOfBirth: {
-            day: Number,
-            month: String,
-            year: Number
+            day: {
+                type: Number,
+                default: null
+            },
+            month: {
+                type: Number,
+                default: null
+            },
+            year: {
+                type: Number,
+                default: null
+            }
         },
         gender: {
             type: String,
@@ -36,8 +48,14 @@ const userSchema = new mongoose.Schema(
             enum: ["male", "female", "other"]
         },
         address: {
-            streetAddress: String,
-            city: String,
+            streetAddress: {
+                type: String,
+                default: ""
+            },
+            city: {
+                type: String,
+                default: ""
+            },
         },
         role: {
             type: String,

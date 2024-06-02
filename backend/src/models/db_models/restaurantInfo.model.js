@@ -11,10 +11,19 @@ const restaurantInfo = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: collection.EMPLOYEES
         }],
-        maxim: String,
+        maxim: {
+            type: String,
+            default: ""
+        },
         description: [{
-            title: String,
-            content: String,
+            title: {
+                type: String,
+                default: ""
+            },
+            content: {
+                type: String,
+                default: ""
+            },
         }],
         schedule: [{
             dayOfWeek: {
@@ -34,9 +43,18 @@ const restaurantInfo = new mongoose.Schema(
                 required: true
             },
         }],
-        foodImageUrls: [String],
-        menuImageUrls: [String],
-        restaurantImageUrls: [String],
+        foodImageUrls: [{
+            type: String,
+            default: ""
+        }],
+        menuImageUrls: [{
+            type: String,
+            default: ""
+        }],
+        restaurantImageUrls: [{
+            type: String,
+            default: ""
+        }],
         isDeleted: {
             type: Boolean,
             default: false

@@ -10,11 +10,16 @@ const reviewSchema = new mongoose.Schema(
         },
         title: {
             type: String,
+            default: ""
         },
         content: {
-            type: String
+            type: String,
+            default: ""
         },
-        reviewImageUrls: [String],
+        reviewImageUrls: [{
+            type: String,
+            default: ""
+        }],
         rate: {
             type: Number,
             min: 1,
