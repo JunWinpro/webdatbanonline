@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-const token = {
+const jwtToken = {
     createToken: (document, type) => {
         const secretKey = type === "AT" ? process.env.AT_SECRET_KEY : process.env.RT_SECRET_KEY
         const expireTime = type === "AT" ? process.env.AT_EXPIRES_IN : process.env.RT_EXPIRES_IN
@@ -14,4 +14,4 @@ const token = {
         return decoded
     }
 }
-export default token
+export default jwtToken

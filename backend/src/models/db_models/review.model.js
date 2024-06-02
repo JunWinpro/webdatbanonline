@@ -1,26 +1,31 @@
 import mongoose from "mongoose";
-import { collection } from "../../database/collection";
+import { collection } from "../../database/collection.js";
 
-const reviewSchema = new mongoose.Schema({
-    author: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: collection.USERS,
-        required: true
+const reviewSchema = new mongoose.Schema(
+    {
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: collection.USERS,
+            required: true
+        },
+        title: {
+            type: String,
+        },
+        content: {
+            type: String
+        },
+        reviewImageUrls: [String],
+        rate: {
+            type: Number,
+            min: 1,
+            max: 5,
+            required: true
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false
+        }
     },
-    title: {
-        type: String,
-    },
-    content: {
-        type: String
-    },
-    reviewImageUrls: [String],
-    rate: {
-        type: Number,
-        min: 1,
-        max: 5,
-        required: true
-    }
-},
     {
         timestamps: true
     }

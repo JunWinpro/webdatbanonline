@@ -6,18 +6,16 @@ import RestaurantModel from "./db_models/restaurant.model.js";
 import RestaurantInfoModel from "./db_models/restaurantInfo.model.js";
 import ReviewModel from "./db_models/review.model.js";
 import UserModel from "./db_models/user.model.js";
-import UserInfoModel from "./db_models/userInfo.model.js";
 
 
-const Model = {
-    UserModel,
-    UserInfoModel,
-    RestaurantModel,
-    RestaurantInfoModel,
-    EmployeeModel,
-    MenuModel,
-    ReviewModel,
-    BillModel,
-    BookingModel
+const ModelDb = {
+    UserModel: UserModel,
+    RestaurantModel: RestaurantModel,
+    RestaurantInfoModel: RestaurantInfoModel,
+    EmployeeModel: EmployeeModel,
+    MenuModel: MenuModel,
+    ReviewModel: ReviewModel,
+    BillModel: BillModel,
+    BookingModel: BookingModel
 }
-export default Model
+export default ModelDb

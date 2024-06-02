@@ -16,7 +16,7 @@ cloudinary.config({
     secure: true,
 })
 
-// connectDb()
+connectDb()
 
 app.use(rootRouter)
 app.listen(process.env.PORT || 8000, () => {
