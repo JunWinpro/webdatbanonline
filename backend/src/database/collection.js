@@ -1,6 +1,5 @@
 export const collection = {
     USERS: "users",
-    USER_INFORMATION: "userInformation",
     EMPLOYEES: "employees",
     RESTAURANTS: "restaurants",
     RESTAURANT_INFORMATION: "restaurantInformation",
