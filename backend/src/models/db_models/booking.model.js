@@ -11,7 +11,7 @@ const bookingSchema = new mongoose.Schema(
             required: true
         },
         phone: {
-            type: Number,
+            type: String,
             required: true
         },
         restaurant: {
@@ -42,7 +42,10 @@ const bookingSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: collection.MENUS,
         }],
-        checkinTime: Date,
+        checkinTime: {
+            type: Number,
+            required: true
+        },
         isCheckin: {
             type: Boolean,
             default: false,

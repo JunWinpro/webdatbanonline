@@ -9,7 +9,7 @@ const employeeSchema = new mongoose.Schema(
             required: true
         },
         phone: {
-            type: Number,
+            type: String,
             unique: true,
             required: true
         },

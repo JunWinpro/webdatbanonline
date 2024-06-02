@@ -1,7 +1,6 @@
 import jwtToken from "../utils/jwtToken.util.js"
 
 const middleware = {
-
     verifyAccessToken: (req, res, next) => {
         try {
             const authToken = req.headers['authorization']

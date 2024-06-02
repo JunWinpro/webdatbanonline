@@ -1,6 +1,7 @@
-import ModelDb from "../models/model.js";
-import bcryptPassword from "../utils/bcrypt.util.js";
+import ModelDb from "../models/model.js"
+import bcryptPassword from "../utils/bcrypt.util.js"
 import jwtToken from "../utils/jwtToken.util.js"
+import { v2 as cloudinary } from "cloudinary"
 const userController = {
     register: async (req, res) => {
         try {
@@ -148,7 +149,7 @@ const userController = {
         catch (err) {
             console.log("user login err: ", err)
 
-            res.status(403).json({
+            res.status(400).json({
                 message: err.message,
                 success: false,
                 data: null
@@ -187,11 +188,15 @@ const userController = {
     },
     getUserById: async (req, res) => {
         try {
-            const id = req.params
+            const { id } = req.params
             const user = await ModelDb.UserModel.findById(id)
             if (!user) throw new Error("User not found")
+
             delete user.password
             delete user.role
+            delete user.createdAt
+            delete user.updatedAt
+
             res.status(200).json({
                 message: "Get user success",
                 data: user,
@@ -206,8 +211,66 @@ const userController = {
                 data: null
             })
         }
-    }
+    },
+    updateUserById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const { firstName, lastName, gender, password, newPassword, dateOfBirth } = req.body
 
+            const user = req.user
+            if (user.userId !== id) throw new Error("You don't have permission for this user")
+
+            let currentUser = await ModelDb.UserModel.findById(user.userId)
+            if (!currentUser) throw new Error("User not found")
+
+            let hashPassword;
+            if (password && newPassword) {
+                if (bcryptPassword.comparePassword(password, currentUser.password)) throw new Error("Password is incorrect")
+                if (bcryptPassword.comparePassword(newPassword, currentUser.password)) throw new Error("Password is the same as current please change different password")
+                hashPassword = bcryptPassword.hashPassword(newPassword)
+            }
+
+            const file = req.file
+            let avatar;
+            if (file) {
+                const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
+                const fileName = `${currentUser._id.toString()}-${new Date().getTime()}`
+                const result = await cloudinary.uploader.upload(dataUrl, {
+                    folder: `Avatar/${currentUser._id.toString()}`,
+                    public_id: fileName,
+                    resource_type: "auto"
+                })
+                if (!result) throw new Error("Upload failed")
+                avatar = result.secure_url
+            }
+
+
+            currentUser = {
+                ...currentUser.toObject(),
+                ...req.body,
+                password: hashPassword ? hashPassword : currentUser.password,
+                avatar: avatar ? avatar : currentUser.avatar
+            }
+            const updatedUser = await ModelDb.UserModel.findByIdAndUpdate(id, currentUser, { new: true })
+
+            delete updatedUser.password
+            delete updatedUser.role
+
+            res.status(201).json({
+                message: "Update user success",
+                data: updatedUser,
+                success: true
+            })
+        }
+        catch (err) {
+            console.log("update user by id err: ", err)
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null
+            })
+        }
+    }
 }
 
 export default userController
