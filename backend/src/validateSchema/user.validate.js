@@ -19,7 +19,7 @@ const messages = {
         pattern: "First name can't have special characters or number",
         min: "First name must have at least 1 character",
         empty: "First name  is empty",
-        required: "First is required"
+        required: "First name is required"
     },
     lastName: {
         pattern: "Last name can't have special characters or number",
@@ -39,6 +39,14 @@ const messages = {
         max: "Date of birth cannot be in the future",
         min: "Date of birth must be in or less 100 years",
         base: "Invalid date of birth format"
+    },
+    address: {
+        streetAddress: {
+            empty: 'Street address is empty'
+        },
+        city: {
+            empty: 'City is empty'
+        },
     },
     role: {
         only: "Role must be one of 'manager', 'admin' or 'customer",
@@ -93,6 +101,15 @@ const userSchema = {
         'date.max': messages.dateOfBirth.max,
         'date.min': messages.dateOfBirth.min
     }),
+
+    address: {
+        streetAddress: joi.string().messages({
+            'string.empty': messages.address.streetAddress.empty,
+        }),
+        city: joi.string().messages({
+            'string.empty': messages.address.city.empty,
+        }),
+    },
 
     role: joi.string().valid('manager', 'admin', 'customer').messages({
         'any.empty': messages.role.empty,
