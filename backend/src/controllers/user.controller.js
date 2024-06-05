@@ -49,7 +49,8 @@ const userController = {
             res.status(403).json({
                 message: err.message,
                 success: false,
-                data: null
+                data: null,
+                err
             })
         }
     },
@@ -58,7 +59,10 @@ const userController = {
         try {
             const { email, password } = req.body
 
-            const user = await ModelDb.UserModel.findOne({ email })
+            const user = await ModelDb.UserModel.findOne({
+                email,
+                isDeleted: false,
+            })
             if (!user) throw new Error("Email or password is wrong")
 
             const checkPassword = bcryptPassword.comparePassword(password, user.password)
@@ -66,21 +70,24 @@ const userController = {
 
             const returnUser = { ...user.toObject() }
 
+            const accessToken = jwtToken.createToken({
+                userId: returnUser._id,
+                email: returnUser.email,
+                role: returnUser.role,
+                isDeleted: returnUser.isDeleted,
+            }, "AT")
+            const refreshToken = jwtToken.createToken({
+                userId: returnUser._id,
+                email: returnUser.email,
+                role: returnUser.role,
+                isDeleted: returnUser.isDeleted,
+            }, "RT")
+
             delete returnUser.password
             delete returnUser.createdAt
             delete returnUser.updatedAt
             delete returnUser.isDeleted
             delete returnUser.isVerified
-
-            const accessToken = jwtToken.createToken({
-                userId: returnUser._id,
-                email: returnUser.email
-            }, "AT")
-            const refreshToken = jwtToken.createToken({
-                userId: returnUser._id,
-                email: returnUser.email
-            }, "RT")
-
 
             res.status(201).json({
                 message: "Login success",
@@ -98,11 +105,12 @@ const userController = {
             res.status(400).json({
                 message: err.message,
                 success: false,
-                data: null
-
+                data: null,
+                err
             })
         }
     },
+
     getAllUsers: async (_, res) => {
         try {
             const allUsers = await ModelDb.UserModel.find({
@@ -128,10 +136,12 @@ const userController = {
             res.status(403).json({
                 message: err.message,
                 success: false,
-                data: null
+                data: null,
+                err
             })
         }
     },
+
     getUserById: async (req, res) => {
         try {
             const { id } = req.params
@@ -161,16 +171,16 @@ const userController = {
             res.status(403).json({
                 message: err.message,
                 success: false,
-                data: null
+                data: null,
+                err
             })
         }
     },
+
     updateUserById: async (req, res) => {
         try {
             const { id } = req.params
             const { password, newPassword } = req.body
-
-
 
             const user = req.user
             if (user.userId !== id) throw new Error("You don't have permission for this user")
@@ -199,7 +209,6 @@ const userController = {
                 avatar = result.secure_url
             }
 
-
             currentUser = {
                 ...currentUser.toObject(),
                 ...req.body,
@@ -222,10 +231,42 @@ const userController = {
             res.status(403).json({
                 message: err.message,
                 success: false,
-                data: null
+                data: null,
+                err
             })
         }
     },
+
+    changeRole: async (req, res) => {
+        try {
+            const { id } = req.params
+            const { role } = req.body
+
+            const currentUser = await ModelDb.UserModel.findById(id)
+            if (!currentUser) throw new Error("User not found")
+
+            currentUser.role = role
+            currentUser.save()
+
+            res.status(201).json({
+                message: "Update user success",
+                data: {
+                    role: currentUser.role
+                },
+                success: true
+            })
+        }
+        catch (err) {
+            console.log("update user by id err: ", err)
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null,
+                err
+            })
+        }
+    },
+
     deleteUserById: async (_, res) => {
         try {
             const { id } = req.params
@@ -237,6 +278,7 @@ const userController = {
             if (!currentUser) throw new Error("User not found")
 
             currentUser.isDeleted = true
+
             currentUser.save()
             res.status(201).json({
                 success: true,
