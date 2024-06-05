@@ -9,16 +9,14 @@ const userRoute = express.Router()
 
 userRoute.post('/register', validateData.user.register, userController.register)
 userRoute.post('/login', validateData.user.login, userController.login)
+userRoute.post('/forget-password', userController.forgetPassword)
 
 userRoute.get('/', tokenMiddleware.verifyAccessToken, userController.getAllUsers)
-
 userRoute.get('/:id', tokenMiddleware.verifyAccessToken, userController.getUserById)
 
+userRoute.put('/reset-password/:token', userController.resetPassword)
 userRoute.put('/:id', tokenMiddleware.verifyAccessToken, memoryUploader.single('file'), validateData.user.update, userController.updateUserById)
-
-userRoute.put('/add-role/:id', tokenMiddleware.verifyAccessToken, memoryUploader.single('file'), validateData.user.update, userController.updateUserById)
-
-userRoute.put('/role/:id', tokenMiddleware.verifyAccessToken, authorization.admin, validateData.user.changeRole, userController.changeRole,)
+userRoute.put('/change-role/:id', tokenMiddleware.verifyAccessToken, authorization.admin, validateData.user.changeRole, userController.changeRole,)
 
 userRoute.delete('/:id', tokenMiddleware.verifyAccessToken, userController.deleteUserById)
 

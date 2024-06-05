@@ -2,6 +2,7 @@ import ModelDb from "../models/model.js"
 import bcryptPassword from "../utils/bcrypt.util.js"
 import jwtToken from "../utils/jwtToken.util.js"
 import { v2 as cloudinary } from "cloudinary"
+import nodemailer from 'nodemailer'
 const userController = {
     register: async (req, res) => {
         try {
@@ -111,8 +112,10 @@ const userController = {
         }
     },
 
-    getAllUsers: async (_, res) => {
+    getAllUsers: async (req, res) => {
         try {
+            const { page, pageSize, filter, search, sortBy } = req.query
+
             const allUsers = await ModelDb.UserModel.find({
                 isDeleted: false
             })
@@ -236,7 +239,92 @@ const userController = {
             })
         }
     },
+    forgetPassword: async (req, res) => {
+        try {
+            const sendEmail = async (email, token) => {
+                const url = `http://${process.env.CLIENT_URL || 'localhost:3000'}/${token}`
 
+                const transporter = nodemailer.createTransport({
+                    service: 'Gmail',
+                    auth: {
+                        user: process.env.GMAIL_USERNAME,
+                        pass: process.env.GMAIL_PASSWORD
+                    }
+                });
+                let mailOptions = {
+                    from: `Taste Tripper <${process.env.GMAIL_USERNAME}>`,
+                    to: email,
+                    subject: 'Reset Password',
+                    text: `Click on the following link to reset your password: ${url}`
+                };
+
+                await transporter.sendMail(mailOptions);
+            }
+
+            const { email } = req.body
+            const user = await ModelDb.UserModel.findOne({
+                email,
+                isDeleted: false
+            })
+            if (!user) throw new Error("User not found")
+
+            user.resetPasswordToken = crypto.randomUUID()
+            user.resetPasswordExpireIn = Date.now() + 3600000
+
+            await user.save()
+            await sendEmail(email, user.resetPasswordToken)
+            res.status(201).json({
+                message: "Please check your email for reset password",
+                success: true,
+                data: null,
+            })
+        }
+        catch (err) {
+            console.log("forgot password err: ", err)
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null,
+                err
+            })
+        }
+    },
+    resetPassword: async (req, res) => {
+        try {
+            const { token } = req.params
+            const { newPassword } = req.body
+
+            const user = await ModelDb.UserModel.findOne({
+                isDeleted: false,
+                resetPasswordToken: token,
+                resetPasswordExpireIn: { $gt: Date.now() }
+            })
+
+            if (!user) throw new Error(`User not found`)
+
+            const hashPassword = bcryptPassword.hashPassword(newPassword)
+
+            user.password = hashPassword
+            user.resetPasswordToken = undefined
+            user.resetPasswordExpireIn = undefined
+
+            await user.save()
+            res.status(201).json({
+                message: "Reset password success",
+                data: null,
+                success: true
+            })
+        }
+        catch (err) {
+            console.log("reset password err: ", err)
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null,
+                err
+            })
+        }
+    },
     changeRole: async (req, res) => {
         try {
             const { id } = req.params
