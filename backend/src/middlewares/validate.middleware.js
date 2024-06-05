@@ -73,7 +73,24 @@ const validateData = {
                 })
             }
         },
+        resetPassword: (req, res, next) => {
+            try {
+                const { error, value } = userValidate.resetPassword.validate(req.body)
+                if (error) throw new Error(error.details[0].message)
 
+                next()
+            }
+            catch (err) {
+                console.log("change role user err: ", err)
+
+                res.status(403).json({
+                    data: null,
+                    err,
+                    message: err.message,
+                    success: false,
+                })
+            }
+        },
         changeRole: (req, res, next) => {
             try {
                 const { error, value } = userValidate.changeRole.validate(req.body)

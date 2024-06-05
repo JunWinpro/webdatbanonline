@@ -129,6 +129,10 @@ const userValidate = {
 
     changeRole: joi.object({
         role: userSchema.role.required()
+    }),
+
+    resetPassword: joi.object({
+        newPassword: userSchema.password.required()
     })
 
 }
