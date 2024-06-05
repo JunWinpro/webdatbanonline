@@ -1,5 +1,4 @@
 import joi from "joi";
-
 const messages = {
     email: {
         email: "Email must have at least 2 domain segments example: example.com",
@@ -17,13 +16,13 @@ const messages = {
         required: "Password is required"
     },
     firstName: {
-        pattern: "First name can't have special characters",
+        pattern: "First name can't have special characters or number",
         min: "First name must have at least 1 character",
         empty: "First name  is empty",
         required: "First is required"
     },
     lastName: {
-        pattern: "Last name can't have special characters",
+        pattern: "Last name can't have special characters or number",
         min: "Last name must have at least 1 character",
         empty: "Last name is empty",
         required: "Last is required"
@@ -34,9 +33,17 @@ const messages = {
         required: "Gender is required"
     },
     dateOfBirth: {
-        only: "Date of birth must be MM-DD-YYYY",
+        format: "Date of birth must be YYYY-MM-DD",
         empty: "Date of birth is empty",
-        required: "Date is required"
+        required: "Date is required",
+        max: "Date of birth cannot be in the future",
+        min: "Date of birth must be in or less 100 years",
+        base: "Invalid date of birth format"
+    },
+    role: {
+        only: "Role must be one of 'manager', 'admin' or 'customer",
+        empty: "Role is empty",
+        required: "Role is required"
     }
 }
 
@@ -46,41 +53,56 @@ const userSchema = {
         'string.empty': messages.email.empty,
         'any.required': messages.email.required
     }),
+
     phone: joi.string().regex(/^\d{10}$/).messages({
         'string.pattern.base': messages.phone.pattern,
         'string.empty': messages.phone.empty,
         'any.required': messages.phone.required
     }),
+
     password: joi.string().min(8).max(12).messages({
         'string.empty': messages.password.empty,
         'string.min': messages.password.only,
         'string.max': messages.password.only,
         'any.required': messages.password.required
-
     }),
+
     firstName: joi.string().regex(/^[a-zA-Z]+$/).min(1).messages({
         'string.min': messages.firstName.min,
         'string.pattern.base': messages.firstName.pattern,
         'string.empty': messages.firstName.empty,
         'any.required': messages.firstName.required
     }),
+
     lastName: joi.string().regex(/^[a-zA-Z]+$/).min(2).messages({
         'string.min': messages.lastName.min,
         'string.pattern.base': messages.lastName.pattern,
         'string.empty': messages.lastName.empty,
         'any.required': messages.lastName.required
     }),
+
     gender: joi.string().valid('male', 'female', 'other').messages({
         'any.only': messages.gender.only,
         'any.empty': messages.gender.empty,
         'any.required': messages.gender.required
     }),
-    dateOfBirth: joi.date().messages({
-        'date.only': messages.dateOfBirth.only,
-        'date.empty': messages.dateOfBirth.empty,
-        'date.required': messages.dateOfBirth.required
-    })
+
+    dateOfBirth: joi.date().iso().max('now').min(Date.now() - 100 * 365 * 24 * 60 * 60 * 1000).messages({
+        'any.required': messages.dateOfBirth.required,
+        'date.format': messages.dateOfBirth.format,
+        'date.max': messages.dateOfBirth.max,
+        'date.min': messages.dateOfBirth.min
+    }),
+
+    role: joi.string().valid('manager', 'admin', 'customer').messages({
+        'any.empty': messages.role.empty,
+        'any.required': messages.role.required,
+        'any.only': messages.role.only,
+    }),
 }
+
+
+
 const userValidate = {
     register: joi.object({
         email: userSchema.email.required(),
@@ -97,14 +119,16 @@ const userValidate = {
     }),
 
     update: joi.object({
-        email: userSchema.email,
-        phone: userSchema.phone,
         password: userSchema.password,
         newPassword: userSchema.password,
         firstName: userSchema.firstName,
         lastName: userSchema.lastName,
         gender: userSchema.gender,
         dateOfBirth: userSchema.dateOfBirth,
+    }),
+
+    changeRole: joi.object({
+        role: userSchema.role.required()
     })
 
 }

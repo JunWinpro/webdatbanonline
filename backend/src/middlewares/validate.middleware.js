@@ -49,15 +49,9 @@ const validateData = {
 
                 if (file && file.length === 0) throw new Error("File not found")
 
-                // const acceptKey = ["password", "newPassword", "firstName", "lastName", "dateOfBirth", "gender", "address"]
-                // let filterData = {}
-                // acceptKey.forEach(data => {
-                //     if (req.body[data]) {
-                //         filterData[data] = req.body[data]
-                //     }
-                // })
-                // req.body = filterData
-                // console.log("2", req.body)
+                const { error, value } = userValidate.update.validate(req.body)
+                if (error) throw new Error(error.details[0].message)
+
                 const { password, newPassword } = req.body
 
                 if (password && !newPassword) throw new Error("Please provide your new password")
@@ -65,10 +59,6 @@ const validateData = {
                 else if (password && newPassword) {
                     if (password === newPassword) throw new Error("New password must be different from old password")
                 }
-
-                const { error, value } = userValidate.update.validate(req.body)
-                console.log(value)
-                if (error) throw new Error(error.details[0].message)
 
                 next()
             }
@@ -83,6 +73,25 @@ const validateData = {
                 })
             }
         },
+
+        changeRole: (req, res, next) => {
+            try {
+                const { error, value } = userValidate.changeRole.validate(req.body)
+                if (error) throw new Error(error.details[0].message)
+
+                next()
+            }
+            catch (err) {
+                console.log("change role user err: ", err)
+
+                res.status(403).json({
+                    data: null,
+                    err,
+                    message: err.message,
+                    success: false,
+                })
+            }
+        }
     }
 
 }
