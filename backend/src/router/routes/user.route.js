@@ -10,6 +10,7 @@ const userRoute = express.Router()
 userRoute.post('/register', validateData.user.register, userController.register)
 userRoute.post('/login', validateData.user.login, userController.login)
 userRoute.post('/forget-password', validateData.user.forgetPassword, userController.forgetPassword)
+userRoute.post('/confirm-reset-password/:token', userController.confirmResetPassword)
 
 userRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.admin, userController.getAllUsers)
 userRoute.get('/:id', tokenMiddleware.verifyAccessToken, userController.getUserById)
