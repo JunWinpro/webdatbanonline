@@ -150,6 +150,10 @@ const userValidate = {
 
     resetPassword: joi.object({
         newPassword: userSchema.password.required()
+    }),
+
+    forgetPassword: joi.object({
+        email: userSchema.email.required()
     })
 
 }

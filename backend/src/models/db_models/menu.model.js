@@ -20,9 +20,13 @@ const menuSchema = new mongoose.Schema(
         },
         price: {
             type: Number,
-            required: true
+            required: true,
+            min: 0
         },
-        discount: Number,
+        discount: {
+            type: Number,
+            min: 0
+        },
         isSelling: {
             type: Boolean,
             default: true
