@@ -20,7 +20,7 @@ const billSchema = new mongoose.Schema(
             },
             totalUnit: {
                 type: Number,
-                required: true
+                required: true,
             },
             lastPrice: {
                 type: Number,

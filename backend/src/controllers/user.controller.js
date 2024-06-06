@@ -241,6 +241,13 @@ const userController = {
     },
     forgetPassword: async (req, res) => {
         try {
+            const { email } = req.body
+            const user = await ModelDb.UserModel.findOne({
+                email,
+                isDeleted: false
+            })
+            if (!user) throw new Error("User not found")
+
             const sendEmail = async (email, token) => {
                 const url = `http://${process.env.CLIENT_URL || 'localhost:3000'}/${token}`
 
@@ -260,13 +267,6 @@ const userController = {
 
                 await transporter.sendMail(mailOptions);
             }
-
-            const { email } = req.body
-            const user = await ModelDb.UserModel.findOne({
-                email,
-                isDeleted: false
-            })
-            if (!user) throw new Error("User not found")
 
             user.resetPasswordToken = crypto.randomUUID()
             user.resetPasswordExpireIn = Date.now() + 3600000
@@ -289,6 +289,35 @@ const userController = {
             })
         }
     },
+    confirmResetPassword: async (req, res) => {
+        try {
+            const { token } = req.params
+
+            const user = await ModelDb.UserModel.findOne({
+                resetPasswordToken: token,
+                isDeleted: false,
+                resetPasswordExpireIn: { $gt: Date.now() }
+            })
+            if (!user) throw new Error('Wrong user')
+
+            res.status(201).json({
+                message: "Token is valid",
+                success: true,
+                data: {
+                    email: user.email
+                }
+            })
+        }
+        catch (err) {
+            console.log("reset password err: ", err)
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null,
+                err
+            })
+        }
+    },
     resetPassword: async (req, res) => {
         try {
             const { token } = req.params
@@ -300,7 +329,7 @@ const userController = {
                 resetPasswordExpireIn: { $gt: Date.now() }
             })
 
-            if (!user) throw new Error(`User not found`)
+            if (!user) throw new Error(`Wrong user`)
 
             const hashPassword = bcryptPassword.hashPassword(newPassword)
 
