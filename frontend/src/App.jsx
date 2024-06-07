@@ -3,12 +3,12 @@ import "./App.css";
 import { HomePage } from "./pages/HomePage.jsx";
 import { ErrorPage } from "./pages/ErrorPage.jsx";
 import { ContactPage } from "./pages/Contact.jsx";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/HomePage/Navbar.jsx";
 
 function App() {
   return (
     <>
-    <Navbar />
+    <Navbar/>
     <div className="App">
       <Routes>
         <Route path="/" element={<HomePage />}/>

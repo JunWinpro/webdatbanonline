@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Input } from "@/components/ui/input";
-import { SearchButton } from "./ui/Searchbutton";
+import { SearchButton } from "../ui/Searchbutton";
+import { Input } from "../ui/input";
 
 
 const SearchBanner = () => {
