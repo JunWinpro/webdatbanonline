@@ -16,7 +16,7 @@ rootRouter.use('/reviews', reviewRoute);
 rootRouter.use('/restaurants', restaurantRoute);
 rootRouter.use('/bills', billRoute);
 rootRouter.use('/bookings', bookingRoute);
-rootRouter.use('/employee', employeeRoute);
+rootRouter.use('/employees', employeeRoute);
 rootRouter.use('/menus', menuRoute);
 rootRouter.use('/managers', managerRoute);
 

@@ -5,8 +5,6 @@ const renewAccessTokenController = (req, res) => {
         const data = {
             userId: req.user.userId,
             email: req.user.email,
-            role: req.user.role,
-            isDeleted: req.user.isDeleted
         }
 
         const createdAccessToken = jwtToken.createToken(data, "AT")

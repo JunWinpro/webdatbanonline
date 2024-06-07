@@ -3,6 +3,11 @@ import { collection } from "../../database/collection.js";
 
 const employeeSchema = new mongoose.Schema(
     {
+        manager: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: collection.USERS,
+            required: true
+        },
         username: {
             type: String,
             unique: true,
@@ -30,8 +35,15 @@ const employeeSchema = new mongoose.Schema(
             required: true
         },
         employeeId: {
-            type: String,
-            required: true
+            prefix: {
+                type: String,
+                default: "TTP",
+                enum: ["TTP"],
+            },
+            suffix: {
+                type: Number,
+                required: true
+            }
         },
         role: {
             type: String,
@@ -42,8 +54,6 @@ const employeeSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
-        resetPasswordToken: String,
-        resetPasswordExpireIn: Number
     },
     {
         timestamps: true

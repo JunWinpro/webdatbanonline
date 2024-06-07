@@ -11,9 +11,6 @@ const tokenMiddleware = {
 
             const data = jwtToken.verifyToken(accessToken, "AT")
 
-            const isDeleted = data.isDeleted
-            if (isDeleted === true) throw new Error("User does not exist")
-
             req.user = data
 
             next()
@@ -60,9 +57,6 @@ const tokenMiddleware = {
             const refreshToken = authToken.split(" ")[1]
 
             const data = jwtToken.verifyToken(refreshToken, "RT")
-
-            const isDeleted = data.isDeleted
-            if (isDeleted === true) throw new Error("User does not exist")
 
             req.user = data
 
