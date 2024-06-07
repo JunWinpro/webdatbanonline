@@ -16,13 +16,13 @@ const messages = {
         required: "Password is required"
     },
     firstName: {
-        pattern: "First name can't have special characters or number",
+        pattern: "First name cannot contain spaces or special characters or number",
         min: "First name must have at least 1 character",
         empty: "First name  is empty",
         required: "First name is required"
     },
     lastName: {
-        pattern: "Last name can't have special characters or number",
+        pattern: "Last name cannot contain spaces or special characters or number",
         min: "Last name must have at least 1 character",
         empty: "Last name is empty",
         required: "Last is required"

@@ -15,13 +15,13 @@ const userController = {
                 ]
             })
 
-            if (userExist?.email === email) throw new Error("Email already exists")
-            if (userExist?.phone === phone) throw new Error("Phone already exists")
+            if (userExist?.email === email) throw new Error("Email already used")
+            if (userExist?.phone === phone) throw new Error("Phone already used")
 
             const employeeExist = await ModelDb.EmployeeModel.findOne({
                 phone
             })
-            if (employeeExist) throw new Error("Phone already exists")
+            if (employeeExist) throw new Error("Phone already usesd")
 
             const hashPassword = bcryptPassword.hashPassword(password)
 
@@ -36,7 +36,6 @@ const userController = {
 
             const returnUser = { ...newUser.toObject() }
 
-            delete returnUser.role
             delete returnUser.password
 
             res.status(201).json({
@@ -67,7 +66,7 @@ const userController = {
             if (!user) throw new Error("Email or password is wrong")
 
             const checkPassword = bcryptPassword.comparePassword(password, user.password)
-            if (!checkPassword) throw new Error("Password is wrong")
+            if (!checkPassword) throw new Error("Email or password is wrong")
 
             const returnUser = { ...user.toObject() }
 
@@ -80,15 +79,11 @@ const userController = {
             const refreshToken = jwtToken.createToken({
                 userId: returnUser._id,
                 email: returnUser.email,
-                role: returnUser.role,
-                isDeleted: returnUser.isDeleted,
             }, "RT")
 
             delete returnUser.password
             delete returnUser.createdAt
             delete returnUser.updatedAt
-            delete returnUser.isDeleted
-            delete returnUser.isVerified
 
             res.status(201).json({
                 message: "Login success",
@@ -188,7 +183,10 @@ const userController = {
             const user = req.user
             if (user.userId !== id) throw new Error("You don't have permission for this user")
 
-            let currentUser = await ModelDb.UserModel.findById(user.userId)
+            let currentUser = await ModelDb.UserModel.findOne({
+                _id: id,
+                isDeleted: false,
+            })
             if (!currentUser) throw new Error("User not found")
 
             let hashPassword;
