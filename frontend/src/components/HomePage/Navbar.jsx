@@ -1,3 +1,4 @@
+// Navbar.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import {
@@ -10,45 +11,35 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "../ui/button.jsx";
 
-const foodAndDrinkItems = [
-  { label: "Restaurant", link: "/restaurant" },
-  { label: "Hotpot", link: "/hotpot" },
-  { label: "Cafe", link: "/cafe" },
-  { label: "Bar", link: "/bar" },
-  { label: "Grilled food", link: "/grilled-food" },
-];
-
-const Navbar = () => {
+const Navbar = ({ navItems }) => {
   return (
     <div className="bg-white">
       <NavigationMenu>
         <NavigationMenuList>
-          <NavigationMenuItem>
-            <NavigationMenuLink>
-              <Button>
-                <Link to="/">Home</Link>
-              </Button>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink as={Link} to="/contact">
-              <Button>
-                <Link to="/contact">Contact</Link>
-              </Button>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger>Food & Drink</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              {foodAndDrinkItems.map((item) => (
+          {navItems.map((item, index) =>
+            item.items ? (
+              <NavigationMenuItem key={index}>
+                <NavigationMenuTrigger>{item.label}</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  {item.items.map((subItem, subIndex) => (
+                    <NavigationMenuLink key={subIndex}>
+                      <Button>
+                        <Link to={subItem.link}>{subItem.label}</Link>
+                      </Button>
+                    </NavigationMenuLink>
+                  ))}
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            ) : (
+              <NavigationMenuItem key={index}>
                 <NavigationMenuLink>
                   <Button>
                     <Link to={item.link}>{item.label}</Link>
                   </Button>
                 </NavigationMenuLink>
-              ))}
-            </NavigationMenuContent>
-          </NavigationMenuItem>
+              </NavigationMenuItem>
+            )
+          )}
         </NavigationMenuList>
       </NavigationMenu>
     </div>
