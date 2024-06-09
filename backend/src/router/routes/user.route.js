@@ -1,9 +1,9 @@
 import express from 'express'
 import { memoryUploader } from '../../middlewares/uploader.middleware.js'
 import userController from '../../controllers/user.controller.js'
-import validateData from '../../middlewares/validate.middleware.js'
 import tokenMiddleware from '../../middlewares/token.middleware.js'
 import authorization from '../../middlewares/authorization.middleware.js'
+import validateData from '../../middlewares/validate/index.js'
 
 const userRoute = express.Router()
 

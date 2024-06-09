@@ -1,10 +1,20 @@
+import ModelDb from "../models/model.js"
+
 const authorization = {
 
     employee: async (req, res, next) => {
         try {
-            const role = req.user.role
+            const user = req.user
 
-            if (role !== "employee") throw new Error("You don't have permission for this action")
+            const currentUser = await ModelDb.EmployeeModel.findOne({
+                _id: user.userId,
+                role: "employee",
+                isDeleted: false
+            })
+
+            if (!currentUser) throw new Error("You don't have permission for this action")
+
+            req.authorizedUser = currentUser
 
             next()
         }
@@ -22,9 +32,17 @@ const authorization = {
 
     manager: async (req, res, next) => {
         try {
-            const role = req.user.role
+            const user = req.user
 
-            if (role !== "manager") throw new Error("You don't have permission for this action")
+            const currentUser = await ModelDb.UserModel.findOne({
+                _id: user.userId,
+                role: "manager",
+                isDeleted: false
+            })
+
+            if (!currentUser) throw new Error("You don't have permission for this action")
+
+            req.authorizedUser = currentUser
 
             next()
         }
@@ -42,9 +60,18 @@ const authorization = {
 
     admin: async (req, res, next) => {
         try {
-            const role = req.user.role
+            const user = req.user
 
-            if (role !== "admin") throw new Error("You don't have permission for this action")
+            const currentUser = await ModelDb.UserModel.findOne({
+                _id: user.userId,
+                role: "admin",
+                isDeleted: false
+            })
+
+            if (!currentUser) throw new Error("You don't have permission for this action")
+
+            req.authorizedUser = currentUser
+
             next()
         }
         catch (err) {
