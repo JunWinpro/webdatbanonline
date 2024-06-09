@@ -8,7 +8,7 @@ const searchButtonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-red-500 text-white hover:bg-red-600",
+        default: "bg-red-600 text-white hover:bg-red-600",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
