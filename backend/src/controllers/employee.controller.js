@@ -186,6 +186,10 @@ const employeeController = {
             })
         }
     },
+    updateEmployeeById: async (req, res) => {
+
+    },
+
     deleteEmployeeById: async (_, res) => {
         try {
             const { id } = req.params

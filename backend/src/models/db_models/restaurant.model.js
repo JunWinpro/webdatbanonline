@@ -17,35 +17,52 @@ const restaurant = new mongoose.Schema(
                 type: String,
                 required: true
             },
+            district: {
+                type: String,
+                required: true
+            },
             city: {
                 type: String,
                 required: true
             }
         },
-        avatar: String,
+        avatar: {
+            type: String,
+            default: null,
+        },
         category: [{
             type: String,
             required: true
         }],
         rating: {
             type: Number,
-            default: 0,
+            default: null,
             min: 1,
             max: 5
         },
-        isOpening: Boolean,
-        isActive: Boolean,
         tableList: [{
             tableId: {
-                type: String,
+                type: Number,
                 required: true
             },
             isEmpty: {
                 type: Boolean,
-                required: true
+                default: true
             },
         }],
+        isOpening: {
+            type: Boolean,
+            default: false
+        },
+        isActive: {
+            type: Boolean,
+            default: true
+        },
         isDeleted: {
+            type: Boolean,
+            default: false
+        },
+        isVerified: {
             type: Boolean,
             default: false
         }

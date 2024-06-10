@@ -1,8 +1,9 @@
+import transporter from "../configs/transporter.config.js"
 import ModelDb from "../models/model.js"
 import bcryptPassword from "../utils/bcrypt.util.js"
 import jwtToken from "../utils/jwtToken.util.js"
 import { v2 as cloudinary } from "cloudinary"
-import nodemailer from 'nodemailer'
+import pageSplit from "../utils/pageSplit.util.js"
 const userController = {
     register: async (req, res) => {
         try {
@@ -21,7 +22,7 @@ const userController = {
             const employeeExist = await ModelDb.EmployeeModel.findOne({
                 phone
             })
-            if (employeeExist) throw new Error("Phone already usesd")
+            if (employeeExist) throw new Error("Phone already used")
 
             const hashPassword = bcryptPassword.hashPassword(password)
 
@@ -109,21 +110,28 @@ const userController = {
 
     getAllUsers: async (req, res) => {
         try {
-            const { page, pageSize, filter, search, sortBy } = req.query
+            const { page, pageSize, search, sortBy } = req.query
 
-            const allUsers = await ModelDb.UserModel.find({
-                isDeleted: false
-            })
+            let filterModel = {}
+            if (search) {
+                formatSearch = search.split("-").join(" ")
+                filterModel.formatSearch = formatSearch
+            }
+
+
+            const allUsers = await pageSplit(ModelDb.UserModel, page, pageSize, filterModel, undefined, sortBy)
             if (!allUsers) throw new Error("User not found")
 
-            const returnUser = allUsers.map(user => {
-                const { password, role, createdAt, updatedAt, isDeleted, isVerified, ...returnUser } = user.toObject();
-                return returnUser;
+            const returnUser = allUsers.data.map(user => {
+                const { password, resetPasswordExpireIn, resetPasswordToken, ...returnUser } = user.toObject();
+                return returnUser
             });
+
+            allUsers.data = returnUser
 
             res.status(200).json({
                 message: "Get all users success",
-                data: returnUser,
+                data: allUsers,
                 success: true
             })
         }
@@ -157,6 +165,9 @@ const userController = {
             delete returnUser.updatedAt
             delete returnUser.isDeleted
             delete returnUser.isVerified
+            delete returnUser.resetPasswordToken
+            delete returnUser.resetPasswordExpireIn
+
 
             res.status(200).json({
                 message: "Get user success",
@@ -249,13 +260,6 @@ const userController = {
             const sendEmail = async (email, token) => {
                 const url = `http://${process.env.CLIENT_URL || 'localhost:3000'}/${token}`
 
-                const transporter = nodemailer.createTransport({
-                    service: 'Gmail',
-                    auth: {
-                        user: process.env.GMAIL_USERNAME,
-                        pass: process.env.GMAIL_PASSWORD
-                    }
-                });
                 let mailOptions = {
                     from: `Taste Tripper <${process.env.GMAIL_USERNAME}>`,
                     to: email,
@@ -291,12 +295,27 @@ const userController = {
         try {
             const { token } = req.params
 
+            if (!token) {
+                return res.status(400).json({
+                    message: "Token is required",
+                    success: false
+                })
+            }
+
             const user = await ModelDb.UserModel.findOne({
                 resetPasswordToken: token,
                 isDeleted: false,
-                resetPasswordExpireIn: { $gt: Date.now() }
             })
-            if (!user) throw new Error('Wrong user')
+            if (!user) throw new Error('User not found')
+
+            if (user.resetPasswordExpireIn <= Date.now()) {
+
+                user.resetPasswordToken = undefined
+                user.resetPasswordExpireIn = undefined
+                await user.save()
+
+                throw new Error('Token expired')
+            }
 
             res.status(201).json({
                 message: "Token is valid",

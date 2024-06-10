@@ -9,7 +9,8 @@ const restaurantInfo = new mongoose.Schema(
         },
         employees: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: collection.EMPLOYEES
+            ref: collection.EMPLOYEES,
+            default: null
         }],
         maxim: {
             type: String,
@@ -30,6 +31,10 @@ const restaurantInfo = new mongoose.Schema(
                 type: Number,
                 required: true
             },
+            isWorkingDay: {
+                type: Boolean,
+                required: true
+            },
             openTime: {
                 type: Number,
                 required: true
@@ -38,27 +43,19 @@ const restaurantInfo = new mongoose.Schema(
                 type: Number,
                 required: true
             },
-            breakTime: {
-                type: Number,
-                required: true
-            },
         }],
-        foodImageUrls: [{
+        foodImages: [{
             type: String,
             default: null
         }],
-        menuImageUrls: [{
+        menuImages: [{
             type: String,
             default: null
         }],
-        restaurantImageUrls: [{
+        restaurantImages: [{
             type: String,
             default: null
         }],
-        isDeleted: {
-            type: Boolean,
-            default: false
-        }
     },
     {
         timestamps: true

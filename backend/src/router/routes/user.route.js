@@ -4,6 +4,7 @@ import userController from '../../controllers/user.controller.js'
 import tokenMiddleware from '../../middlewares/token.middleware.js'
 import authorization from '../../middlewares/authorization.middleware.js'
 import validateData from '../../middlewares/validate/index.js'
+import imageValidate from '../../middlewares/imageValidate.middleware.js'
 
 const userRoute = express.Router()
 
@@ -12,13 +13,13 @@ userRoute.post('/login', validateData.user.login, userController.login)
 userRoute.post('/forget-password', validateData.user.forgetPassword, userController.forgetPassword)
 userRoute.post('/confirm-reset-password/:token', userController.confirmResetPassword)
 
-userRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.admin, userController.getAllUsers)
+userRoute.get('/', tokenMiddleware.verifyAccessToken, userController.getAllUsers)
 userRoute.get('/:id', tokenMiddleware.verifyAccessToken, userController.getUserById)
 
 userRoute.put('/reset-password/:token', validateData.user.resetPassword, userController.resetPassword)
-userRoute.put('/:id', tokenMiddleware.verifyAccessToken, memoryUploader.single('file'), validateData.user.update, userController.updateUserById)
+userRoute.put('/:id', tokenMiddleware.verifyAccessToken, memoryUploader.single('file'), imageValidate, validateData.user.update, userController.updateUserById)
 userRoute.put('/change-role/:id', tokenMiddleware.verifyAccessToken, authorization.admin, validateData.user.changeRole, userController.changeRole,)
 
-userRoute.delete('/:id', tokenMiddleware.verifyAccessToken, userController.deleteUserById)
+userRoute.delete('/:id', tokenMiddleware.verifyAccessToken, validateData.user.deleteUser, userController.deleteUserById)
 
 export default userRoute    
