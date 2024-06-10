@@ -22,7 +22,10 @@ function App() {
         { label: "Bar", link: "/bar" },
         { label: "Grilled food", link: "/grilled-food" },
       ],
+    },{
+      label: "Sales", link: "/sales"  
     },
+
   ];
 
   useEffect(() => {
@@ -50,6 +53,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/contact" element={<ContactPage />} />
+  
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </div>

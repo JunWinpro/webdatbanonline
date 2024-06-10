@@ -52,7 +52,7 @@ const Categorybar = () => {
         <CarouselPrevious className="absolute top-1/2 -left-10 -translate-y-1/2"></CarouselPrevious>
         <CarouselContent className="w-full flex-nowrap\">
           {categoryData.map((category, index) => (
-            <CarouselItem key={index} className=" md:basis-1/8 lg:basis-1/8">
+            <CarouselItem key={index} className="ml-10 md:basis-1/8 lg:basis-1/8">
               <Card
                 hoverable
                 style={{ width: 200 }}
