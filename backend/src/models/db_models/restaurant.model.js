@@ -47,7 +47,7 @@ const restaurant = new mongoose.Schema(
             },
             isEmpty: {
                 type: Boolean,
-                default: true
+                required: true,
             },
         }],
         isOpening: {
@@ -65,8 +65,11 @@ const restaurant = new mongoose.Schema(
         isVerified: {
             type: Boolean,
             default: false
+        },
+        numberOfTablesBookInWeek: {
+            type: Number,
+            default: 0
         }
-        // Number table booking in 1 week
     },
     {
         timestamps: true
