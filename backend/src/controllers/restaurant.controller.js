@@ -60,7 +60,10 @@ const restaurantController = {
             res.status(201).json({
                 message: "Create restaurant success",
                 success: true,
-                data: null,
+                data: {
+                    restaurant: newRestaurant,
+                    restaurantInfo: newRestaurantInfo,
+                },
             })
         }
         catch (err) {
