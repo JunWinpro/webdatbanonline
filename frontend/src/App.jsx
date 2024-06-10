@@ -6,6 +6,8 @@ import { ContactPage } from "./pages/Contact.jsx";
 import FixedNavBar from "./components/HomePage/FixedNavBar.jsx";
 import Navbar from "./components/HomePage/Navbar";
 import React, { useState, useEffect } from "react";
+import SearchBanner from "./components/HomePage/SearchBanner";
+import { ProductPage } from "./pages/ProductPage";
 
 function App() {
   const [showFixedNavBar, setShowFixedNavBar] = useState(false);
@@ -49,12 +51,14 @@ function App() {
           <FixedNavBar navItems={navItems} />
         </div>
       )}
+      <SearchBanner/>
       <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/contact" element={<ContactPage />} />
-  
+          <Route path="/product" element={<ProductPage />} />
           <Route path="*" element={<ErrorPage />} />
+          
         </Routes>
       </div>
     </>
