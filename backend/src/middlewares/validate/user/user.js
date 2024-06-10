@@ -122,6 +122,24 @@ const userValidateData = {
                 success: false,
             })
         }
+    },
+    deleteUser: (req, res, next) => {
+        try {
+            const { error, value } = userValidate.deleteUser.validate(req.body)
+            if (error) throw new Error(error.details[0].message)
+
+            next()
+        }
+        catch (err) {
+            console.log("change role user err: ", err)
+
+            res.status(403).json({
+                data: null,
+                err,
+                message: err.message,
+                success: false,
+            })
+        }
     }
 }
 export default userValidateData

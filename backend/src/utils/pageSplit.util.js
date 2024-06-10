@@ -1,16 +1,17 @@
-const pageSplit = async (page, pageSize, model, filterModel, populated, sortBy) => {
+const pageSplit = async (model, page, pageSize, filterModel, populated, sortBy) => {
     let sortType = {}
     let totalItems;
+    let currentPage = page ? Number(page) : 1
+    let currentPageSize = pageSize ? Number(pageSize) : 12
+
+    if (!Number.isInteger(currentPage) || currentPage <= 0) throw new Error("Invalid page")
+    if (!Number.isInteger(currentPageSize) || currentPageSize <= 0) throw new Error("Invalid page size")
+
     if (sortBy) {
         if (sortBy === "latest") {
             sortType.createdAt = -1
         } else if (sortBy === "oldest") {
             sortType.createdAt = 1
-        } else if (sortBy === "lowest") {
-            sortType.finalPrice = 1
-        }
-        else if (sortBy = "highest") {
-            sortType.finalPrice = -1
         }
     }
     if (filterModel) {
@@ -18,28 +19,23 @@ const pageSplit = async (page, pageSize, model, filterModel, populated, sortBy) 
     } else {
         totalItems = await model.countDocuments()
     }
-    const totalPages = Math.ceil(totalItems / Number(pageSize || 4))
-    const skip = page ? (Number(page) - 1) * Number(pageSize || 4) : 0
+    const totalPages = Math.ceil(totalItems / currentPageSize)
+    const skip = currentPage > 1 ? (Number(page) - 1) * currentPageSize : 0
+    let data = {
+        totalPages,
+        totalItems,
+        data: null,
+        page: currentPage
+    }
     if (!populated) {
-        const result = await model.find(filterModel && filterModel).sort(sortBy && sortType).skip(skip).limit(Number(pageSize || 4))
-        const data = {
-            totalPages,
-            totalItems,
-            data: result,
-            page: Number(page) || 1
-        }
-        return data
+        const result = await model.find(filterModel && filterModel).sort(sortBy && sortType).skip(skip).limit(currentPageSize)
+        data.data = result
     }
     else {
-        const result = await model.find(filterModel).skip(skip).limit(Number(pageSize || 4)).populate(populated)
-        const data = {
-            totalPages,
-            totalItems,
-            data: result,
-            page: Number(page) || 1
-        }
-        return data
+        const result = await model.find(filterModel).skip(skip).limit(currentPageSize).populate(populated)
+        data.data = result
     }
-
+    return data
 }
+
 export default pageSplit

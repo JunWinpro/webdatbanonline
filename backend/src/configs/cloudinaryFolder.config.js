@@ -1,5 +1,6 @@
 const baseFolder = {
-    AVATAR: "Avatar",
+    USER: "User",
     RESTAURANT: "Restaurant",
     REVIEW: "Review"
 }
+export default baseFolder

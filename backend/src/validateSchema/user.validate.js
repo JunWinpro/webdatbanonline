@@ -116,6 +116,12 @@ const userSchema = {
         'any.required': messages.role.required,
         'any.only': messages.role.only,
     }),
+
+    isDeleted: joi.boolean().messages({
+        // 'any.only': messages.isDeleted.only,
+        // 'any.empty': messages.isDeleted.empty,
+        // 'any.required': messages.isDeleted.required,
+    })
 }
 
 
@@ -154,6 +160,10 @@ const userValidate = {
 
     forgetPassword: joi.object({
         email: userSchema.email.required()
+    }),
+
+    deleteUser: joi.object({
+        isDeleted: userSchema.isDeleted.required()
     })
 
 }
