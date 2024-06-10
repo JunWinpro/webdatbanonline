@@ -264,7 +264,6 @@ const restaurantInfoSchema = {
     ).unique((a, b) => a.dayOfWeek === b.dayOfWeek).messages({
         ...messages.schedule.schedule
     })
-    ,
 }
 
 
@@ -273,11 +272,11 @@ const restaurantValidate = {
 
         name: restaurantSchema.name.required(),
 
-        address: restaurantSchema.address,
+        address: restaurantSchema.address.required(),
 
         category: restaurantSchema.category.required(),
 
-        tableList: restaurantSchema.tableList,
+        tableList: restaurantSchema.tableList.required(),
 
         isOpening: restaurantSchema.isOpening,
 
