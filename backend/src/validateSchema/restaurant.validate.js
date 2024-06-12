@@ -137,6 +137,21 @@ const messages = {
             'number.max': "Close time maximum is less than 24",
             'any.required': "Close time is required"
         },
+    },
+
+    description: {
+        description: {
+            'array.base': "Description must be an array of objects with title and content",
+            'object.base': "Missing title or content"
+        },
+        title: {
+            'string.empty': "Title can't be empty",
+            'any.required': "Title is required"
+        },
+        content: {
+            'string.empty': "Content can't be empty",
+            'any.required': "Content is required"
+        }
     }
 }
 
@@ -210,14 +225,12 @@ const restaurantInfoSchema = {
 
     description: joi.array().items(
         joi.object({
-
             title: joi.string().required().messages({
                 ...messages.description.title
             }).custom((value, helpers) => {
                 if (value.trim().length === 0) {
                     return helpers.message("Title can't be empty")
                 }
-
                 return trimString(value)
             }),
 
@@ -227,12 +240,11 @@ const restaurantInfoSchema = {
                 if (value.trim().length === 0) {
                     return helpers.message("Content can't be empty")
                 }
-
                 return trimString(value)
             }),
         })
     ).messages({
-
+        ...messages.description.description
     }),
 
     schedule: joi.array().items(
@@ -258,12 +270,19 @@ const restaurantInfoSchema = {
             if (openTime >= closeTime) {
                 return helpers.message("Open time must be before close time")
             }
+
             return value
         })
 
     ).unique((a, b) => a.dayOfWeek === b.dayOfWeek).messages({
         ...messages.schedule.schedule
     })
+        .custom((value, helpers) => {
+            if (value.length < 7) {
+                return helpers.message("Schedule need full fill 7 days")
+            }
+            return value
+        })
 }
 
 

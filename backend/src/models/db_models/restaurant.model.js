@@ -12,6 +12,11 @@ const restaurant = new mongoose.Schema(
             unique: true,
             required: true
         },
+        docName: {
+            type: String,
+            unique: true,
+            required: true
+        },
         address: {
             streetAddress: {
                 type: String,
@@ -66,7 +71,7 @@ const restaurant = new mongoose.Schema(
             type: Boolean,
             default: false
         },
-        numberOfTablesBookInWeek: {
+        numberOfTablesBookedInLastWeek: {
             type: Number,
             default: 0
         }
