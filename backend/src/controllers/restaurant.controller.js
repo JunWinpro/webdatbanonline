@@ -4,6 +4,8 @@ import { v2 as cloudinary } from 'cloudinary'
 import mongoose from "mongoose"
 import pageSplit from "../utils/pageSplit.util.js"
 import lowerCaseString from "../utils/lowerCaseString.js"
+import sortModelType from "../utils/sortModel.js"
+import convertUnicode from "../validateSchema/unidecode.js"
 const restaurantController = {
 
     createRestaurant: async (req, res) => {
@@ -31,7 +33,6 @@ const restaurantController = {
                 for (let file of files[key]) {
 
                     const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
-                    console.log(file)
                     const fileName = `${Date.now()}-${file.originalname.replace(" ", "-").split('.')[0]}`
                     const folder = key
 
@@ -86,7 +87,6 @@ const restaurantController = {
 
             if (district && !city) throw new Error("Please choose city first")
 
-
             let filterLocation = {}
             if (city) {
                 filterLocation = {
@@ -107,12 +107,47 @@ const restaurantController = {
                 }
             }
 
-            let filterName = {}
+            const filterName = {}
             if (name) {
                 filterName.name = {
-                    $regex: new RegExp('^' + name.normalize('NFD').replace(/[\u0300-\u036f]/g, function (c) {
-                        return c.charCodeAt(0).toString(16);
-                    }).replace(/[^a-zA-Z0-9]/g, ''), 'i')
+                    $regex: convertUnicode(lowerCaseString(name)),
+                    $options: 'i'
+                }
+            }
+
+            const sortModel = {}
+            const sortToObject = (ele) => {
+                if (ele.type === "rating") {
+                    sortModel.rating = sortModelType(ele.value)
+                }
+                if (ele.type === "price") {
+                    if (ele.value === "desc") {
+                        sortModel.maxPrice = sortModelType(ele.value)
+                    } else {
+                        sortModel.minPrice = sortModelType(ele.value)
+                    }
+                }
+                if (ele.type === "new") {
+                    sortModel.createdAt = sortModelType(ele.value)
+                }
+                if (ele.type === "name") {
+                    sortModel.name = sortModelType(ele.value)
+                }
+            }
+            if (sortBy) {
+                if (Array.isArray(sortBy)) {
+                    const sortMap = sortBy?.map(ele => {
+                        const [type, value] = ele.split("_")
+                        return { type, value }
+                    })
+
+                    sortMap?.forEach(ele => {
+                        sortToObject(ele)
+                    })
+                }
+                else {
+                    const [type, value] = sortBy.split("_")
+                    sortToObject({ type, value })
                 }
             }
 
@@ -121,14 +156,7 @@ const restaurantController = {
                 ...filterName
             }
 
-            const restaurants = await ModelDb.RestaurantModel.find(
-                {
-                    name: {
-                        $regex: 'nhà',
-                        $options: "i"
-                    }
-                }
-            )
+            const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel, undefined)
 
             if (restaurants.length === 0) throw new Error("No restaurant found")
 
