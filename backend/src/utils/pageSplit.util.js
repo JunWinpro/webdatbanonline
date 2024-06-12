@@ -1,4 +1,4 @@
-const pageSplit = async (model, filterModel, page, pageSize, sortBy, populated) => {
+const pageSplit = async (model, filterModel, page, pageSize, sortModel, populated) => {
     let sortType = {}
     let totalItems;
     let currentPage = page ? Number(page) : 1
@@ -6,14 +6,6 @@ const pageSplit = async (model, filterModel, page, pageSize, sortBy, populated) 
 
     if (!Number.isInteger(currentPage) || currentPage <= 0) throw new Error("Invalid page")
     if (!Number.isInteger(currentPageSize) || currentPageSize <= 0) throw new Error("Invalid page size")
-
-    if (sortBy) {
-        if (sortBy === "latest") {
-            sortType.createdAt = -1
-        } else if (sortBy === "oldest") {
-            sortType.createdAt = 1
-        }
-    }
 
     totalItems = await model.countDocuments(filterModel)
 
@@ -26,7 +18,7 @@ const pageSplit = async (model, filterModel, page, pageSize, sortBy, populated) 
         page: currentPage
     }
     if (!populated) {
-        const result = await model.find(filterModel && filterModel).sort(sortBy && sortType).skip(skip).limit(currentPageSize)
+        const result = await model.find(filterModel && filterModel).sort(sortModel).skip(skip).limit(currentPageSize)
         data.data = result
     }
     else {
