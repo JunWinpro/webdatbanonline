@@ -9,7 +9,6 @@ const restaurantValidateData = {
             if (error) throw new Error(error.details[0].message)
 
             req.body = value
-            req.body.docName = convertUnicode(value.name)
             next()
         }
         catch (err) {

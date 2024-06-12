@@ -12,11 +12,6 @@ const restaurant = new mongoose.Schema(
             unique: true,
             required: true
         },
-        docName: {
-            type: String,
-            unique: true,
-            required: true
-        },
         address: {
             streetAddress: {
                 type: String,
