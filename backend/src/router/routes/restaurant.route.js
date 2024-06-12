@@ -16,8 +16,7 @@ restaurantRoute.post('/create-restaurant', tokenMiddleware.verifyAccessToken, au
         { name: 'avatar', maxCount: 1 }
     ]), imageValidate, validateData.restaurant.createRestaurant, restaurantController.createRestaurant)
 
-restaurantRoute.get('/', restaurantController.getRestaurants)
-
+restaurantRoute.get('/', validateData.restaurant.getRestaurants, restaurantController.getRestaurants)
 restaurantRoute.get('/:id', restaurantController.getRestaurantById)
 restaurantRoute.get('/full-info/:id', restaurantController.getRestaurantById)
 
