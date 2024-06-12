@@ -19,6 +19,26 @@ const restaurantValidateData = {
                 err
             })
         }
+    },
+
+    getRestaurants: (req, res, next) => {
+        try {
+            const { error, value } = restaurantValidate.getRestaurants.validate(req.query)
+            console.log(error && error)
+            console.log(value)
+            if (error) throw new Error(error.details[0].message)
+            req.query = value
+
+            next()
+        }
+        catch (err) {
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null,
+                err
+            })
+        }
     }
 }
 

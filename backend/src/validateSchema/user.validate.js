@@ -118,9 +118,7 @@ const userSchema = {
     }),
 
     isDeleted: joi.boolean().messages({
-        // 'any.only': messages.isDeleted.only,
-        // 'any.empty': messages.isDeleted.empty,
-        // 'any.required': messages.isDeleted.required,
+
     })
 }
 

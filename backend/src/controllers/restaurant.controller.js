@@ -87,54 +87,48 @@ const restaurantController = {
 
             if (district && !city) throw new Error("Please choose city first")
 
-            let filterLocation = {}
+            const filterLocation = {}
             if (city) {
-                filterLocation = {
-                    ...filterLocation,
-                    'address.city': {
-                        $regex: lowerCaseString(city),
-                        $options: "i"
-                    }
+                filterLocation['address.city'] = {
+                    $regex: lowerCaseString(city),
+                    $options: "i"
                 }
             }
             if (district) {
-                filterLocation = {
-                    ...filterLocation,
-                    'address.district': {
-                        $regex: lowerCaseString(district),
-                        $options: "i"
-                    }
+                filterLocation['address.district'] = {
+                    $regex: lowerCaseString(district),
+                    $options: "i"
                 }
             }
 
             const filterName = {}
             if (name) {
                 filterName.name = {
-                    $regex: convertUnicode(lowerCaseString(name)),
+                    $regex: lowerCaseString(name),
                     $options: 'i'
                 }
             }
 
             const sortModel = {}
-            const sortToObject = (ele) => {
-                if (ele.type === "rating") {
-                    sortModel.rating = sortModelType(ele.value)
-                }
-                if (ele.type === "price") {
-                    if (ele.value === "desc") {
-                        sortModel.maxPrice = sortModelType(ele.value)
-                    } else {
-                        sortModel.minPrice = sortModelType(ele.value)
+            if (sortBy) {
+                const sortToObject = (ele) => {
+                    if (ele.type === "rating") {
+                        sortModel.rating = sortModelType(ele.value)
+                    }
+                    if (ele.type === "price") {
+                        if (ele.value === "desc") {
+                            sortModel.maxPrice = sortModelType(ele.value)
+                        } else {
+                            sortModel.minPrice = sortModelType(ele.value)
+                        }
+                    }
+                    if (ele.type === "new") {
+                        sortModel.createdAt = sortModelType(ele.value)
+                    }
+                    if (ele.type === "name") {
+                        sortModel.name = sortModelType(ele.value)
                     }
                 }
-                if (ele.type === "new") {
-                    sortModel.createdAt = sortModelType(ele.value)
-                }
-                if (ele.type === "name") {
-                    sortModel.name = sortModelType(ele.value)
-                }
-            }
-            if (sortBy) {
                 if (Array.isArray(sortBy)) {
                     const sortMap = sortBy?.map(ele => {
                         const [type, value] = ele.split("_")
@@ -151,14 +145,23 @@ const restaurantController = {
                 }
             }
 
+            const filterCategory = {}
+            if (category) {
+                filterCategory.category = {
+                    $regex: lowerCaseString(category),
+                    $options: 'i'
+                }
+            }
+
             const filterModel = {
                 ...filterLocation,
-                ...filterName
+                ...filterName,
+                ...filterCategory
             }
 
             const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel, undefined)
 
-            if (restaurants.length === 0) throw new Error("No restaurant found")
+            if (restaurants.totalItems === 0) throw new Error("No restaurant found")
 
             res.status(200).json({
                 message: "Get restaurants success",
@@ -229,17 +232,42 @@ const restaurantController = {
     updateRestaurantById: async (req, res) => {
         try {
             const { id } = req.params
+            const user = req.user
 
-            const restaurant = await ModelDb.RestaurantModel.findOne({
-
+            let restaurant = await ModelDb.RestaurantModel.findOne({
+                manager: new mongoose.Type.ObjectId(user.userId),
+                isDeleted: false,
+                _id: id
             })
-            if (!restaurant) throw new Error("")
+            if (!restaurant) throw new Error("Restaurant not found")
 
+            restaurant = {
+                ...restaurant,
+                ...req.body
+            }
+
+            await restaurant.save()
+            res.status(203).json({
+                message: "Update restaurant success",
+                success: true,
+                data: restaurant,
+            })
+        } catch (error) {
+            res.status(403).json({
+                message: error.message,
+                success: false,
+                data: null,
+                err: error,
+            })
+        }
+    },
+
+    deleteRestaurantById: async (req, res) => {
+        try {
 
         } catch (error) {
 
         }
     }
-
 }
 export default restaurantController

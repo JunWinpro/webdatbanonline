@@ -1,5 +1,7 @@
 import joi from "joi";
 import trimString from "../utils/trimString.js";
+import convertUnicode from "./unidecode.js";
+import lowerCaseString from "../utils/lowerCaseString.js";
 const messages = {
     name: {
         'any.required': "Name is required",
@@ -152,7 +154,7 @@ const messages = {
             'string.empty': "Content can't be empty",
             'any.required': "Content is required"
         }
-    }
+    },
 }
 
 const restaurantSchema = {
@@ -276,42 +278,112 @@ const restaurantInfoSchema = {
 
     ).unique((a, b) => a.dayOfWeek === b.dayOfWeek).messages({
         ...messages.schedule.schedule
+    }).custom((value, helpers) => {
+        if (value.length < 7) {
+            return helpers.message("Schedule need full fill 7 days")
+        }
+        return value
     })
-        .custom((value, helpers) => {
-            if (value.length < 7) {
-                return helpers.message("Schedule need full fill 7 days")
-            }
-            return value
-        })
 }
+const restaurantQuerySchema = {
+    name: joi.string().regex(/^[\p{L}\p{N}\s]+$/u).messages({
+        'string.base': "Name must be a string",
+        'string.empty': "Name is empty",
+        'string.pattern.base': "Name can't contain special character"
+    }).custom((value, helpers) => {
+        if (value.trim().length === 0) {
+            return helpers.message("Name can't be empty")
+        }
+        return convertUnicode(lowerCaseString(trimString(value)))
+    }),
 
+    page: joi.string().regex(/^[0-9]+$/).messages({
+        'string.empty': "Page can't be empty",
+        'string.base': "Page must be a string",
+        'string.pattern.base': "Page only contains integer number",
+    }).custom((value, helpers) => {
+        if (!Number.isInteger(Number(value)))
+            return helpers.message("Page can't be float")
+
+        if (Number(value) <= 0)
+            return helpers.message("Page can't be negative")
+
+        return Number(value)
+    }),
+
+    pageSize: joi.string().regex(/^[0-9]+$/).messages({
+        'string.empty': "Page size can't be empty",
+        'string.base': "Page size must be a string",
+        'string.pattern.base': "Page size only contains integer number",
+    }).custom((value, helpers) => {
+        if (!Number.isInteger(Number(value)))
+            return helpers.message("Page size can't be float")
+
+        if (Number(value) <= 0)
+            return helpers.message("Page size can't be negative")
+
+        return Number(value)
+    }),
+
+    city: joi.string().messages({
+
+    }).custom((value, helpers) => { }),
+
+    district: joi.string().messages({
+
+    }),
+    category: joi.alternatives().try(
+        joi.string(),
+        joi.array().items(joi.string())
+    ).messages({
+        'any.invalid': 'Category must be a string or an array of strings'
+    }),
+    sortBy: joi.alternatives().try(
+        joi.string(),
+        joi.array().items(joi.string())
+    ).messages({
+        'any.invalid': 'SortBy must be a string or an array of strings'
+    }),
+
+}
 
 const restaurantValidate = {
     createRestaurant: joi.object({
-
         name: restaurantSchema.name.required(),
-
         address: restaurantSchema.address.required(),
-
         category: restaurantSchema.category.required(),
-
         tableList: restaurantSchema.tableList.required(),
-
         isOpening: restaurantSchema.isOpening,
-
         isActive: restaurantSchema.isActive,
-
         isDeleted: restaurantSchema.isDeleted,
-
         isVerified: restaurantSchema.isVerified,
-
-        //restaurant info
         maxim: restaurantInfoSchema.maxim,
-
         description: restaurantInfoSchema.description,
-
         schedule: restaurantInfoSchema.schedule.required(),
-    })
+    }),
+
+    getRestaurants: joi.object({
+        name: restaurantQuerySchema.name,
+        page: restaurantQuerySchema.page,
+        pageSize: restaurantQuerySchema.pageSize,
+        city: restaurantQuerySchema.city,
+        district: restaurantQuerySchema.district,
+        category: restaurantQuerySchema.category,
+    }),
+
+    updateRestaurant: joi.object({
+        name: restaurantSchema.name,
+        address: restaurantSchema.address,
+        category: restaurantSchema.category,
+        tableList: restaurantSchema.tableList,
+        isOpening: restaurantSchema.isOpening,
+        isActive: restaurantSchema.isActive,
+        isDeleted: restaurantSchema.isDeleted,
+        isVerified: restaurantSchema.isVerified,
+        maxim: restaurantInfoSchema.maxim,
+        description: restaurantInfoSchema.description,
+        schedule: restaurantInfoSchema.schedule,
+    }),
 }
 
 export default restaurantValidate
