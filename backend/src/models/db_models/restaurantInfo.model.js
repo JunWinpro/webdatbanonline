@@ -7,7 +7,7 @@ const restaurantInfo = new mongoose.Schema(
             ref: collection.RESTAURANTS,
             required: true
         },
-        employees: [{
+        employee: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: collection.EMPLOYEES,
             default: null

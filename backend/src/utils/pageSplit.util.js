@@ -1,4 +1,4 @@
-const pageSplit = async (model, page, pageSize, filterModel, populated, sortBy) => {
+const pageSplit = async (model, filterModel, page, pageSize, sortBy, populated) => {
     let sortType = {}
     let totalItems;
     let currentPage = page ? Number(page) : 1
@@ -14,11 +14,9 @@ const pageSplit = async (model, page, pageSize, filterModel, populated, sortBy) 
             sortType.createdAt = 1
         }
     }
-    if (filterModel) {
-        totalItems = await model.countDocuments(filterModel)
-    } else {
-        totalItems = await model.countDocuments()
-    }
+
+    totalItems = await model.countDocuments(filterModel)
+
     const totalPages = Math.ceil(totalItems / currentPageSize)
     const skip = currentPage > 1 ? (Number(page) - 1) * currentPageSize : 0
     let data = {
