@@ -1,81 +1,65 @@
 import joi from "joi";
 const messages = {
     username: {
-        alphanum: "Username cannot contain spaces or special characters",
-        min: "Username length must be from 5 to 10",
-        max: "Username length must be from 5 to 10",
-        empty: "Username is empty",
-        required: "Username is required"
+        'string.alphanum': "Username cannot contain spaces or special characters",
+        'string.min': "Username length must be from 5 to 10",
+        'string.max': "Username length must be from 5 to 10",
+        'string.empty': "Username is empty",
+        'any.required': "Username is required"
     },
     phone: {
-        pattern: "Phone must be 10 numbers",
-        empty: "Phone is empty",
-        required: "Phone is required"
+        'string.pattern.base': "Phone must be 10 numbers",
+        'string.empty': "Phone is empty",
+        'any.required': "Phone is required"
     },
     password: {
-        only: "Password must be from 8 to 12 characters",
-        empty: "Password is empty",
-        required: "Password is required"
+        'string.empty': "Password is empty",
+        'string.min': "Password minimum length is 8 characters",
+        'string.max': "Password maximum length is 12 characters",
+        'any.required': "Password is required"
     },
     firstName: {
-        pattern: "First name cannot contain spaces or special characters or number",
-        min: "First name must have at least 1 character",
-        empty: "First name  is empty",
-        required: "First name is required"
+        'string.pattern.base': "First name cannot contain spaces or special characters or number",
+        'string.min': "First name must have at least 1 character",
+        'string.empty': "First name  is empty",
+        'any.required': "First name is required"
     },
     lastName: {
-        pattern: "Last name cannot contain spaces or special characters or number",
-        min: "Last name must have at least 1 character",
-        empty: "Last name is empty",
-        required: "Last is required"
+        'string.pattern.base': "Last name cannot contain spaces or special characters or number",
+        'string.min': "Last name must have at least 1 character",
+        'string.empty': "Last name is empty",
+        'any.required': "Last name is required"
     },
     gender: {
-        only: "Gender must be one of 'male', 'female', 'other'",
-        empty: "Gender is empty",
-        required: "Gender is required"
+        'any.only': "Gender must be one of 'male', 'female', 'other'",
+        'any.empty': "Gender is empty",
+        'any.required': "Gender is required"
     },
 }
 
 const employeeSchema = {
     username: joi.string().alphanum().min(5).max(10).messages({
-        'string.alphanum': messages.username.alphanum,
-        'string.min': messages.username.min,
-        'string.max': messages.username.max,
-        'string.empty': messages.username.empty,
-        'any.required': messages.username.required
+        ...messages.username
     }),
 
     phone: joi.string().regex(/^\d{10}$/).messages({
-        'string.pattern.base': messages.phone.pattern,
-        'string.empty': messages.phone.empty,
-        'any.required': messages.phone.required
+        ...messages.phone
     }),
 
     password: joi.string().min(8).max(12).messages({
-        'string.empty': messages.password.empty,
-        'string.min': messages.password.only,
-        'string.max': messages.password.only,
-        'any.required': messages.password.required
+        ...messages.password
     }),
 
     firstName: joi.string().regex(/^[a-zA-Z]+$/).min(1).messages({
-        'string.min': messages.firstName.min,
-        'string.pattern.base': messages.firstName.pattern,
-        'string.empty': messages.firstName.empty,
-        'any.required': messages.firstName.required
+        ...messages.firstName
     }),
 
     lastName: joi.string().regex(/^[a-zA-Z]+$/).min(2).messages({
-        'string.min': messages.lastName.min,
-        'string.pattern.base': messages.lastName.pattern,
-        'string.empty': messages.lastName.empty,
-        'any.required': messages.lastName.required
+        ...messages.lastName
     }),
 
     gender: joi.string().valid('male', 'female', 'other').messages({
-        'any.only': messages.gender.only,
-        'any.empty': messages.gender.empty,
-        'any.required': messages.gender.required
+        ...messages.gender
     }),
 
 }

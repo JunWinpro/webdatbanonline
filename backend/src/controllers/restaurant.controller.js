@@ -5,7 +5,6 @@ import mongoose from "mongoose"
 import pageSplit from "../utils/pageSplit.util.js"
 import lowerCaseString from "../utils/lowerCaseString.js"
 import sortModelType from "../utils/sortModel.js"
-import convertUnicode from "../validateSchema/unidecode.js"
 const restaurantController = {
 
     createRestaurant: async (req, res) => {
@@ -101,6 +100,8 @@ const restaurantController = {
                 }
             }
 
+
+
             const filterName = {}
             if (name) {
                 filterName.name = {
@@ -160,8 +161,6 @@ const restaurantController = {
             }
 
             const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel, undefined)
-
-            if (restaurants.totalItems === 0) throw new Error("No restaurant found")
 
             res.status(200).json({
                 message: "Get restaurants success",
@@ -241,12 +240,41 @@ const restaurantController = {
             })
             if (!restaurant) throw new Error("Restaurant not found")
 
+            const files = req.files
+            // const { restaurantImages, menuImages, foodImages,avatar } = files
+
+            const imageUrls = {}
+            let i = 0;
+
+            // while (Object.keys(files)[i]) {
+
+            //     let listUrl = []
+            //     let key = Object.keys(files)[i]
+
+            //     for (let file of files[key]) {
+
+            //         const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
+            //         const fileName = `${Date.now()}-${file.originalname.replace(" ", "-").split('.')[0]}`
+            //         const folder = key
+
+            //         const result = await cloudinary.uploader.upload(dataUrl, {
+            //             public_id: fileName,
+            //             resource_type: "auto",
+            //             folder: `${baseFolder.RESTAURANT}/${folder}/${restaurant.name.replace(" ", "-")}`
+            //         })
+            //         if (!result) throw new Error("Error uploading file in: " + key)
+            //         listUrl.push(result.secure_url)
+            //         imageUrls[key] = listUrl
+            //     }
+            //     i++;
+            // }
+
             restaurant = {
                 ...restaurant,
                 ...req.body
             }
-
             await restaurant.save()
+
             res.status(203).json({
                 message: "Update restaurant success",
                 success: true,

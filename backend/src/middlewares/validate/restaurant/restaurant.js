@@ -1,5 +1,4 @@
 import restaurantValidate from "../../../validateSchema/restaurant.validate.js"
-import convertUnicode from "../../../validateSchema/unidecode.js"
 
 const restaurantValidateData = {
     createRestaurant: (req, res, next) => {
