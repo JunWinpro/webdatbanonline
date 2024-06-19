@@ -94,6 +94,7 @@ const Carousel = React.forwardRef((
         opts,
         orientation:
           orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+
         scrollPrev,
         scrollNext,
         canScrollPrev,
@@ -143,6 +144,7 @@ const CarouselItem = React.forwardRef(({ className, ...props }, ref) => {
         "min-w-0 shrink-0 grow-0 ",
         orientation === "horizontal" ? "pl-0" : "pt-4",
         className
+
       )}
       {...props} />)
   );
