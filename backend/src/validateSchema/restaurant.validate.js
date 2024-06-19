@@ -1,7 +1,7 @@
 import joi from "joi";
 import trimString from "../utils/trimString.js";
-import convertUnicode from "./unidecode.js";
 import lowerCaseString from "../utils/lowerCaseString.js";
+import convertUnicode from "../utils/unidecode.js";
 const messages = {
     name: {
         'any.required': "Name is required",

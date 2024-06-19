@@ -1,120 +1,101 @@
 import joi from "joi";
 const messages = {
     email: {
-        email: "Email must have at least 2 domain segments example: example.com",
-        empty: "Email is empty",
-        required: "Email is required"
+        'string.email': "Email must have at least 2 domain segments example: example.com",
+        'string.empty': "Email is empty",
+        'any.required': "Email is required"
     },
     phone: {
-        pattern: "Phone must be 10 numbers",
-        empty: "Phone is empty",
-        required: "Phone is required"
+        'string.pattern.base': "Phone must be 10 numbers",
+        'string.empty': "Phone is empty",
+        'any.required': "Phone is required"
     },
     password: {
-        only: "Password must be from 8 to 12 characters",
-        empty: "Password is empty",
-        required: "Password is required"
+        'string.empty': "Password is empty",
+        'string.min': "Password minimum length is 8 characters",
+        'string.max': "Password maximum length is 12 characters",
+        'any.required': "Password is required"
     },
     firstName: {
-        pattern: "First name cannot contain spaces or special characters or number",
-        min: "First name must have at least 1 character",
-        empty: "First name  is empty",
-        required: "First name is required"
+        'string.pattern.base': "First name cannot contain spaces or special characters or number",
+        'string.min': "First name must have at least 1 character",
+        'string.empty': "First name  is empty",
+        'any.required': "First name is required"
     },
     lastName: {
-        pattern: "Last name cannot contain spaces or special characters or number",
-        min: "Last name must have at least 1 character",
-        empty: "Last name is empty",
-        required: "Last is required"
+        'string.pattern.base': "Last name cannot contain spaces or special characters or number",
+        'string.min': "Last name must have at least 1 character",
+        'string.empty': "Last name is empty",
+        'any.required': "Last name is required"
     },
     gender: {
-        only: "Gender must be one of 'male', 'female', 'other'",
-        empty: "Gender is empty",
-        required: "Gender is required"
+        'any.only': "Gender must be one of 'male', 'female', 'other'",
+        'any.empty': "Gender is empty",
+        'any.required': "Gender is required"
     },
     dateOfBirth: {
-        format: "Date of birth must be YYYY-MM-DD",
-        empty: "Date of birth is empty",
-        required: "Date is required",
-        max: "Date of birth cannot be in the future",
-        min: "Date of birth must be in or less 100 years",
-        base: "Invalid date of birth format"
+        'date.format': "Date of birth must be YYYY-MM-DD",
+        'date.empty': "Date of birth is empty",
+        'any.required': "Date is required",
+        'date.max': "Date of birth cannot be in the future",
+        'date.min': "Date of birth must be in or less 100 years",
+        'date.base': "Invalid date of birth format"
     },
     address: {
         streetAddress: {
-            empty: 'Street address is empty'
+            'string.empty': 'Street address is empty'
         },
         city: {
-            empty: 'City is empty'
+            'string.empty': 'City is empty'
         },
     },
     role: {
-        only: "Role must be one of 'manager', 'admin' or 'customer",
-        empty: "Role is empty",
-        required: "Role is required"
+        'any.only': "Role must be one of 'manager', 'admin' or 'customer",
+        'any.empty': "Role is empty",
+        'any.required': "Role is required"
     }
 }
 
 const userSchema = {
     email: joi.string().email({ minDomainSegments: 2 }).messages({
-        'string.email': messages.email.email,
-        'string.empty': messages.email.empty,
-        'any.required': messages.email.required
+        ...messages.email
     }),
 
     phone: joi.string().regex(/^\d{10}$/).messages({
-        'string.pattern.base': messages.phone.pattern,
-        'string.empty': messages.phone.empty,
-        'any.required': messages.phone.required
+        ...messages.phone
     }),
 
     password: joi.string().min(8).max(12).messages({
-        'string.empty': messages.password.empty,
-        'string.min': messages.password.only,
-        'string.max': messages.password.only,
-        'any.required': messages.password.required
+        ...messages.password
     }),
 
     firstName: joi.string().regex(/^[a-zA-Z]+$/).min(1).messages({
-        'string.min': messages.firstName.min,
-        'string.pattern.base': messages.firstName.pattern,
-        'string.empty': messages.firstName.empty,
-        'any.required': messages.firstName.required
+        ...messages.firstName
     }),
 
-    lastName: joi.string().regex(/^[a-zA-Z]+$/).min(2).messages({
-        'string.min': messages.lastName.min,
-        'string.pattern.base': messages.lastName.pattern,
-        'string.empty': messages.lastName.empty,
-        'any.required': messages.lastName.required
+    lastName: joi.string().regex(/^[a-zA-Z]+$/).min(1).messages({
+        ...messages.lastName
     }),
 
     gender: joi.string().valid('male', 'female', 'other').messages({
-        'any.only': messages.gender.only,
-        'any.empty': messages.gender.empty,
-        'any.required': messages.gender.required
+        ...messages.gender
     }),
 
     dateOfBirth: joi.date().iso().max('now').min(Date.now() - 100 * 365 * 24 * 60 * 60 * 1000).messages({
-        'any.required': messages.dateOfBirth.required,
-        'date.format': messages.dateOfBirth.format,
-        'date.max': messages.dateOfBirth.max,
-        'date.min': messages.dateOfBirth.min
+        ...messages.dateOfBirth
     }),
 
     address: {
         streetAddress: joi.string().messages({
-            'string.empty': messages.address.streetAddress.empty,
+            ...messages.address.streetAddress
         }),
         city: joi.string().messages({
-            'string.empty': messages.address.city.empty,
+            ...messages.address.city
         }),
     },
 
     role: joi.string().valid('manager', 'admin', 'customer').messages({
-        'any.empty': messages.role.empty,
-        'any.required': messages.role.required,
-        'any.only': messages.role.only,
+        ...messages.role
     }),
 
     isDeleted: joi.boolean().messages({
