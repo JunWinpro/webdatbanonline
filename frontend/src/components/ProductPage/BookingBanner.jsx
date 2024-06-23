@@ -103,7 +103,7 @@ const BookingBanner = () => {
   };
 
   return (
-    <div className="flex w-full max-w-screen-xl">
+    <div className="flex w-full max-w-screen-xl bg-slate-100	">
       <div className="carousel relative w-2/3 overflow-hidden">
         <div
           className={`carousel-inner w-full h-full transition-transform duration-500 ${
@@ -235,6 +235,7 @@ const BookingBanner = () => {
         ))}
       </div>
     </div>
+    
   );
 };
 
