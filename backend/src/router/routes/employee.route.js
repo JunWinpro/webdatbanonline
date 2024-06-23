@@ -10,11 +10,10 @@ const employeeRoute = express.Router()
 employeeRoute.post('/register', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.employee.register, employeeController.register)
 employeeRoute.post('/login', validateData.employee.login, employeeController.login)
 
-// employeeRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.manager, employeeController.getAllUsers)
-employeeRoute.get('/:id', tokenMiddleware.verifyAccessToken, employeeController.getEmployeeById)
+employeeRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.manager, employeeController.getEmployees)
+employeeRoute.get('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, employeeController.getEmployeeById)
 
-// employeeRoute.put('/reset-password/:token', validateData.user.resetPassword, employeeController.resetPassword)
-// employeeRoute.put('/:id', tokenMiddleware.verifyAccessToken, memoryUploader.single('file'), validateData.user.update, employeeController.updateUserById)
+employeeRoute.put('/:id', tokenMiddleware.verifyAccessToken, validateData.employee.update, employeeController.updateEmployeeById)
 
 employeeRoute.delete('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, employeeController.deleteEmployeeById)
 

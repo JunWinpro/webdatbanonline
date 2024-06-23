@@ -8,6 +8,11 @@ const employeeSchema = new mongoose.Schema(
             ref: collection.USERS,
             required: true
         },
+        restaurant: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: collection.RESTAURANTS,
+            required: true
+        },
         username: {
             type: String,
             unique: true,

@@ -1,13 +1,16 @@
-import transporter from "../configs/transporter.config.js"
 import ModelDb from "../models/model.js"
 import bcryptPassword from "../utils/bcrypt.util.js"
 import jwtToken from "../utils/jwtToken.util.js"
 import { v2 as cloudinary } from "cloudinary"
 import pageSplit from "../utils/pageSplit.util.js"
+import sendEmail from "../utils/sendEmail.js"
+import returnUser from "../dto/user.dto.js"
+import lowerCaseString from "../utils/lowerCaseString.js"
+import trimString from "../utils/trimString.js"
 const userController = {
     register: async (req, res) => {
         try {
-            const { email, phone, password, firstName, lastName, gender } = req.body;
+            const { email, phone, password } = req.body;
 
             const userExist = await ModelDb.UserModel.findOne({
                 $or: [
@@ -26,22 +29,23 @@ const userController = {
 
             const hashPassword = bcryptPassword.hashPassword(password)
 
-            const newUser = await ModelDb.UserModel.create({
-                email,
-                phone,
+            const veryficationToken = crypto.randomUUID()
+
+            await ModelDb.UserModel.create({
+                ...req.body,
                 password: hashPassword,
-                firstName,
-                lastName,
-                gender,
+                veryficationToken
             })
-
-            const returnUser = { ...newUser.toObject() }
-
-            delete returnUser.password
+            const info = {
+                path: 'verify-user',
+                subject: 'Verify account',
+                action: 'verify your account'
+            }
+            await sendEmail(email, veryficationToken, info)
 
             res.status(201).json({
-                message: "User created successfully",
-                data: returnUser,
+                message: "Please check your email for verify account",
+                data: null,
                 success: true
             })
         }
@@ -52,6 +56,33 @@ const userController = {
                 success: false,
                 data: null,
                 err
+            })
+        }
+    },
+    verifyUser: async (req, res) => {
+        try {
+            const { token } = req.params
+            const user = await ModelDb.UserModel.findOne({
+                veryficationToken: token
+            })
+            if (!user) throw new Error("Token is invalid")
+
+            user.isVerified = true
+            user.veryficationToken = null
+
+            await user.save()
+            res.status(201).json({
+                success: true,
+                data: null,
+                message: "Verify success, you can login now"
+            })
+
+        } catch (error) {
+            console.log("verify user err: ", error)
+            res.status(403).json({
+                message: error.message,
+                success: false,
+                data: null
             })
         }
     },
@@ -69,27 +100,36 @@ const userController = {
             const checkPassword = bcryptPassword.comparePassword(password, user.password)
             if (!checkPassword) throw new Error("Email or password is wrong")
 
-            const returnUser = { ...user.toObject() }
+            if (user.isVerified === false) {
+                const verificationToken = crypto.randomUUID()
+
+                user.veryficationToken = verificationToken
+                const info = {
+                    path: 'verify-user',
+                    subject: 'Verify account',
+                    action: 'verify your account'
+                }
+                await user.save()
+                await sendEmail(email, verificationToken, info)
+                throw new Error("Account is not verified, please check your email for verify account")
+            }
 
             const accessToken = jwtToken.createToken({
-                userId: returnUser._id,
-                email: returnUser.email,
-                role: returnUser.role,
-                isDeleted: returnUser.isDeleted,
+                userId: user._id,
+                email: user.email,
+                role: user.role,
             }, "AT")
-            const refreshToken = jwtToken.createToken({
-                userId: returnUser._id,
-                email: returnUser.email,
-            }, "RT")
 
-            delete returnUser.password
-            delete returnUser.createdAt
-            delete returnUser.updatedAt
+            const refreshToken = jwtToken.createToken({
+                userId: user._id,
+                email: user.email,
+                role: user.role
+            }, "RT")
 
             res.status(201).json({
                 message: "Login success",
                 data: {
-                    userInfo: returnUser,
+                    userInfo: returnUser(user),
                     accessToken,
                     refreshToken
                 },
@@ -99,7 +139,7 @@ const userController = {
         catch (err) {
             console.log("user login err: ", err)
 
-            res.status(400).json({
+            res.status(403).json({
                 message: err.message,
                 success: false,
                 data: null,
@@ -107,31 +147,40 @@ const userController = {
             })
         }
     },
-
-    getAllUsers: async (req, res) => {
+    getUsers: async (req, res) => {
         try {
-            const { page, pageSize, search, sortBy } = req.query
+            const { page, pageSize, email, name, sortBy } = req.query
 
-            let filterModel = {}
-            if (search) {
-                formatSearch = search.split("-").join(" ")
-                filterModel.formatSearch = formatSearch
+            const filterModel = {}
+            if (name) {
+                filterModel.name = {
+                    $regex: lowerCaseString(trimString(name)),
+                    $options: 'i'
+                }
+            }
+            if (email) {
+                filterModel.email = {
+                    $regex: lowerCaseString(trimString(email)),
+                    $options: 'i'
+                }
             }
 
+            const sortModel = {}
+            // Notice: need sort later
 
-            const allUsers = await pageSplit(ModelDb.UserModel, page, pageSize, filterModel, undefined, sortBy)
-            if (!allUsers) throw new Error("User not found")
+            const users = await pageSplit(ModelDb.UserModel, filterModel, page, pageSize, sortModel, undefined)
+            if (!users) throw new Error("User not found")
 
-            const returnUser = allUsers.data.map(user => {
-                const { password, resetPasswordExpireIn, resetPasswordToken, ...returnUser } = user.toObject();
-                return returnUser
+
+            const data = users.data.map(data => {
+                return returnUser(data)
             });
 
-            allUsers.data = returnUser
+            users.data = data
 
             res.status(200).json({
                 message: "Get all users success",
-                data: allUsers,
+                data: users,
                 success: true
             })
         }
@@ -153,25 +202,14 @@ const userController = {
             const { id } = req.params
             const user = await ModelDb.UserModel.findOne({
                 _id: id,
-                isDeleted: false
+                isDeleted: false,
+                isVerified: true
             })
             if (!user) throw new Error("User not found")
 
-            const returnUser = { ...user.toObject() }
-
-            delete returnUser.password
-            delete returnUser.role
-            delete returnUser.createdAt
-            delete returnUser.updatedAt
-            delete returnUser.isDeleted
-            delete returnUser.isVerified
-            delete returnUser.resetPasswordToken
-            delete returnUser.resetPasswordExpireIn
-
-
             res.status(200).json({
                 message: "Get user success",
-                data: returnUser,
+                data: returnUser(user),
                 success: true
             })
         }
@@ -185,96 +223,26 @@ const userController = {
             })
         }
     },
-
-    updateUserById: async (req, res) => {
-        try {
-            const { id } = req.params
-            const { password, newPassword } = req.body
-
-            const user = req.user
-            if (user.userId !== id) throw new Error("You don't have permission for this user")
-
-            let currentUser = await ModelDb.UserModel.findOne({
-                _id: id,
-                isDeleted: false,
-            })
-            if (!currentUser) throw new Error("User not found")
-
-            let hashPassword;
-            if (password && newPassword) {
-                if (bcryptPassword.comparePassword(password, currentUser.password)) throw new Error("Password is incorrect")
-                if (bcryptPassword.comparePassword(newPassword, currentUser.password)) throw new Error("Password is the same as current please change different password")
-                hashPassword = bcryptPassword.hashPassword(newPassword)
-            }
-
-            const file = req.file
-            let avatar;
-            if (file) {
-                const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
-                const fileName = `${currentUser._id.toString()}-${new Date().getTime()}`
-                const result = await cloudinary.uploader.upload(dataUrl, {
-                    folder: `Avatar/${currentUser._id.toString()}`,
-                    public_id: fileName,
-                    resource_type: "auto"
-                })
-                if (!result) throw new Error("Upload failed")
-                avatar = result.secure_url
-            }
-
-            currentUser = {
-                ...currentUser.toObject(),
-                ...req.body,
-                password: hashPassword ? hashPassword : currentUser.password,
-                avatar: avatar ? avatar : currentUser.avatar
-            }
-            const updatedUser = await ModelDb.UserModel.findByIdAndUpdate(id, currentUser, { new: true })
-
-            delete updatedUser.password
-            delete updatedUser.role
-
-            res.status(201).json({
-                message: "Update user success",
-                data: updatedUser,
-                success: true
-            })
-        }
-        catch (err) {
-            console.log("update user by id err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
-        }
-    },
     forgetPassword: async (req, res) => {
         try {
             const { email } = req.body
             const user = await ModelDb.UserModel.findOne({
                 email,
-                isDeleted: false
+                isDeleted: false,
+                isVerified: true
             })
             if (!user) throw new Error("User not found")
 
-            const sendEmail = async (email, token) => {
-                const url = `http://${process.env.CLIENT_URL || 'localhost:3000'}/${token}`
-
-                let mailOptions = {
-                    from: `Taste Tripper <${process.env.GMAIL_USERNAME}>`,
-                    to: email,
-                    subject: 'Reset Password',
-                    text: `Click on the following link to reset your password: ${url}`
-                };
-
-                await transporter.sendMail(mailOptions);
-            }
-
             user.resetPasswordToken = crypto.randomUUID()
             user.resetPasswordExpireIn = Date.now() + 3600000
-
+            const info = {
+                path: 'reset-password',
+                subject: 'Reset Password',
+                action: 'reset your password'
+            }
             await user.save()
-            await sendEmail(email, user.resetPasswordToken)
+            await sendEmail(email, user.resetPasswordToken, info)
+
             res.status(201).json({
                 message: "Please check your email for reset password",
                 success: true,
@@ -291,7 +259,7 @@ const userController = {
             })
         }
     },
-    confirmResetPassword: async (req, res) => {
+    validateResetPasswordToken: async (req, res) => {
         try {
             const { token } = req.params
 
@@ -305,13 +273,14 @@ const userController = {
             const user = await ModelDb.UserModel.findOne({
                 resetPasswordToken: token,
                 isDeleted: false,
+                isVerified: true
             })
             if (!user) throw new Error('User not found')
 
             if (user.resetPasswordExpireIn <= Date.now()) {
 
-                user.resetPasswordToken = undefined
-                user.resetPasswordExpireIn = undefined
+                user.resetPasswordToken = null
+                user.resetPasswordExpireIn = null
                 await user.save()
 
                 throw new Error('Token expired')
@@ -351,8 +320,8 @@ const userController = {
             const hashPassword = bcryptPassword.hashPassword(newPassword)
 
             user.password = hashPassword
-            user.resetPasswordToken = undefined
-            user.resetPasswordExpireIn = undefined
+            user.resetPasswordToken = null
+            user.resetPasswordExpireIn = null
 
             await user.save()
             res.status(201).json({
@@ -400,15 +369,76 @@ const userController = {
             })
         }
     },
+    updateUserById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const { password, newPassword } = req.body
+            const user = req.user
+            if (user.userId !== id) throw new Error("You don't have permission for this action")
 
-    deleteUserById: async (_, res) => {
+            let currentUser = await ModelDb.UserModel.findOne({
+                _id: id,
+                isDeleted: false,
+            })
+            if (!currentUser) throw new Error("User not found")
+
+            let hashPassword;
+            if (password && newPassword) {
+                if (!bcryptPassword.comparePassword(password, currentUser.password)) throw new Error("Password is incorrect")
+                if (bcryptPassword.comparePassword(newPassword, currentUser.password)) throw new Error("Password is the same as current please change different password")
+                hashPassword = bcryptPassword.hashPassword(newPassword)
+            }
+            const file = req.file
+            let avatar;
+            if (file) {
+                const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
+                const fileName = `${currentUser._id.toString()}-${new Date().getTime()}`
+                const result = await cloudinary.uploader.upload(dataUrl, {
+                    folder: `Avatar/${currentUser._id.toString()}`,
+                    public_id: fileName,
+                    resource_type: "auto"
+                })
+                if (!result) throw new Error("Upload failed")
+                avatar = result.secure_url
+            }
+
+            currentUser = {
+                ...currentUser.toObject(),
+                ...req.body,
+                password: hashPassword ? hashPassword : currentUser.password,
+                avatar: avatar ? avatar : currentUser.avatar
+            }
+            const updatedUser = await ModelDb.UserModel.findByIdAndUpdate(id, currentUser, { new: true })
+
+            res.status(201).json({
+                message: "Update user success",
+                data: returnUser(updatedUser),
+                success: true
+            })
+        }
+        catch (err) {
+            console.log("update user by id err: ", err)
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null,
+                err
+            })
+        }
+    },
+    deleteUserById: async (req, res) => {
         try {
             const { id } = req.params
 
             const user = req.user
             if (user.userId !== id) throw new Error("You don't have permission for this user")
 
-            const currentUser = await ModelDb.UserModel.findById(id)
+            const currentUser = await ModelDb.UserModel.findOne({
+                _id: id,
+                email: user.email,
+                isDeleted: false,
+                isVerified: true
+            })
             if (!currentUser) throw new Error("User not found")
 
             currentUser.isDeleted = true
@@ -424,6 +454,41 @@ const userController = {
             console.log("update user by id err: ", err)
             res.status(403).json({
                 message: err.message,
+                success: false,
+                data: null
+            })
+        }
+    },
+    recoverAccount: async (req, res) => {
+        try {
+            const { email } = req.body
+            const user = await ModelDb.UserModel.findOne({
+                email,
+                isDeleted: true,
+                isVerified: true
+            })
+            if (!user) throw new Error("User not found")
+
+            user.isDeleted = false
+
+            await user.save()
+
+            const info = {
+                subject: "Recover account",
+                textOption: "Recover account successfully",
+            }
+            await sendEmail(user.email, undefined, info)
+
+            res.status(201).json({
+                success: true,
+                data: null,
+                message: "Recover account success"
+            })
+
+        } catch (error) {
+            console.log("recover account err: ", error)
+            res.status(403).json({
+                message: error.message,
                 success: false,
                 data: null
             })

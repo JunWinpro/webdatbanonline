@@ -1,4 +1,5 @@
 import joi from "joi";
+import trimString from "../utils/trimString.js";
 const messages = {
     email: {
         'string.email': "Email must have at least 2 domain segments example: example.com",
@@ -42,11 +43,26 @@ const messages = {
         'date.base': "Invalid date of birth format"
     },
     address: {
+        address: {
+            'object.base': "Address is object and must include streetAddress, district, and city",
+            'any.required': "Address is required",
+        },
         streetAddress: {
-            'string.empty': 'Street address is empty'
+            'any.required': "Street address is required",
+            'string.min': "Street address must have at least one character",
+            'string.empty': "Street address can't be empty"
+        },
+        district: {
+            'any.required': "District is required",
+            'string.min': "District must have at least one character",
+            'string.empty': "District can't be empty",
+            'string.pattern.base': "District can't have special character or number"
         },
         city: {
-            'string.empty': 'City is empty'
+            'any.required': "City is required",
+            'string.min': "City must have at least one character",
+            'string.empty': "City can't be empty",
+            'string.pattern.base': "City can't have special character or number"
         },
     },
     role: {
@@ -85,22 +101,40 @@ const userSchema = {
         ...messages.dateOfBirth
     }),
 
-    address: {
+    address: joi.object({
         streetAddress: joi.string().messages({
             ...messages.address.streetAddress
-        }),
-        city: joi.string().messages({
+        }).required()
+            .custom((value, helpers) => {
+                if (trimString(value).length === 0) return helpers.message("Street address can't be empty")
+                return trimString(value)
+            }),
+
+        district: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
+            ...messages.address.district
+        }).required()
+            .custom((value, helpers) => {
+                if (trimString(value).length === 0) return helpers.message("District can't be empty")
+                return trimString(value)
+            }),
+
+        city: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
             ...messages.address.city
-        }),
-    },
+        }).required()
+            .custom((value, helpers) => {
+                if (trimString(value).length === 0) return helpers.message("City can't be empty")
+                return trimString(value)
+            })
+
+    }).messages({
+        ...messages.address.address
+    }),
 
     role: joi.string().valid('manager', 'admin', 'customer').messages({
         ...messages.role
     }),
 
-    isDeleted: joi.boolean().messages({
 
-    })
 }
 
 
@@ -122,11 +156,13 @@ const userValidate = {
 
     update: joi.object({
         password: userSchema.password,
+        phone: userSchema.phone,
         newPassword: userSchema.password,
         firstName: userSchema.firstName,
         lastName: userSchema.lastName,
         gender: userSchema.gender,
         dateOfBirth: userSchema.dateOfBirth,
+        address: userSchema.address
     }),
 
     changeRole: joi.object({
@@ -141,9 +177,7 @@ const userValidate = {
         email: userSchema.email.required()
     }),
 
-    deleteUser: joi.object({
-        isDeleted: userSchema.isDeleted.required()
-    })
+
 
 }
 

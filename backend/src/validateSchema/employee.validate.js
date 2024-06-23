@@ -1,4 +1,5 @@
 import joi from "joi";
+import trimString from "../utils/trimString";
 const messages = {
     username: {
         'string.alphanum': "Username cannot contain spaces or special characters",
@@ -52,10 +53,16 @@ const employeeSchema = {
 
     firstName: joi.string().regex(/^[a-zA-Z]+$/).min(1).messages({
         ...messages.firstName
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("First name can't be empty")
+        return trimString(value)
     }),
 
     lastName: joi.string().regex(/^[a-zA-Z]+$/).min(2).messages({
         ...messages.lastName
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Last name can't be empty")
+        return trimString(value)
     }),
 
     gender: joi.string().valid('male', 'female', 'other').messages({
@@ -88,24 +95,10 @@ const employeeValidate = {
             'object.xor': 'Please use only username or phone',
         }),
 
-
-    // update: joi.object({
-    //     password: employeeSchema.password,
-    //     newPassword: employeeSchema.password,
-    //     firstName: employeeSchema.firstName,
-    //     lastName: employeeSchema.lastName,
-    //     gender: employeeSchema.gender,
-    //     dateOfBirth: employeeSchema.dateOfBirth,
-    // }),
-
-    // resetPassword: joi.object({
-    //     newPassword: employeeSchema.password.required()
-    // }),
-
-    // forgetPassword: joi.object({
-    //     email: employeeSchema.email.required()
-    // })
-
+    update: joi.object({
+        password: employeeSchema.password.required(),
+        newPassword: employeeSchema.password.required(),
+    }),
 }
 
 export default employeeValidate

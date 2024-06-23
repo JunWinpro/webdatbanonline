@@ -7,7 +7,14 @@ const menuSchema = new mongoose.Schema(
             ref: collection.RESTAURANTS,
             required: true
         },
+        manager: {
+            type: mongoose.Schema.Types.ObjectId
+        },
         image: String,
+        name: {
+            type: String,
+            required: true
+        },
         type: {
             type: String,
             enum: ["food", "drink"],

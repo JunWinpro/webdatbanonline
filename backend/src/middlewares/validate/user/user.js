@@ -5,6 +5,7 @@ const userValidateData = {
         try {
             const { error, value } = userValidate.register.validate(req.body)
             if (error) throw new Error(error.details[0].message)
+            req.body = value
             next()
         }
         catch (err) {
@@ -20,11 +21,9 @@ const userValidateData = {
     },
     login: (req, res, next) => {
         try {
-
             const { error, value } = userValidate.login.validate(req.body)
-
             if (error) throw new Error(error.details[0].message)
-
+            req.body = value
             next()
         }
         catch (err) {
@@ -55,7 +54,7 @@ const userValidateData = {
             else if (password && newPassword) {
                 if (password === newPassword) throw new Error("New password must be different from old password")
             }
-
+            req.body = value
             next()
         }
         catch (err) {
@@ -73,7 +72,7 @@ const userValidateData = {
         try {
             const { error, value } = userValidate.forgetPassword.validate(req.body)
             if (error) throw new Error(error.details[0].message)
-
+            req.body = value
             next()
         }
         catch (err) {

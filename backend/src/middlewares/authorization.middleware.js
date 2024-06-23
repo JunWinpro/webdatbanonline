@@ -65,7 +65,7 @@ const authorization = {
             const currentUser = await ModelDb.UserModel.findOne({
                 _id: user.userId,
                 role: "admin",
-                isDeleted: false
+                isDeleted: false,
             })
 
             if (!currentUser) throw new Error("You don't have permission for this action")

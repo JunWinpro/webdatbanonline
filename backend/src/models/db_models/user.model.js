@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema(
                 type: String,
                 default: null
             },
+            district: {
+                type: String,
+                default: null
+            },
             city: {
                 type: String,
                 default: null
@@ -56,12 +60,22 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
+        veryficationToken: {
+            type: String,
+            default: null
+        },
         isDeleted: {
             type: Boolean,
             default: false
         },
-        resetPasswordToken: String,
-        resetPasswordExpireIn: Number,
+        resetPasswordToken: {
+            type: String,
+            default: null
+        },
+        resetPasswordExpireIn: {
+            type: Number,
+            default: null
+        },
     },
     {
         timestamps: true
