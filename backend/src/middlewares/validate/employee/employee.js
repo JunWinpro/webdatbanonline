@@ -5,6 +5,7 @@ const employeeValidateData = {
         try {
             const { error, value } = employeeValidate.register.validate(req.body)
             if (error) throw new Error(error.details[0].message)
+            req.body = value
             next()
         }
         catch (err) {
@@ -24,12 +25,14 @@ const employeeValidateData = {
 
             if (error) throw new Error(error.details[0].message)
 
+            let loginMethod;
             if (req.body.username) {
-                req.username = req.body.username
+                loginMethod = req.body.username
             } else if (req.body.phone) {
-                req.phone = req.body.phone
+                loginMethod = req.body.phone
             }
-
+            req.loginMethod = loginMethod
+            req.body = value
             next()
         }
         catch (err) {
@@ -46,10 +49,6 @@ const employeeValidateData = {
     },
     update: (req, res, next) => {
         try {
-            const file = req.file
-
-            if (file && file.length === 0) throw new Error("File not found")
-
             const { error, value } = employeeValidate.update.validate(req.body)
             if (error) throw new Error(error.details[0].message)
 
@@ -60,7 +59,7 @@ const employeeValidateData = {
             else if (password && newPassword) {
                 if (password === newPassword) throw new Error("New password must be different from old password")
             }
-
+            req.body = value
             next()
         }
         catch (err) {
@@ -74,59 +73,5 @@ const employeeValidateData = {
             })
         }
     },
-    forgetPassword: (req, res, next) => {
-        try {
-            const { error, value } = employeeValidate.forgetPassword.validate(req.body)
-            if (error) throw new Error(error.details[0].message)
-
-            next()
-        }
-        catch (err) {
-            console.log("change role user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
-        }
-    },
-    resetPassword: (req, res, next) => {
-        try {
-            const { error, value } = employeeValidate.resetPassword.validate(req.body)
-            if (error) throw new Error(error.details[0].message)
-
-            next()
-        }
-        catch (err) {
-            console.log("change role user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
-        }
-    },
-    changeRole: (req, res, next) => {
-        try {
-            const { error, value } = employeeValidate.changeRole.validate(req.body)
-            if (error) throw new Error(error.details[0].message)
-
-            next()
-        }
-        catch (err) {
-            console.log("change role user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
-        }
-    }
 }
 export default employeeValidateData

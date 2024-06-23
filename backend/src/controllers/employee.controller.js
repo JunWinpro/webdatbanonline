@@ -2,12 +2,24 @@ import ModelDb from "../models/model.js";
 import mongoose from "mongoose";
 import bcryptPassword from "../utils/bcrypt.util.js";
 import jwtToken from "../utils/jwtToken.util.js";
+import returnEmployee from "../dto/employee.dto.js";
 
 const employeeController = {
     register: async (req, res) => {
         try {
-            const { username, phone, password } = req.body;
+            const { username, phone, password, } = req.body;
+            const { id } = req.params
             const user = req.user
+
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                _id: id,
+                manager: new mongoose.Types.ObjectId(user.userId),
+                isDeleted: false,
+                isVerified: true
+            })
+
+            if (!restaurant) throw new Error("You don't have permission for this action")
+
 
             const userExist = await ModelDb.EmployeeModel.findOne({
                 $or: [
@@ -25,7 +37,8 @@ const employeeController = {
             if (userPhoneExist) throw new Error("Phone already used")
 
             const getLatestEmployeeId = await ModelDb.EmployeeModel.findOne({
-                manager: user.userId
+                manager: user.userId,
+                isDeleted: false
             }).sort({
                 'employeeId.suffix': -1
             })
@@ -38,16 +51,13 @@ const employeeController = {
                 manager: new mongoose.Types.ObjectId(user.userId),
                 employeeId: {
                     suffix: getLatestEmployeeId ? getLatestEmployeeId.employeeId.suffix + 1 : 1
-                }
+                },
+                restaurant: new mongoose.Types.ObjectId(restaurantId)
             })
-
-            const returnUser = { ...newUser.toObject() }
-
-            delete returnUser.password
 
             res.status(201).json({
                 message: "Employee created successfully",
-                data: returnUser,
+                data: returnUser(newUser),
                 success: true
             })
         }
@@ -65,45 +75,39 @@ const employeeController = {
     login: async (req, res) => {
         try {
             const { password } = req.body
-            const username = req.username
-            const phone = req.phone
-            const loginMethod = async (method) => {
-                return await ModelDb.EmployeeModel.findOne({
-                    $or: [
-                        { username: method },
-                        { phone: method },
-                    ],
-                    isDeleted: false,
-                })
-            }
+            const loginMethod = req.loginMethod
+            const employee = await ModelDb.EmployeeModel.findOne({
+                $or: [
+                    { username: loginMethod },
+                    { phone: loginMethod },
+                ],
+                isDeleted: false,
+            }).populate('restaurant')
+            const user = req.user
+            const restaurant = employee.restaurant
 
-            const user = await loginMethod(username || phone)
-            if (!user) throw new Error("Username/phone or password is wrong")
+            if (!employee) throw new Error("Username/phone or password is wrong")
 
             const checkPassword = bcryptPassword.comparePassword(password, user.password)
             if (!checkPassword) throw new Error("Username/phone or password is wrong")
 
-            const returnUser = { ...user.toObject() }
-
             const accessToken = jwtToken.createToken({
-                userId: returnUser._id,
-                username: returnUser.username,
-                phone: returnUser.phone,
+                userId: user._id,
+                username: employee.username,
+                phone: employee.phone,
             }, "AT")
 
             const refreshToken = jwtToken.createToken({
-                userId: returnUser._id,
-                username: returnUser.username,
-                phone: returnUser.phone,
-
+                userId: user._id,
+                username: employee.username,
+                phone: employee.phone,
             }, "RT")
-
-            delete returnUser.password
 
             res.status(201).json({
                 message: "Login success",
                 data: {
-                    userInfo: returnUser,
+                    userInfo: returnEmployee(employee),
+                    restaurant: returnRestaurant(restaurant),
                     accessToken,
                     refreshToken
                 },
@@ -122,23 +126,21 @@ const employeeController = {
         }
     },
 
-    getAllEmployees: async (req, res) => {
+    getEmployees: async (req, res) => {
         try {
             const { page, pageSize, filter, search, sortBy } = req.query
-
-            const allUsers = await ModelDb.UserModel.find({
-                isDeleted: false
+            const user = req.user
+            const employees = await ModelDb.UserModel.find({
+                isDeleted: false,
+                manager: new mongoose.Types.ObjectId(user.userId)
             })
-            if (!allUsers) throw new Error("User not found")
+            if (!employees) throw new Error("User not found")
 
-            const returnUser = allUsers.map(user => {
-                const { password, role, createdAt, updatedAt, isDeleted, isVerified, ...returnUser } = user.toObject();
-                return returnUser;
-            });
+            const returnEmployees = employees.map(employee => returnEmployee(employee));
 
             res.status(200).json({
                 message: "Get all users success",
-                data: returnUser,
+                data: returnEmployees,
                 success: true
             })
         }
@@ -166,13 +168,9 @@ const employeeController = {
             })
             if (!employee) throw new Error("Employee not found")
 
-            const returnEmployee = { ...employee.toObject() }
-
-            delete returnEmployee.password
-
             res.status(200).json({
                 message: "Get Employee success",
-                data: returnEmployee,
+                data: returnEmployee(employee),
                 success: true
             })
         }
@@ -187,7 +185,38 @@ const employeeController = {
         }
     },
     updateEmployeeById: async (req, res) => {
+        try {
+            const { password, newPassword } = req.body
+            const user = req.user
+            const currentUser = await ModelDb.EmployeeModel.findOne({
+                _id: user.userId,
+                isDeleted: false
+            })
+            if (!currentUser) throw new Error("You don't have permission for this action")
 
+            const checkPassword = bcryptPassword.comparePassword(password, currentUser.password)
+            if (!checkPassword) throw new Error("Password is wrong")
+
+            const checkNewPassword = bcryptPassword.comparePassword(newPassword, currentUser.password)
+            if (!checkNewPassword) throw new Error("New password must be different from old password")
+
+            const hashPassword = bcryptPassword.hashPassword(newPassword)
+
+            currentUser.password = hashPassword
+            await currentUser.save()
+            res.status(201).json({
+                success: true,
+                data: null,
+                message: "Update password success"
+            })
+        } catch (error) {
+            console.log("update user by id err: ", error)
+            res.status(403).json({
+                message: error.message,
+                success: false,
+                data: null
+            })
+        }
     },
 
     deleteEmployeeById: async (_, res) => {
@@ -203,10 +232,10 @@ const employeeController = {
             if (!currentUser) throw new Error("You don't have permission for this user")
             currentUser.isDeleted = true
 
-            currentUser.save()
+            await currentUser.save()
             res.status(201).json({
                 success: true,
-                data: {},
+                data: null,
                 message: "Delete user success"
             })
         }

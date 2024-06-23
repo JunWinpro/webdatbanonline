@@ -4,7 +4,6 @@ const restaurantValidateData = {
     createRestaurant: (req, res, next) => {
         try {
             const { error, value } = restaurantValidate.createRestaurant.validate(req.body)
-            console.log(error && error?.details)
             if (error) throw new Error(error.details[0].message)
 
             req.body = value
@@ -23,11 +22,9 @@ const restaurantValidateData = {
     getRestaurants: (req, res, next) => {
         try {
             const { error, value } = restaurantValidate.getRestaurants.validate(req.query)
-            console.log(error && error)
-            console.log(value)
             if (error) throw new Error(error.details[0].message)
-            req.query = value
 
+            req.query = value
             next()
         }
         catch (err) {
@@ -38,6 +35,9 @@ const restaurantValidateData = {
                 err
             })
         }
+    },
+
+    updateRestaurantById: (req, res, next) => {
     }
 }
 

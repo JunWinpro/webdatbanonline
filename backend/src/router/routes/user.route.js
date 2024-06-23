@@ -11,15 +11,17 @@ const userRoute = express.Router()
 userRoute.post('/register', validateData.user.register, userController.register)
 userRoute.post('/login', validateData.user.login, userController.login)
 userRoute.post('/forget-password', validateData.user.forgetPassword, userController.forgetPassword)
-userRoute.post('/confirm-reset-password/:token', userController.confirmResetPassword)
+userRoute.post('/validate-reset-password-token/:token', userController.validateResetPasswordToken)
 
-userRoute.get('/', tokenMiddleware.verifyAccessToken, userController.getAllUsers)
+userRoute.get('/', tokenMiddleware.verifyAccessToken, userController.getUsers)
 userRoute.get('/:id', tokenMiddleware.verifyAccessToken, userController.getUserById)
 
 userRoute.put('/reset-password/:token', validateData.user.resetPassword, userController.resetPassword)
 userRoute.put('/:id', tokenMiddleware.verifyAccessToken, memoryUploader.single('file'), imageValidate, validateData.user.update, userController.updateUserById)
-userRoute.put('/change-role/:id', tokenMiddleware.verifyAccessToken, authorization.admin, validateData.user.changeRole, userController.changeRole,)
+userRoute.put('/change-role/:id', tokenMiddleware.verifyAccessToken, authorization.admin, validateData.user.changeRole, userController.changeRole)
+userRoute.put('/verify-user/:token', userController.verifyUser)
+userRoute.put('/recover-account', tokenMiddleware.verifyAccessToken, authorization.admin, userController.recoverAccount)
 
-userRoute.delete('/:id', tokenMiddleware.verifyAccessToken, validateData.user.deleteUser, userController.deleteUserById)
+userRoute.delete('/:id', tokenMiddleware.verifyAccessToken, userController.deleteUserById)
 
 export default userRoute    

@@ -23,18 +23,15 @@ const messages = {
         district: {
             'any.required': "District is required",
             'string.min': "District must have at least one character",
-            'string.empty': "District can't be empty"
+            'string.empty': "District can't be empty",
+            'string.pattern.base': "District can't have special character or number"
         },
         city: {
             'any.required': "City is required",
             'string.min': "City must have at least one character",
-            'string.empty': "City can't be empty"
+            'string.empty': "City can't be empty",
+            'string.pattern.base': "City can't have special character or number"
         },
-    },
-
-    rating: {
-        empty: "Rating is empty",
-        required: "Rating is required"
     },
 
     category: {
@@ -58,28 +55,6 @@ const messages = {
             'boolean.base': "Table status must be a boolean",
             'boolean.empty': "Table status can't be empty"
         }
-    },
-
-    isOpening: {
-        'any.required': "Restaurant open status is required",
-        'boolean.base': "Restaurant open status must be a boolean",
-        'boolean.empty': "Restaurant open status can't be empty"
-    },
-
-    isActive: {
-        'any.required': "Restaurant active status is required",
-        'boolean.base': "Restaurant active status must be a boolean",
-        'boolean.empty': "Restaurant active status can't be empty"
-    },
-    isDeleted: {
-        'any.required': "Restaurant delete status is required",
-        'boolean.base': "Restaurant delete status must be a boolean",
-        'boolean.empty': "Restaurant delete status can't be empty"
-    },
-    isVerified: {
-        'any.required': "Restaurant verify status is required",
-        'boolean.base': "Restaurant verify status must be a boolean",
-        'boolean.empty': "Restaurant verify status can't be empty"
     },
 
     maxim: {
@@ -168,18 +143,29 @@ const restaurantSchema = {
     }),
 
     address: joi.object({
-
         streetAddress: joi.string().messages({
             ...messages.address.streetAddress
-        }).required().custom(value => trimString(value)),
+        }).required()
+            .custom((value, helpers) => {
+                if (trimString(value).length === 0) return helpers.message("Street address can't be empty")
+                return trimString(value)
+            }),
 
-        district: joi.string().messages({
+        district: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
             ...messages.address.district
-        }).required().custom(value => trimString(value)),
+        }).required()
+            .custom((value, helpers) => {
+                if (trimString(value).length === 0) return helpers.message("District can't be empty")
+                return trimString(value)
+            }),
 
-        city: joi.string().messages({
+        city: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
             ...messages.address.city
-        }).required().custom(value => trimString(value))
+        }).required()
+            .custom((value, helpers) => {
+                if (trimString(value).length === 0) return helpers.message("City can't be empty")
+                return trimString(value)
+            })
 
     }).messages({
         ...messages.address.address
@@ -202,35 +188,21 @@ const restaurantSchema = {
     })).unique((a, b) => a.tableId === b.tableId).messages({
         ...messages.tableList.tableList
     }),
-
-    isOpening: joi.boolean().messages({
-        ...messages.isOpening
-    }),
-
-    isActive: joi.boolean().messages({
-        ...messages.isActive
-    }),
-
-    isDeleted: joi.boolean().messages({
-        ...messages.isDeleted
-    }),
-
-    isVerified: joi.boolean().messages({
-        ...messages.isVerified
-    }),
-
 }
 const restaurantInfoSchema = {
     maxim: joi.string().messages({
         ...messages.maxim
-    }).custom((value) => trimString(value)),
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Maxim can't be empty")
+        return trimString(value)
+    }),
 
     description: joi.array().items(
         joi.object({
             title: joi.string().required().messages({
                 ...messages.description.title
             }).custom((value, helpers) => {
-                if (value.trim().length === 0) {
+                if (trimString(value).length === 0) {
                     return helpers.message("Title can't be empty")
                 }
                 return trimString(value)
@@ -239,7 +211,7 @@ const restaurantInfoSchema = {
             content: joi.string().required().messages({
                 ...messages.description.content
             }).custom((value, helpers) => {
-                if (value.trim().length === 0) {
+                if (trimString(value).length === 0) {
                     return helpers.message("Content can't be empty")
                 }
                 return trimString(value)
@@ -302,6 +274,8 @@ const restaurantQuerySchema = {
         'string.base': "Page must be a string",
         'string.pattern.base': "Page only contains integer number",
     }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Page can't be empty")
+
         if (!Number.isInteger(Number(value)))
             return helpers.message("Page can't be float")
 
@@ -316,6 +290,8 @@ const restaurantQuerySchema = {
         'string.base': "Page size must be a string",
         'string.pattern.base': "Page size only contains integer number",
     }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Page size can't be empty")
+
         if (!Number.isInteger(Number(value)))
             return helpers.message("Page size can't be float")
 
@@ -325,13 +301,20 @@ const restaurantQuerySchema = {
         return Number(value)
     }),
 
-    city: joi.string().messages({
-
-    }).custom((value, helpers) => { }),
-
-    district: joi.string().messages({
-
+    district: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
+        ...messages.address.district
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("District can't be empty")
+        return trimString(value)
     }),
+
+    city: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
+        ...messages.address.city
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("City can't be empty")
+        return trimString(value)
+    }),
+
     category: joi.alternatives().try(
         joi.string(),
         joi.array().items(joi.string())
@@ -353,10 +336,6 @@ const restaurantValidate = {
         address: restaurantSchema.address.required(),
         category: restaurantSchema.category.required(),
         tableList: restaurantSchema.tableList.required(),
-        isOpening: restaurantSchema.isOpening,
-        isActive: restaurantSchema.isActive,
-        isDeleted: restaurantSchema.isDeleted,
-        isVerified: restaurantSchema.isVerified,
         maxim: restaurantInfoSchema.maxim,
         description: restaurantInfoSchema.description,
         schedule: restaurantInfoSchema.schedule.required(),
@@ -376,10 +355,6 @@ const restaurantValidate = {
         address: restaurantSchema.address,
         category: restaurantSchema.category,
         tableList: restaurantSchema.tableList,
-        isOpening: restaurantSchema.isOpening,
-        isActive: restaurantSchema.isActive,
-        isDeleted: restaurantSchema.isDeleted,
-        isVerified: restaurantSchema.isVerified,
         maxim: restaurantInfoSchema.maxim,
         description: restaurantInfoSchema.description,
         schedule: restaurantInfoSchema.schedule,

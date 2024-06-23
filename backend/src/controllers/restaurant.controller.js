@@ -6,7 +6,6 @@ import pageSplit from "../utils/pageSplit.util.js"
 import lowerCaseString from "../utils/lowerCaseString.js"
 import sortModelType from "../utils/sortModel.js"
 const restaurantController = {
-
     createRestaurant: async (req, res) => {
         try {
             const { name } = req.body
@@ -86,26 +85,33 @@ const restaurantController = {
 
             if (district && !city) throw new Error("Please choose city first")
 
-            const filterLocation = {}
+            const filterModel = {
+                isDeleted: false,
+                isVerified: true
+            }
             if (city) {
-                filterLocation['address.city'] = {
-                    $regex: lowerCaseString(city),
+                filterModel['address.city'] = {
+                    $regex: lowerCaseString(trimString(city)),
                     $options: "i"
                 }
             }
             if (district) {
-                filterLocation['address.district'] = {
-                    $regex: lowerCaseString(district),
+                filterModel['address.district'] = {
+                    $regex: lowerCaseString(trimString(district)),
                     $options: "i"
                 }
             }
 
-
-
-            const filterName = {}
             if (name) {
-                filterName.name = {
-                    $regex: lowerCaseString(name),
+                filterModel.name = {
+                    $regex: lowerCaseString(trimString(name)),
+                    $options: 'i'
+                }
+            }
+
+            if (category) {
+                filterModel.category = {
+                    $regex: lowerCaseString(category),
                     $options: 'i'
                 }
             }
@@ -131,12 +137,12 @@ const restaurantController = {
                     }
                 }
                 if (Array.isArray(sortBy)) {
-                    const sortMap = sortBy?.map(ele => {
+                    const sortMap = sortBy.map(ele => {
                         const [type, value] = ele.split("_")
                         return { type, value }
                     })
 
-                    sortMap?.forEach(ele => {
+                    sortMap.forEach(ele => {
                         sortToObject(ele)
                     })
                 }
@@ -144,20 +150,6 @@ const restaurantController = {
                     const [type, value] = sortBy.split("_")
                     sortToObject({ type, value })
                 }
-            }
-
-            const filterCategory = {}
-            if (category) {
-                filterCategory.category = {
-                    $regex: lowerCaseString(category),
-                    $options: 'i'
-                }
-            }
-
-            const filterModel = {
-                ...filterLocation,
-                ...filterName,
-                ...filterCategory
             }
 
             const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel, undefined)
@@ -270,7 +262,7 @@ const restaurantController = {
             // }
 
             restaurant = {
-                ...restaurant,
+                ...restaurant.toObject(),
                 ...req.body
             }
             await restaurant.save()
