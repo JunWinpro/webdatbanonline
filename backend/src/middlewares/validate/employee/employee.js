@@ -1,3 +1,4 @@
+import returnError from "../../../errors/error.js"
 import employeeValidate from "../../../validateSchema/employee.validate.js"
 
 const employeeValidateData = {
@@ -10,13 +11,7 @@ const employeeValidateData = {
         }
         catch (err) {
             console.log("Validate register err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
     },
     login: (req, res, next) => {
@@ -37,13 +32,7 @@ const employeeValidateData = {
         }
         catch (err) {
             console.log("Validate login err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
 
     },
@@ -64,13 +53,7 @@ const employeeValidateData = {
         }
         catch (err) {
             console.log("Validate update user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
     },
 }

@@ -1,3 +1,4 @@
+import returnError from "../../../errors/error.js"
 import userValidate from "../../../validateSchema/user.validate.js"
 
 const userValidateData = {
@@ -10,13 +11,7 @@ const userValidateData = {
         }
         catch (err) {
             console.log("Validate register err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
     },
     login: (req, res, next) => {
@@ -28,44 +23,25 @@ const userValidateData = {
         }
         catch (err) {
             console.log("Validate login err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
 
     },
     update: (req, res, next) => {
         try {
-            const file = req.file
+            const { password } = req.body
 
-            if (file && file.length === 0) throw new Error("File not found")
+            if (!password) throw new Error("Please enter your password")
 
             const { error, value } = userValidate.update.validate(req.body)
             if (error) throw new Error(error.details[0].message)
 
-            const { password, newPassword } = req.body
-
-            if (password && !newPassword) throw new Error("Please provide your new password")
-            else if (!password && newPassword) throw new Error("Please provide your current password")
-            else if (password && newPassword) {
-                if (password === newPassword) throw new Error("New password must be different from old password")
-            }
             req.body = value
             next()
         }
         catch (err) {
             console.log("Validate update user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
     },
     forgetPassword: (req, res, next) => {
@@ -77,17 +53,12 @@ const userValidateData = {
         }
         catch (err) {
             console.log("change role user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
     },
     resetPassword: (req, res, next) => {
         try {
+
             const { error, value } = userValidate.resetPassword.validate(req.body)
             if (error) throw new Error(error.details[0].message)
 
@@ -95,13 +66,7 @@ const userValidateData = {
         }
         catch (err) {
             console.log("change role user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
     },
     changeRole: (req, res, next) => {
@@ -113,13 +78,7 @@ const userValidateData = {
         }
         catch (err) {
             console.log("change role user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
     },
     deleteUser: (req, res, next) => {
@@ -131,13 +90,7 @@ const userValidateData = {
         }
         catch (err) {
             console.log("change role user err: ", err)
-
-            res.status(403).json({
-                data: null,
-                err,
-                message: err.message,
-                success: false,
-            })
+            returnError(res, 403, err)
         }
     }
 }

@@ -81,6 +81,7 @@ const userSchema = new mongoose.Schema(
         timestamps: true
     }
 )
+
 const UserModel = mongoose.model(collection.USERS, userSchema)
 export default UserModel
 

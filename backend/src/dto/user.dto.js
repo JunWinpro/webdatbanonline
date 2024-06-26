@@ -1,17 +1,14 @@
-const returnUser = (data) => {
-    const dto = data.toObject()
-    return {
-        _id: dto._id,
-        email: dto.email,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        gender: dto.gender,
-        address: dto.address,
-        phone: dto.phone,
-        avatar: dto.avatar,
-        role: dto.role,
-        isVerified: dto.isVerified
+const userDTO = (data) => {
+    let dto = null;
+    if (data) {
+        dto = data.toObject()
+        delete dto.password
+        delete dto.isDeleted
+        delete dto.resetPasswordToken
+        delete dto.resetPasswordExpireIn
+        delete dto.veryficationToken
     }
+    return dto
 }
 
-export default returnUser
+export default userDTO

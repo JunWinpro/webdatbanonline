@@ -1,16 +1,16 @@
-const returnEmployee = (data) => {
-    const dto = data.toObject()
-    return {
-        _id: dto._id,
-        manager: dto.manager,
-        username: dto.username,
-        phone: dto.phone,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        gender: dto.gender,
-        employeeId: dto.employeeId,
-        role: dto.role,
+const returnEmployee = (res, status, message, data, token) => {
+    let dto = null;
+    if (data) {
+        dto = data.toObject()
+        delete dto.password
+        delete dto.isDeleted
     }
+    return res.status(status).json({
+        data: dto,
+        success: true,
+        message,
+        ...token
+    })
 }
 
 export default returnEmployee

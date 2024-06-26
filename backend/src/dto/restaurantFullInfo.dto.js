@@ -1,12 +1,14 @@
-const returnRestaurant = (res, status, message, data, user) => {
+const returnRestaurantFullInfo = (res, status, data, user) => {
     let dto = null
     if (data) {
         dto = data.toObject()
         if (user.userId !== data.manager.toString()) {
-            delete dto.manager
+            delete dto.restaurant.manager
+            delete dto.employee
         }
     }
     delete dto.isDeleted
+    delete dto.restaurant.isDeleted
     return res.status(status).json({
         success: true,
         data: dto,
@@ -14,4 +16,4 @@ const returnRestaurant = (res, status, message, data, user) => {
     })
 }
 
-export default returnRestaurant
+export default returnRestaurantFullInfo
