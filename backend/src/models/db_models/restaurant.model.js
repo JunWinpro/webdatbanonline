@@ -55,7 +55,7 @@ const restaurant = new mongoose.Schema(
         },
         isActive: {
             type: Boolean,
-            default: true
+            default: false
         },
         isDeleted: {
             type: Boolean,
