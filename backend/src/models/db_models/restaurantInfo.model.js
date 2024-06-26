@@ -1,5 +1,59 @@
 import mongoose from "mongoose"
 import { collection } from "../../database/collection.js"
+const descriptionSchema = new mongoose.Schema(
+    {
+        title: {
+            type: String,
+            default: null
+        },
+        content: {
+            type: String,
+            default: null
+        }
+    },
+    {
+        _id: false
+    }
+)
+
+const scheduleSchema = new mongoose.Schema(
+    {
+        dayOfWeek: {
+            type: Number,
+            required: true
+        },
+        isWorkingDay: {
+            type: Boolean,
+            required: true
+        },
+        openTime: {
+            type: Number,
+            required: true
+        },
+        closeTime: {
+            type: Number,
+            required: true
+        }
+    },
+    {
+        _id: false
+    }
+)
+const tableListSchema = new mongoose.Schema(
+    {
+        tableId: {
+            type: Number,
+            required: true
+        },
+        isEmpty: {
+            type: Boolean,
+            required: true,
+        },
+    },
+    {
+        _id: false
+    }
+)
 const restaurantInfo = new mongoose.Schema(
     {
         restaurant: {
@@ -16,34 +70,9 @@ const restaurantInfo = new mongoose.Schema(
             type: String,
             default: null
         },
-        description: [{
-            title: {
-                type: String,
-                default: null
-            },
-            content: {
-                type: String,
-                default: null
-            },
-        }],
-        schedule: [{
-            dayOfWeek: {
-                type: Number,
-                required: true
-            },
-            isWorkingDay: {
-                type: Boolean,
-                required: true
-            },
-            openTime: {
-                type: Number,
-                required: true
-            },
-            closeTime: {
-                type: Number,
-                required: true
-            },
-        }],
+        description: [descriptionSchema],
+        schedule: [scheduleSchema],
+        tableList: [tableListSchema],
         foodImages: [{
             type: String,
             default: null

@@ -7,7 +7,7 @@ import validateData from '../../middlewares/validate/index.js'
 
 const employeeRoute = express.Router()
 
-employeeRoute.post('/register/:restaurantId', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.employee.register, employeeController.register)
+employeeRoute.post('/register/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.employee.register, employeeController.register)
 employeeRoute.post('/login', validateData.employee.login, employeeController.login)
 
 employeeRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.manager, employeeController.getEmployees)

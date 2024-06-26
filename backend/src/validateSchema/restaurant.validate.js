@@ -257,6 +257,9 @@ const restaurantInfoSchema = {
         return value
     })
 }
+
+const sortType = ['rating', 'price', 'new', 'name']
+const sortValue = ['asc', 'desc']
 const restaurantQuerySchema = {
     name: joi.string().regex(/^[\p{L}\p{N}\s]+$/u).messages({
         'string.base': "Name must be a string",
@@ -305,29 +308,48 @@ const restaurantQuerySchema = {
         ...messages.address.district
     }).custom((value, helpers) => {
         if (trimString(value).length === 0) return helpers.message("District can't be empty")
-        return trimString(value)
+        return convertUnicode(lowerCaseString(trimString(value)))
     }),
 
     city: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
         ...messages.address.city
     }).custom((value, helpers) => {
         if (trimString(value).length === 0) return helpers.message("City can't be empty")
-        return trimString(value)
+        return convertUnicode(lowerCaseString(trimString(value)))
     }),
 
-    category: joi.alternatives().try(
-        joi.string(),
-        joi.array().items(joi.string())
-    ).messages({
-        'any.invalid': 'Category must be a string or an array of strings'
+    category: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
+        'any.invalid': 'Category must be a string or an array of strings',
+        'string.empty': "Category can't be empty",
+        'string.pattern.base': "Category can't contain special character"
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Category can't be empty")
+        return convertUnicode(lowerCaseString(trimString(value)))
     }),
+
     sortBy: joi.alternatives().try(
-        joi.string(),
-        joi.array().items(joi.string())
-    ).messages({
-        'any.invalid': 'SortBy must be a string or an array of strings'
-    }),
+        joi.string().custom((value, helpers) => {
 
+            if (trimString(value).length === 0) return helpers.message("Sort by can't be empty")
+            const [type, sort] = value.split("_")
+            if (!sortValue.includes(sort)) return helpers.message("Sort value must be asc or desc")
+            if (!sortType.includes(type)) return helpers.message("Sort type must be rating, price, new or name")
+            return convertUnicode(lowerCaseString(trimString(value)))
+        }),
+
+        joi.array().items(joi.string().custom((value, helpers) => {
+
+            if (trimString(value).length === 0) return helpers.message("Sort by can't be empty")
+            const [type, sort] = value.split("_")
+
+            if (!sortValue.includes(sort)) return helpers.message("Sort value must be asc or desc")
+            if (!sortType.includes(type)) return helpers.message("Sort type must be rating, price, new or name")
+            return convertUnicode(lowerCaseString(trimString(value)))
+        }))
+    ).messages({
+        'any.invalid': 'Sort by must be a string or an array of strings',
+        'string.empty': "Sort by can't be empty"
+    })
 }
 
 const restaurantValidate = {
@@ -348,6 +370,7 @@ const restaurantValidate = {
         city: restaurantQuerySchema.city,
         district: restaurantQuerySchema.district,
         category: restaurantQuerySchema.category,
+        sortBy: restaurantQuerySchema.sortBy
     }),
 
     updateRestaurant: joi.object({
@@ -359,6 +382,8 @@ const restaurantValidate = {
         description: restaurantInfoSchema.description,
         schedule: restaurantInfoSchema.schedule,
     }),
+
+
 }
 
 export default restaurantValidate

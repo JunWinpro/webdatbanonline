@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import { collection } from "../../database/collection.js"
+
 const restaurant = new mongoose.Schema(
     {
         manager: {
@@ -48,16 +49,6 @@ const restaurant = new mongoose.Schema(
             min: 1,
             max: 5
         },
-        tableList: [{
-            tableId: {
-                type: Number,
-                required: true
-            },
-            isEmpty: {
-                type: Boolean,
-                required: true,
-            },
-        }],
         isOpening: {
             type: Boolean,
             default: false

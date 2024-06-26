@@ -3,6 +3,7 @@ import jwtToken from "../utils/jwtToken.util.js"
 const tokenMiddleware = {
     verifyAccessToken: (req, res, next) => {
         try {
+
             const authToken = req.headers['authorization']
 
             if (!authToken) throw new Error("Invalid token")

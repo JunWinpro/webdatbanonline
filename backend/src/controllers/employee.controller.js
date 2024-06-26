@@ -2,18 +2,19 @@ import ModelDb from "../models/model.js";
 import mongoose from "mongoose";
 import bcryptPassword from "../utils/bcrypt.util.js";
 import jwtToken from "../utils/jwtToken.util.js";
-import returnEmployee from "../dto/employee.dto.js";
+import employeeDTO from "../dto/employee.dto.js";
+import dataResponse from "../dto/data.js";
 
 const employeeController = {
     register: async (req, res) => {
         try {
             const { username, phone, password, } = req.body;
-            const { restaurantId } = req.params
+            const { id } = req.params
             const user = req.user
 
             const restaurant = await ModelDb.RestaurantModel.findOne({
-                _id: restaurantId,
-                manager: new mongoose.Types.ObjectId(user.userId),
+                _id: id,
+                manager: user.userId,
                 isDeleted: false,
                 isVerified: true
             })
@@ -49,14 +50,16 @@ const employeeController = {
             const newEployee = await ModelDb.EmployeeModel.create({
                 ...req.body,
                 password: hashPassword,
-                manager: new mongoose.Types.ObjectId(user.userId),
+                manager: user.userId,
                 employeeId: {
                     suffix: getLatestEmployeeId ? getLatestEmployeeId.employeeId.suffix + 1 : 1
                 },
-                restaurant: new mongoose.Types.ObjectId(restaurantId)
+                restaurant: id
             })
+
+
             const message = "Register success"
-            returnEmployee(200, message, newEployee)
+            dataResponse(res, 200, message, employeeDTO(newEployee))
         }
         catch (err) {
             console.log("user register err: ", err)
@@ -94,7 +97,7 @@ const employeeController = {
                 role: employee.role
             }, "RT")
             const message = "Login success"
-            returnEmployee(200, message, employee, { accessToken, refreshToken })
+            employeeDTO(200, message, employee, { accessToken, refreshToken })
         }
         catch (err) {
             console.log("user login err: ", err)
@@ -114,15 +117,15 @@ const employeeController = {
             const user = req.user
             const employees = await ModelDb.UserModel.find({
                 isDeleted: false,
-                manager: new mongoose.Types.ObjectId(user.userId)
+                manager: user.userId
             })
             if (!employees) throw new Error("User not found")
 
-            const returnEmployees = employees.map(employee => returnEmployee(employee));
+            const employeeDTOs = employees.map(employee => employeeDTO(employee));
 
             res.status(200).json({
                 message: "Get all users success",
-                data: returnEmployees,
+                data: employeeDTOs,
                 success: true
             })
         }
@@ -145,14 +148,14 @@ const employeeController = {
             const user = req.user
             const employee = await ModelDb.EmployeeModel.findOne({
                 _id: id,
-                manager: new mongoose.Types.ObjectId(user.userId),
+                manager: user.userId,
                 isDeleted: false
             })
             if (!employee) throw new Error("Employee not found")
 
             res.status(200).json({
                 message: "Get Employee success",
-                data: returnEmployee(employee),
+                data: employeeDTO(employee),
                 success: true
             })
         }
@@ -208,7 +211,7 @@ const employeeController = {
 
             const currentUser = await ModelDb.EmployeeModel.findOne({
                 _id: id,
-                manager: new mongoose.Types.ObjectId(user.userId),
+                manager: user.userId,
                 isDeleted: false
             })
             if (!currentUser) throw new Error("You don't have permission for this user")

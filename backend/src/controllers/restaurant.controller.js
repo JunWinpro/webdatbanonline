@@ -5,14 +5,15 @@ import mongoose from "mongoose"
 import pageSplit from "../utils/pageSplit.util.js"
 import lowerCaseString from "../utils/lowerCaseString.js"
 import sortModelType from "../utils/sortModel.js"
-import returnRestaurantFullInfo from "../dto/restaurantFullInfo.dto.js"
-import returnRestaurant from "../dto/restaurant.dto.js"
+import restaurantInfoDTO from "../dto/restaurantInfo.dto.js"
 import returnError from "../errors/error.js"
+import dataResponse from "../dto/data.js"
+import restaurantDTO from "../dto/restaurant.dto.js"
+import sendEmail from "../utils/sendEmail.js"
 const restaurantController = {
     createRestaurant: async (req, res) => {
         try {
             const { name } = req.body
-            const user = req.user
 
             const restaurantExist = await ModelDb.RestaurantModel.findOne({
                 name
@@ -23,30 +24,34 @@ const restaurantController = {
             const files = req.files
 
             const imageUrls = {}
-            let i = 0;
             // restaurantImages, menuImages, foodImages, avatar
-            while (Object.keys(files)[i]) {
+            if (files) {
+                let i = 0;
+                while (Object.keys(files)[i]) {
 
-                let listUrl = []
-                let key = Object.keys(files)[i]
+                    let listUrl = []
+                    let key = Object.keys(files)[i]
 
-                for (let file of files[key]) {
+                    for (let file of files[key]) {
 
-                    const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
-                    const fileName = `${Date.now()}-${file.originalname.replace(" ", "-").split('.')[0]}`
-                    const folder = key
+                        const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
+                        const fileName = `${Date.now()}-${file.originalname.replace(" ", "-").split('.')[0]}`
+                        const folder = key
 
-                    const result = await cloudinary.uploader.upload(dataUrl, {
-                        public_id: fileName,
-                        resource_type: "auto",
-                        folder: `${baseFolder.RESTAURANT}/${folder}/${name.replace(" ", "-")}`
-                    })
-                    if (!result) throw new Error("Error uploading file in: " + key)
-                    listUrl.push(result.secure_url)
-                    imageUrls[key] = listUrl
+                        const result = await cloudinary.uploader.upload(dataUrl, {
+                            public_id: fileName,
+                            resource_type: "auto",
+                            folder: `${baseFolder.RESTAURANT}/${folder}/${name.replace(" ", "-")}`
+                        })
+                        if (!result) throw new Error("Error uploading file in: " + key)
+                        listUrl.push(result.secure_url)
+                        imageUrls[key] = listUrl
+                    }
+                    i++;
                 }
-                i++;
             }
+            const user = req.user
+
             const newRestaurant = await ModelDb.RestaurantModel.create({
                 ...req.body,
                 manager: user.userId,
@@ -60,8 +65,12 @@ const restaurantController = {
                 menuImages: imageUrls.menuImages || null,
                 foodImages: imageUrls.foodImages || null
             })
+            const message = "Create restaurant success, please wait for admin approve"
 
-            returnRestaurantFullInfo(res, 200, newRestaurantInfo, user)
+            dataResponse(res, 201, message, {
+                ...restaurantDTO(newRestaurant),
+                ...restaurantInfoDTO(newRestaurantInfo, user)
+            })
         }
         catch (err) {
             console.log("create restaurant err: ", err)
@@ -75,37 +84,6 @@ const restaurantController = {
 
             if (district && !city) throw new Error("Please choose city first")
 
-            const filterModel = {
-                isDeleted: false,
-                isVerified: true
-            }
-            if (city) {
-                filterModel['address.city'] = {
-                    $regex: lowerCaseString(trimString(city)),
-                    $options: "i"
-                }
-            }
-            if (district) {
-                filterModel['address.district'] = {
-                    $regex: lowerCaseString(trimString(district)),
-                    $options: "i"
-                }
-            }
-
-            if (name) {
-                filterModel.name = {
-                    $regex: lowerCaseString(trimString(name)),
-                    $options: 'i'
-                }
-            }
-
-            if (category) {
-                filterModel.category = {
-                    $regex: lowerCaseString(category),
-                    $options: 'i'
-                }
-            }
-
             const sortModel = {}
             if (sortBy) {
                 const sortToObject = (ele) => {
@@ -113,11 +91,7 @@ const restaurantController = {
                         sortModel.rating = sortModelType(ele.value)
                     }
                     if (ele.type === "price") {
-                        if (ele.value === "desc") {
-                            sortModel.maxPrice = sortModelType(ele.value)
-                        } else {
-                            sortModel.minPrice = sortModelType(ele.value)
-                        }
+                        sortModel.minPrice = sortModelType(ele.value)
                     }
                     if (ele.type === "new") {
                         sortModel.createdAt = sortModelType(ele.value)
@@ -142,36 +116,153 @@ const restaurantController = {
                 }
             }
 
-            const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel, undefined)
+            const filterModel = {
+                isDeleted: false,
+                isVerified: true
+            }
 
-            res.status(200).json({
-                message: "Get restaurants success",
-                success: true,
-                data: restaurants,
-            })
+            if (city) {
+                filterModel['address.city'] = {
+                    $regex: city,
+                    $options: "i"
+                }
+            }
+
+            if (district) {
+                filterModel['address.district'] = {
+                    $regex: district,
+                    $options: "i"
+                }
+            }
+
+            if (name) {
+                filterModel.name = {
+                    $regex: name,
+                    $options: 'i'
+                }
+            }
+
+            if (category) {
+                filterModel.category = {
+                    $regex: category,
+                    $options: 'i'
+                }
+            }
+
+            const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
+
+            const dataDTO = restaurants.data.map(restaurant => restaurantDTO(restaurant))
+
+            const message = "Get restaurants success"
+            dataResponse(res, 200, message, dataDTO)
         }
         catch (err) {
-            console.log('get restaurant error: ', error.message)
+            console.log('get restaurant error: ', err.message)
             returnError(res, 403, err)
         }
     },
+    getOwnedRestaurants: async (req, res) => {
+        {
+            try {
+                let { name, sortBy, page, pageSize, city, district, category } = req.query
 
+                if (district && !city) throw new Error("Please choose city first")
+
+                const sortModel = {}
+                if (sortBy) {
+                    const sortToObject = (ele) => {
+                        if (ele.type === "rating") {
+                            sortModel.rating = sortModelType(ele.value)
+                        }
+                        if (ele.type === "price") {
+                            sortModel.minPrice = sortModelType(ele.value)
+                        }
+                        if (ele.type === "new") {
+                            sortModel.createdAt = sortModelType(ele.value)
+                        }
+                        if (ele.type === "name") {
+                            sortModel.name = sortModelType(ele.value)
+                        }
+                    }
+                    if (Array.isArray(sortBy)) {
+                        const sortMap = sortBy.map(ele => {
+                            const [type, value] = ele.split("_")
+                            return { type, value }
+                        })
+
+                        sortMap.forEach(ele => {
+                            sortToObject(ele)
+                        })
+                    }
+                    else {
+                        const [type, value] = sortBy.split("_")
+                        sortToObject({ type, value })
+                    }
+                }
+
+                const user = req.user
+
+                const filterModel = {
+                    isDeleted: false,
+                    isVerified: true
+                }
+
+                filterModel['manager'] = user.userId
+
+                if (city) {
+                    filterModel['address.city'] = {
+                        $regex: city,
+                        $options: "i"
+                    }
+                }
+
+                if (district) {
+                    filterModel['address.district'] = {
+                        $regex: district,
+                        $options: "i"
+                    }
+                }
+
+                if (name) {
+                    filterModel.name = {
+                        $regex: name,
+                        $options: 'i'
+                    }
+                }
+
+                if (category) {
+                    filterModel.category = {
+                        $regex: category,
+                        $options: 'i'
+                    }
+                }
+
+                const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
+
+                const dataDTO = restaurants.data.map(restaurant => restaurantDTO(restaurant))
+
+                const message = "Get restaurants success"
+                dataResponse(res, 200, message, dataDTO)
+            }
+            catch (err) {
+                console.log('get restaurant error: ', err.message)
+                returnError(res, 403, err)
+            }
+        }
+    },
     getRestaurantById: async (req, res) => {
         try {
             const { id } = req.params
-            const restaurant = await ModelDb.RestaurantInfoModel.findOne({
-                restaurant: new mongoose.Types.ObjectId(id)
+            const currentRestaurant = await ModelDb.RestaurantInfoModel.findOne({
+                restaurant: id
             }).populate('restaurant')
 
-            if (!restaurant || restaurant.restaurant.isDeleted) throw new Error("Restaurant not found")
+            if (!currentRestaurant || currentRestaurant.restaurant.isDeleted) throw new Error("Restaurant not found")
 
             const user = req.user
 
-            res.status(200).json({
-                message: "Get restaurant success",
-                success: true,
-                data: returnRestaurantFullInfo(restaurant, user),
-            })
+            const message = "Get restaurant success"
+            dataResponse(res, 200, message, restaurantInfoDTO(currentRestaurant), user)
         }
         catch (err) {
             returnError(res, 403, err)
@@ -183,27 +274,21 @@ const restaurantController = {
             const { id } = req.params
             const user = req.user
 
-            let restaurant = await ModelDb.RestaurantModel.findOne({
+            const restaurant = await ModelDb.RestaurantModel.findOne({
                 manager: new mongoose.Type.ObjectId(user.userId),
                 isDeleted: false,
                 _id: id
             })
             if (!restaurant) throw new Error("Restaurant not found")
 
-            // tableList update 
-
-
-            restaurant = {
-                ...restaurant.toObject(),
-                ...req.body
+            for (let key of Object.keys(req.body)) {
+                restaurant[key] = req.body[key]
             }
-            await restaurant.save()
 
-            res.status(203).json({
-                message: "Update restaurant success",
-                success: true,
-                data: returnRestaurant(restaurant),
-            })
+            await restaurant.save()
+            const message = "Update restaurant success"
+            dataResponse(res, 200, message, restaurantDTO(restaurant))
+
         } catch (err) {
             console.log("update restaurant err: ", err)
             returnError(res, 403, err)
@@ -211,9 +296,30 @@ const restaurantController = {
     },
 
     updateRestaurantInfoById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const user = req.user
 
+            const restaurantInfo = await ModelDb.RestaurantInfoModel.findOne({
+                restaurant: new mongoose.Type.ObjectId(id),
+                isDeleted: false
+            }).populate('restaurant')
+            if (!restaurantInfo) throw new Error("Restaurant not found")
+            if (restaurantInfo.restaurant.manager !== user.userId) throw new Error("You don't have permission for this action")
+
+            for (let key of Object.keys(req.body)) {
+                restaurantInfo[key] = req.body[key]
+            }
+            await restaurantInfo.save()
+            const message = "Update restaurant info success"
+            const depopulate = mongoose.models.RestaurantInfoModel.depopulate(restaurantInfo)
+            dataResponse(res, 200, message, restaurantInfoDTO(depopulate, user))
+        }
+        catch (err) {
+            returnError(res, 403, err)
+        }
     },
-    updateRestaurantImage: async (req, res) => {
+    updateRestaurantImages: async (req, res) => {
 
     },
 
@@ -223,22 +329,36 @@ const restaurantController = {
             const user = req.user
 
             const restaurant = await ModelDb.RestaurantModel.findOne({
-                manager: new mongoose.Type.ObjectId(user.userId),
+                manager: user.userId,
                 isDeleted: false,
                 _id: id,
-            })
+            }).populate('manager')
+
             if (!restaurant) throw new Error("Restaurant not found")
 
+            const restaurantInfo = await ModelDb.RestaurantInfoModel.findOne({
+                restaurant: id,
+                isDeleted: false,
+            })
+
             restaurant.isDeleted = true
+            restaurantInfo.isDeleted = true
 
             await restaurant.save()
+            await restaurantInfo.save()
 
-            res.status(203).json({
-                message: "Delete restaurant success",
-                success: true,
-                data: restaurant,
-            })
+            const info = {
+                subject: `Restaurant Deleted`,
+                textOption: `Your restaurant has been deleted successfully  ${user.role === 'admin' ? 'by admin' : 'you'}, if you have any questions, please contact us.`,
+            }
+
+            await sendEmail(restaurant.manager.email, undefined, info)
+
+            const message = "Delete restaurant success"
+            dataResponse(res, 200, message)
+
         } catch (err) {
+
             console.log("delete restaurant err: ", err)
             returnError(res, 403, err)
         }

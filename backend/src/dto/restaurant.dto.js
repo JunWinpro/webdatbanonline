@@ -1,17 +1,12 @@
-const returnRestaurant = (res, status, message, data, user) => {
+const restaurantDTO = (data) => {
     let dto = null
     if (data) {
         dto = data.toObject()
-        if (user.userId !== data.manager.toString()) {
-            delete dto.manager
-        }
+        delete dto.manager
+        delete dto.isDeleted
     }
-    delete dto.isDeleted
-    return res.status(status).json({
-        success: true,
-        data: dto,
-        message,
-    })
+
+    return dto
 }
 
-export default returnRestaurant
+export default restaurantDTO
