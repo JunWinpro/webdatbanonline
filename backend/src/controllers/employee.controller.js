@@ -8,11 +8,11 @@ const employeeController = {
     register: async (req, res) => {
         try {
             const { username, phone, password, } = req.body;
-            const { id } = req.params
+            const { restaurantId } = req.params
             const user = req.user
 
             const restaurant = await ModelDb.RestaurantModel.findOne({
-                _id: id,
+                _id: restaurantId,
                 manager: new mongoose.Types.ObjectId(user.userId),
                 isDeleted: false,
                 isVerified: true
@@ -20,19 +20,20 @@ const employeeController = {
 
             if (!restaurant) throw new Error("You don't have permission for this action")
 
-
             const userExist = await ModelDb.EmployeeModel.findOne({
                 $or: [
                     { username },
                     { phone },
                 ],
+                isDeleted: false
             })
 
             if (userExist?.username === username) throw new Error("Username already used")
             if (userExist?.phone === phone) throw new Error("Phone already used")
 
             const userPhoneExist = await ModelDb.UserModel.findOne({
-                phone
+                phone,
+                isDeleted: false
             })
             if (userPhoneExist) throw new Error("Phone already used")
 
@@ -45,7 +46,7 @@ const employeeController = {
 
             const hashPassword = bcryptPassword.hashPassword(password)
 
-            const newUser = await ModelDb.EmployeeModel.create({
+            const newEployee = await ModelDb.EmployeeModel.create({
                 ...req.body,
                 password: hashPassword,
                 manager: new mongoose.Types.ObjectId(user.userId),
@@ -54,21 +55,12 @@ const employeeController = {
                 },
                 restaurant: new mongoose.Types.ObjectId(restaurantId)
             })
-
-            res.status(201).json({
-                message: "Employee created successfully",
-                data: returnUser(newUser),
-                success: true
-            })
+            const message = "Register success"
+            returnEmployee(200, message, newEployee)
         }
         catch (err) {
             console.log("user register err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            returnError(err, 403)
         }
     },
 
@@ -84,7 +76,6 @@ const employeeController = {
                 isDeleted: false,
             }).populate('restaurant')
             const user = req.user
-            const restaurant = employee.restaurant
 
             if (!employee) throw new Error("Username/phone or password is wrong")
 
@@ -94,25 +85,16 @@ const employeeController = {
             const accessToken = jwtToken.createToken({
                 userId: user._id,
                 username: employee.username,
-                phone: employee.phone,
+                role: employee.role
             }, "AT")
 
             const refreshToken = jwtToken.createToken({
                 userId: user._id,
                 username: employee.username,
-                phone: employee.phone,
+                role: employee.role
             }, "RT")
-
-            res.status(201).json({
-                message: "Login success",
-                data: {
-                    userInfo: returnEmployee(employee),
-                    restaurant: returnRestaurant(restaurant),
-                    accessToken,
-                    refreshToken
-                },
-                success: true
-            })
+            const message = "Login success"
+            returnEmployee(200, message, employee, { accessToken, refreshToken })
         }
         catch (err) {
             console.log("user login err: ", err)

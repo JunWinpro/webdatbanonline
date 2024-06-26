@@ -1,5 +1,5 @@
 import joi from "joi";
-import trimString from "../utils/trimString";
+import trimString from "../utils/trimString.js";
 const messages = {
     username: {
         'string.alphanum': "Username cannot contain spaces or special characters",

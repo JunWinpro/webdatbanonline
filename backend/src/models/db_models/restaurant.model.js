@@ -36,11 +36,11 @@ const restaurant = new mongoose.Schema(
         }],
         minPrice: {
             type: Number,
-            default: 0
+            default: null
         },
         maxPrice: {
             type: Number,
-            default: 0
+            default: null
         },
         rating: {
             type: Number,
@@ -77,7 +77,8 @@ const restaurant = new mongoose.Schema(
         numberOfTablesBookedInLastWeek: {
             type: Number,
             default: 0
-        }
+        },
+
     },
     {
         timestamps: true

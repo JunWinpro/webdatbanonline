@@ -4,9 +4,11 @@ import jwtToken from "../utils/jwtToken.util.js"
 import { v2 as cloudinary } from "cloudinary"
 import pageSplit from "../utils/pageSplit.util.js"
 import sendEmail from "../utils/sendEmail.js"
-import returnUser from "../dto/user.dto.js"
 import lowerCaseString from "../utils/lowerCaseString.js"
 import trimString from "../utils/trimString.js"
+import returnError from "../errors/error.js"
+import userDTO from "../dto/user.dto.js"
+import dataResponse from "../dto/data.js"
 const userController = {
     register: async (req, res) => {
         try {
@@ -31,7 +33,7 @@ const userController = {
 
             const veryficationToken = crypto.randomUUID()
 
-            await ModelDb.UserModel.create({
+            const newUser = await ModelDb.UserModel.create({
                 ...req.body,
                 password: hashPassword,
                 veryficationToken
@@ -43,20 +45,12 @@ const userController = {
             }
             await sendEmail(email, veryficationToken, info)
 
-            res.status(201).json({
-                message: "Please check your email for verify account",
-                data: null,
-                success: true
-            })
+            const message = "Please check your email for verify account"
+            dataResponse(res, 201, message, userDTO(newUser))
         }
         catch (err) {
-            console.log("user register err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            console.log("user register err: ", err.message)
+            returnError(res, 403, err)
         }
     },
     verifyUser: async (req, res) => {
@@ -71,19 +65,12 @@ const userController = {
             user.veryficationToken = null
 
             await user.save()
-            res.status(201).json({
-                success: true,
-                data: null,
-                message: "Verify success, you can login now"
-            })
+            const message = "Verify success, you can login now"
 
-        } catch (error) {
-            console.log("verify user err: ", error)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null
-            })
+            dataResponse(res, 200, message, null)
+        } catch (err) {
+            console.log("verify user err: ", err.message)
+            returnError(res, 403, err)
         }
     },
 
@@ -111,7 +98,7 @@ const userController = {
                 }
                 await user.save()
                 await sendEmail(email, verificationToken, info)
-                throw new Error("Account is not verified, please check your email for verify account")
+                throw new Error("Account is not verified, please check your email to verify account")
             }
 
             const accessToken = jwtToken.createToken({
@@ -126,80 +113,69 @@ const userController = {
                 role: user.role
             }, "RT")
 
-            res.status(201).json({
-                message: "Login success",
-                data: {
-                    userInfo: returnUser(user),
-                    accessToken,
-                    refreshToken
-                },
-                success: true
-            })
+            const message = "Login success"
+
+            dataResponse(res, 200, message, { accessToken, refreshToken, ...userDTO(user) })
         }
         catch (err) {
-            console.log("user login err: ", err)
-
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            console.log("user login err: ", err.message)
+            returnError(res, 401, err)
         }
     },
     getUsers: async (req, res) => {
-        try {
-            const { page, pageSize, email, name, sortBy } = req.query
+        // try {
+        //     const { page, pageSize, email, name, sortBy } = req.query
 
-            const filterModel = {}
-            if (name) {
-                filterModel.name = {
-                    $regex: lowerCaseString(trimString(name)),
-                    $options: 'i'
-                }
-            }
-            if (email) {
-                filterModel.email = {
-                    $regex: lowerCaseString(trimString(email)),
-                    $options: 'i'
-                }
-            }
+        //     const filterModel = {}
+        //     if (name) {
+        //         filterModel.name = {
+        //             $regex: lowerCaseString(trimString(name)),
+        //             $options: 'i'
+        //         }
+        //     }
+        //     if (email) {
+        //         filterModel.email = {
+        //             $regex: lowerCaseString(trimString(email)),
+        //             $options: 'i'
+        //         }
+        //     }
 
-            const sortModel = {}
-            // Notice: need sort later
+        //     const sortModel = {}
+        //     // Notice: need sort later
 
-            const users = await pageSplit(ModelDb.UserModel, filterModel, page, pageSize, sortModel, undefined)
-            if (!users) throw new Error("User not found")
+        //     const users = await pageSplit(ModelDb.UserModel, filterModel, page, pageSize, sortModel, undefined)
+        //     if (!users) throw new Error("User not found")
 
 
-            const data = users.data.map(data => {
-                return returnUser(data)
-            });
+        //     const data = users.data.map(data => {
+        //         return userDTO(data)
+        //     });
 
-            users.data = data
+        //     users.data = data
 
-            res.status(200).json({
-                message: "Get all users success",
-                data: users,
-                success: true
-            })
-        }
+        //     res.status(200).json({
+        //         message: "Get all users success",
+        //         data: users,
+        //         success: true
+        //     })
+        // }
 
-        catch (err) {
-            console.log("get all users err: ", err)
+        // catch (err) {
+        //     console.log("get all users err: ", err.message)
 
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
-        }
+        //     res.status(403).json({
+        //         message: err.message,
+        //         success: false,
+        //         data: null,
+        //         err
+        //     })
+        // }
     },
 
     getUserById: async (req, res) => {
         try {
             const { id } = req.params
+
             const user = await ModelDb.UserModel.findOne({
                 _id: id,
                 isDeleted: false,
@@ -207,20 +183,13 @@ const userController = {
             })
             if (!user) throw new Error("User not found")
 
-            res.status(200).json({
-                message: "Get user success",
-                data: returnUser(user),
-                success: true
-            })
+            const message = "Get user success"
+
+            dataResponse(res, 200, message, userDTO(user))
         }
         catch (err) {
-            console.log("get user by id err")
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            console.log("get user by id err: ", err.message)
+            returnError(res, 403, err)
         }
     },
     forgetPassword: async (req, res) => {
@@ -243,65 +212,13 @@ const userController = {
             await user.save()
             await sendEmail(email, user.resetPasswordToken, info)
 
-            res.status(201).json({
-                message: "Please check your email for reset password",
-                success: true,
-                data: null,
-            })
+            const message = "Please check your email for reset password"
+
+            dataResponse(res, 201, message, null)
         }
         catch (err) {
-            console.log("forgot password err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
-        }
-    },
-    validateResetPasswordToken: async (req, res) => {
-        try {
-            const { token } = req.params
-
-            if (!token) {
-                return res.status(400).json({
-                    message: "Token is required",
-                    success: false
-                })
-            }
-
-            const user = await ModelDb.UserModel.findOne({
-                resetPasswordToken: token,
-                isDeleted: false,
-                isVerified: true
-            })
-            if (!user) throw new Error('User not found')
-
-            if (user.resetPasswordExpireIn <= Date.now()) {
-
-                user.resetPasswordToken = null
-                user.resetPasswordExpireIn = null
-                await user.save()
-
-                throw new Error('Token expired')
-            }
-
-            res.status(201).json({
-                message: "Token is valid",
-                success: true,
-                data: {
-                    email: user.email
-                }
-            })
-        }
-        catch (err) {
-            console.log("reset password err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            console.log("forgot password err: ", err.message)
+            returnError(res, 403, err)
         }
     },
     resetPassword: async (req, res) => {
@@ -312,10 +229,10 @@ const userController = {
             const user = await ModelDb.UserModel.findOne({
                 isDeleted: false,
                 resetPasswordToken: token,
-                resetPasswordExpireIn: { $gt: Date.now() }
             })
 
-            if (!user) throw new Error(`Wrong user`)
+            if (!user) throw new Error(`You don't have permission for this action`)
+            if (user.resetPasswordExpireIn < Date.now()) throw new Error("Token is expired")
 
             const hashPassword = bcryptPassword.hashPassword(newPassword)
 
@@ -324,20 +241,13 @@ const userController = {
             user.resetPasswordExpireIn = null
 
             await user.save()
-            res.status(201).json({
-                message: "Reset password success",
-                data: null,
-                success: true
-            })
+            const message = "Reset password success"
+
+            dataResponse(res, 200, message, null)
         }
         catch (err) {
-            console.log("reset password err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            console.log("reset password err: ", err.message)
+            returnError(res, 403, err)
         }
     },
     changeRole: async (req, res) => {
@@ -351,22 +261,13 @@ const userController = {
             currentUser.role = role
             currentUser.save()
 
-            res.status(201).json({
-                message: "Update user success",
-                data: {
-                    role: currentUser.role
-                },
-                success: true
-            })
+            const message = "Change role success"
+
+            dataResponse(res, 200, message, userDTO(currentUser))
         }
         catch (err) {
-            console.log("update user by id err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            console.log("update user by id err: ", err.message)
+            returnError(res, 403, err)
         }
     },
     updateUserById: async (req, res) => {
@@ -376,15 +277,16 @@ const userController = {
             const user = req.user
             if (user.userId !== id) throw new Error("You don't have permission for this action")
 
-            let currentUser = await ModelDb.UserModel.findOne({
+            const currentUser = await ModelDb.UserModel.findOne({
                 _id: id,
                 isDeleted: false,
             })
             if (!currentUser) throw new Error("User not found")
+            if (!bcryptPassword.comparePassword(password, currentUser.password)) throw new Error("Password is incorrect")
 
             let hashPassword;
-            if (password && newPassword) {
-                if (!bcryptPassword.comparePassword(password, currentUser.password)) throw new Error("Password is incorrect")
+
+            if (newPassword) {
                 if (bcryptPassword.comparePassword(newPassword, currentUser.password)) throw new Error("Password is the same as current please change different password")
                 hashPassword = bcryptPassword.hashPassword(newPassword)
             }
@@ -401,29 +303,21 @@ const userController = {
                 if (!result) throw new Error("Upload failed")
                 avatar = result.secure_url
             }
-
-            currentUser = {
-                ...currentUser.toObject(),
-                ...req.body,
-                password: hashPassword ? hashPassword : currentUser.password,
-                avatar: avatar ? avatar : currentUser.avatar
+            for (let key of Object.keys(req.body)) {
+                if (key === "password") continue;
+                currentUser[key] = req.body[key]
             }
-            const updatedUser = await ModelDb.UserModel.findByIdAndUpdate(id, currentUser, { new: true })
 
-            res.status(201).json({
-                message: "Update user success",
-                data: returnUser(updatedUser),
-                success: true
-            })
+            if (hashPassword) currentUser.password = hashPassword
+            if (avatar) currentUser.avatar = avatar
+            const updatedUser = await ModelDb.UserModel.findByIdAndUpdate(id, currentUser, { new: true })
+            const message = "Update success"
+
+            dataResponse(res, 200, message, userDTO(updatedUser))
         }
         catch (err) {
-            console.log("update user by id err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            console.log("update user by id err: ", err.message)
+            returnError(res, 403, err)
         }
     },
     deleteUserById: async (req, res) => {
@@ -444,19 +338,13 @@ const userController = {
             currentUser.isDeleted = true
 
             currentUser.save()
-            res.status(201).json({
-                success: true,
-                data: {},
-                message: "Delete user success"
-            })
+            const message = "Delete success"
+
+            dataResponse(res, 200, message, null)
         }
         catch (err) {
-            console.log("update user by id err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null
-            })
+            console.log("update user by id err: ", err.message)
+            returnError(res, 403, err)
         }
     },
     recoverAccount: async (req, res) => {
@@ -478,20 +366,13 @@ const userController = {
                 textOption: "Recover account successfully",
             }
             await sendEmail(user.email, undefined, info)
+            const message = "Recover account success"
 
-            res.status(201).json({
-                success: true,
-                data: null,
-                message: "Recover account success"
-            })
+            dataResponse(res, 200, message, null)
 
-        } catch (error) {
-            console.log("recover account err: ", error)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null
-            })
+        } catch (err) {
+            console.log("recover account err: ", err.message)
+            returnError(res, 403, err)
         }
     }
 }

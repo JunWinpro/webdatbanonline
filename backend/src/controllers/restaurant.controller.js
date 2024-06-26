@@ -5,6 +5,9 @@ import mongoose from "mongoose"
 import pageSplit from "../utils/pageSplit.util.js"
 import lowerCaseString from "../utils/lowerCaseString.js"
 import sortModelType from "../utils/sortModel.js"
+import returnRestaurantFullInfo from "../dto/restaurantFullInfo.dto.js"
+import returnRestaurant from "../dto/restaurant.dto.js"
+import returnError from "../errors/error.js"
 const restaurantController = {
     createRestaurant: async (req, res) => {
         try {
@@ -18,11 +21,10 @@ const restaurantController = {
             if (restaurantExist) throw new Error("Restaurant name already exist")
 
             const files = req.files
-            // const { restaurantImages, menuImages, foodImages,avatar } = files
 
             const imageUrls = {}
             let i = 0;
-
+            // restaurantImages, menuImages, foodImages, avatar
             while (Object.keys(files)[i]) {
 
                 let listUrl = []
@@ -59,23 +61,11 @@ const restaurantController = {
                 foodImages: imageUrls.foodImages || null
             })
 
-            res.status(201).json({
-                message: "Create restaurant success",
-                success: true,
-                data: {
-                    restaurant: newRestaurant,
-                    restaurantInfo: newRestaurantInfo,
-                },
-            })
+            returnRestaurantFullInfo(res, 200, newRestaurantInfo, user)
         }
         catch (err) {
             console.log("create restaurant err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            returnError(res, 403, err)
         }
     },
 
@@ -160,63 +150,31 @@ const restaurantController = {
                 data: restaurants,
             })
         }
-        catch (error) {
+        catch (err) {
             console.log('get restaurant error: ', error.message)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null,
-                err: error,
-            })
+            returnError(res, 403, err)
         }
     },
 
     getRestaurantById: async (req, res) => {
         try {
             const { id } = req.params
+            const restaurant = await ModelDb.RestaurantInfoModel.findOne({
+                restaurant: new mongoose.Types.ObjectId(id)
+            }).populate('restaurant')
 
-            let returnRestaurant;
+            if (!restaurant || restaurant.restaurant.isDeleted) throw new Error("Restaurant not found")
 
-            if (req.originalUrl.includes('full-info')) {
-
-                const restaurant = await ModelDb.RestaurantInfoModel.findOne({
-                    restaurant: new mongoose.Types.ObjectId(id)
-                }).populate('restaurant')
-
-                if (restaurant.restaurant.isDeleted) throw new Error("Restaurant not found")
-
-                returnRestaurant = restaurant.toObject()
-
-                delete returnRestaurant.restaurant.manager
-                delete returnRestaurant.restaurant.employee
-
-            } else {
-                const restaurant = await ModelDb.RestaurantModel.findOne({
-                    _id: new mongoose.Types.ObjectId(id),
-                    isDeleted: false
-                })
-
-                if (!restaurant) throw new Error("Restaurant not found")
-
-                returnRestaurant = restaurant.toObject()
-
-                delete returnRestaurant.manager
-                delete returnRestaurant.employee
-            }
+            const user = req.user
 
             res.status(200).json({
                 message: "Get restaurant success",
                 success: true,
-                data: returnRestaurant,
+                data: returnRestaurantFullInfo(restaurant, user),
             })
         }
         catch (err) {
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            returnError(res, 403, err)
         }
     },
 
@@ -232,34 +190,8 @@ const restaurantController = {
             })
             if (!restaurant) throw new Error("Restaurant not found")
 
-            const files = req.files
-            // const { restaurantImages, menuImages, foodImages,avatar } = files
+            // tableList update 
 
-            const imageUrls = {}
-            let i = 0;
-
-            // while (Object.keys(files)[i]) {
-
-            //     let listUrl = []
-            //     let key = Object.keys(files)[i]
-
-            //     for (let file of files[key]) {
-
-            //         const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
-            //         const fileName = `${Date.now()}-${file.originalname.replace(" ", "-").split('.')[0]}`
-            //         const folder = key
-
-            //         const result = await cloudinary.uploader.upload(dataUrl, {
-            //             public_id: fileName,
-            //             resource_type: "auto",
-            //             folder: `${baseFolder.RESTAURANT}/${folder}/${restaurant.name.replace(" ", "-")}`
-            //         })
-            //         if (!result) throw new Error("Error uploading file in: " + key)
-            //         listUrl.push(result.secure_url)
-            //         imageUrls[key] = listUrl
-            //     }
-            //     i++;
-            // }
 
             restaurant = {
                 ...restaurant.toObject(),
@@ -270,23 +202,45 @@ const restaurantController = {
             res.status(203).json({
                 message: "Update restaurant success",
                 success: true,
-                data: restaurant,
+                data: returnRestaurant(restaurant),
             })
-        } catch (error) {
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null,
-                err: error,
-            })
+        } catch (err) {
+            console.log("update restaurant err: ", err)
+            returnError(res, 403, err)
         }
+    },
+
+    updateRestaurantInfoById: async (req, res) => {
+
+    },
+    updateRestaurantImage: async (req, res) => {
+
     },
 
     deleteRestaurantById: async (req, res) => {
         try {
+            const { id } = req.params
+            const user = req.user
 
-        } catch (error) {
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                manager: new mongoose.Type.ObjectId(user.userId),
+                isDeleted: false,
+                _id: id,
+            })
+            if (!restaurant) throw new Error("Restaurant not found")
 
+            restaurant.isDeleted = true
+
+            await restaurant.save()
+
+            res.status(203).json({
+                message: "Delete restaurant success",
+                success: true,
+                data: restaurant,
+            })
+        } catch (err) {
+            console.log("delete restaurant err: ", err)
+            returnError(res, 403, err)
         }
     }
 }

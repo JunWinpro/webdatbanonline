@@ -38,6 +38,21 @@ const restaurantValidateData = {
     },
 
     updateRestaurantById: (req, res, next) => {
+        try {
+            const { error, value } = restaurantValidate.updateRestaurant.validate(req.query)
+            if (error) throw new Error(error.details[0].message)
+
+            req.body = value
+            next()
+        }
+        catch (err) {
+            res.status(403).json({
+                message: err.message,
+                success: false,
+                data: null,
+                err
+            })
+        }
     }
 }
 
