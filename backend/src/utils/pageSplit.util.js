@@ -2,7 +2,7 @@ const pageSplit = async (model, filterModel, page, pageSize, sortModel, populate
 
     const totalItems = await model.countDocuments(filterModel)
     const totalPages = Math.ceil(totalItems / (pageSize || 16))
-    const skip = page > 1 ? (Number(page) - 1) * pageSize : 0
+    const skip = page > 1 ? (page - 1) * pageSize : 0
 
     const data = {
         totalPages,

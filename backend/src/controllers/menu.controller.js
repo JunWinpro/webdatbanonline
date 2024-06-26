@@ -11,7 +11,7 @@ const menuController = {
 
             const findMenu = await ModelDb.MenuModel.findOne({
                 name: req.body.name,
-                restaurant: new mongoose.Types.ObjectId(id),
+                restaurant: id,
                 manager: user.userId
             })
 
@@ -19,8 +19,8 @@ const menuController = {
 
             const createMenu = await ModelDb.MenuModel.create({
                 ...req.body,
-                restaurant: new mongoose.Types.ObjectId(id),
-                manager: new mongoose.Types.ObjectId(user.userId)
+                restaurant: id,
+                manager: user.userId
             })
 
             res.status(201).json({
@@ -122,8 +122,8 @@ const menuController = {
             const findMenu = await ModelDb.MenuModel.find({
                 _id: id,
                 isDeleted: false,
-                manager: new mongoose.Types.ObjectId(user.userId),
-                restaurant: new mongoose.Types.ObjectId(restaurantId)
+                manager: user.userId,
+                restaurant: restaurantId
             })
 
             if (!findMenu) throw new Error("Menu not found")

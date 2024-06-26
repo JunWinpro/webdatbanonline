@@ -317,6 +317,9 @@ const userController = {
         }
         catch (err) {
             console.log("update user by id err: ", err.message)
+            if (err.code === 11000) {
+                err.message = `${Object.keys(err.keyPattern)[0]} is already exist`
+            }
             returnError(res, 403, err)
         }
     },

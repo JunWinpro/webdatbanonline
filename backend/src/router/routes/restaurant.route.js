@@ -8,7 +8,7 @@ import imageValidate from '../../middlewares/imageValidate.middleware.js'
 
 const restaurantRoute = express.Router()
 
-restaurantRoute.post('/create-restaurant', tokenMiddleware.verifyAccessToken, authorization.manager,
+restaurantRoute.post('/', tokenMiddleware.verifyAccessToken, authorization.manager,
     memoryUploader.fields([
         { name: 'foodImages' },
         { name: 'menuImages' },
@@ -17,8 +17,10 @@ restaurantRoute.post('/create-restaurant', tokenMiddleware.verifyAccessToken, au
     ]), imageValidate, validateData.restaurant.createRestaurant, restaurantController.createRestaurant)
 
 restaurantRoute.get('/', validateData.restaurant.getRestaurants, restaurantController.getRestaurants)
-restaurantRoute.get('/:id', restaurantController.getRestaurantById)
-
+restaurantRoute.get('/restaurant/:id', restaurantController.getRestaurantById)
+restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.restaurant.getRestaurants, restaurantController.getOwnedRestaurants)
 restaurantRoute.put('/:id', validateData.restaurant.updateRestaurantById)
+
+restaurantRoute.delete('/:id', tokenMiddleware.verifyAccessToken, authorization.managerOrAdmin, validateData.objectId, restaurantController.deleteRestaurantById)
 
 export default restaurantRoute
