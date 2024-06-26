@@ -332,6 +332,12 @@ const restaurantController = {
             if (!restaurant) throw new Error("Restaurant not found")
             restaurant.isVerified = true
             await restaurant.save()
+            const info = {
+                subject: `Restaurant Approved`,
+                textOption: `Your restaurant has been approved successfully, if you have any questions, please contact us.`
+            }
+            await sendEmail(restaurant.manager.email, undefined, info)
+
             const message = "Approve restaurant success"
             dataResponse(res, 200, message, restaurantDTO(restaurant))
         }
@@ -357,10 +363,13 @@ const restaurantController = {
             await restaurant.save()
             const info = {
                 subject: `Restaurant Activated`,
-                textOption: `Your restaurant has been activated successfully  ${user.role === 'admin' ? 'by admin' : 'you'}, if you have any questions, please contact us.`,
+                textOption: `Your restaurant has been activated successfully  ${user.role === 'admin' ? 'by admin' : 'you'}, if you have any questions, please contact us.`
             }
 
             await sendEmail(restaurant.manager.email, undefined, info)
+
+            const message = "Active restaurant success"
+            dataResponse(res, 200, message, restaurantDTO(restaurant))
         }
         catch (err) {
             returnError(res, 403, err)

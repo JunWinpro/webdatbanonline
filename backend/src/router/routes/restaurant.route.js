@@ -19,7 +19,10 @@ restaurantRoute.post('/', tokenMiddleware.verifyAccessToken, authorization.manag
 restaurantRoute.get('/', validateData.restaurant.getRestaurants, restaurantController.getRestaurants)
 restaurantRoute.get('/restaurant/:id', restaurantController.getRestaurantById)
 restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.restaurant.getRestaurants, restaurantController.getOwnedRestaurants)
+
 restaurantRoute.put('/:id', validateData.restaurant.updateRestaurantById)
+restaurantRoute.put('/approve/:id', tokenMiddleware.verifyAccessToken, authorization.admin, restaurantController.approveRestaurantById)
+restaurantRoute.put('/active/:id', tokenMiddleware.verifyAccessToken, authorization.manager, restaurantController.activeRestaurantById)
 
 restaurantRoute.delete('/:id', tokenMiddleware.verifyAccessToken, authorization.managerOrAdmin, validateData.objectId, restaurantController.deleteRestaurantById)
 

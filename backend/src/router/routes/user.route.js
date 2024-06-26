@@ -21,6 +21,7 @@ userRoute.put('/change-role/:id', tokenMiddleware.verifyAccessToken, authorizati
 userRoute.put('/verify-user/:token', userController.verifyUser)
 userRoute.put('/recover-account', tokenMiddleware.verifyAccessToken, authorization.admin, userController.recoverAccount)
 
+
 userRoute.delete('/:id', tokenMiddleware.verifyAccessToken, validateData.objectId, userController.deleteUserById)
 
 export default userRoute    
