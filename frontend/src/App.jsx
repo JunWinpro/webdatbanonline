@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { HomePage } from "./pages/HomePage.jsx";
+import { SigninPage } from './pages/SigninPage';
+import { SignupPage } from './pages/SignupPage';
 import { ErrorPage } from "./pages/ErrorPage.jsx";
 import { ContactPage } from "./pages/Contact.jsx";
 import FixedNavBar from "./components/HomePage/FixedNavBar.jsx";
@@ -24,11 +26,13 @@ function App() {
         { label: "Bar", link: "/bar" },
         { label: "Grilled food", link: "/grilled-food" },
       ],
-    },{
+    },
+    {
       label: "Sales", link: "/sales"  
     },
-
   ];
+
+  const avatarSrc = "https://github.com/shadcn.png";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,7 +49,7 @@ function App() {
 
   return (
     <>
-      <Navbar navItems={navItems} />
+      <Navbar navItems={navItems} username="John Doe" avatarSrc={avatarSrc} />
       {showFixedNavBar && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <FixedNavBar navItems={navItems} />
@@ -57,8 +61,9 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/product" element={<ProductPage />} />
+          <Route path="/signin" element={<SigninPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route path="*" element={<ErrorPage />} />
-          
         </Routes>
       </div>
     </>

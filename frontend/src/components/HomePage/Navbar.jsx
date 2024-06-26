@@ -1,6 +1,7 @@
-// Navbar.jsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
 import {
   NavigationMenu,
   NavigationMenuLink,
@@ -11,9 +12,10 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "../ui/button.jsx";
 
-const Navbar = ({ navItems }) => {
+const Navbar = ({ navItems, username, avatarSrc }) => {
   return (
-    <div className="bg-white">
+    <div className="bg-white flex justify-between items-center px-4">
+
       <NavigationMenu>
         <NavigationMenuList>
           {navItems.map((item, index) =>
@@ -42,6 +44,16 @@ const Navbar = ({ navItems }) => {
           )}
         </NavigationMenuList>
       </NavigationMenu>
+
+      <div className="flex items-center text-black">
+        <Avatar>
+          <AvatarImage src={avatarSrc} />
+          <AvatarFallback>
+            {username ? username.charAt(0).toUpperCase() : 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <span className="ml-2">{username}</span>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,7 @@
-  
 import React from "react";
 import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { User } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuLink,
@@ -11,9 +12,9 @@ import {
 } from "@/components/ui/fixed-navigation-menu";
 import { Button, buttonVariants } from "../ui/fixed-button.jsx";
 
-const FixedNavBar = ({ navItems }) => {
+const FixedNavBar = ({ navItems, username }) => {
   return (
-    <div className="bg-red-600">
+    <div className="bg-red-600 flex justify-between items-center px-4">
       <NavigationMenu>
         <NavigationMenuList>
           {navItems.map((item, index) =>
@@ -24,9 +25,7 @@ const FixedNavBar = ({ navItems }) => {
                   {item.items.map((subItem, subIndex) => (
                     <NavigationMenuLink key={subIndex}>
                       <Button
-
                         className={buttonVariants({
-
                           className: "bg-white text-black",
                         })}
                       >
@@ -48,6 +47,8 @@ const FixedNavBar = ({ navItems }) => {
           )}
         </NavigationMenuList>
       </NavigationMenu>
+      
+
     </div>
   );
 };
