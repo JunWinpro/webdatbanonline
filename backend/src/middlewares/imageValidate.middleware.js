@@ -1,3 +1,5 @@
+import returnError from "../errors/error.js"
+
 const imageValidate = (req, res, next) => {
     try {
         const files = req.files
@@ -20,12 +22,7 @@ const imageValidate = (req, res, next) => {
 
         next()
     } catch (error) {
-        res.status(403).json({
-            message: error.message,
-            success: false,
-            data: null,
-            err: error,
-        })
+        returnError(res, 403, error)
     }
 
 }

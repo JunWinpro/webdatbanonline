@@ -4,7 +4,6 @@ const restaurantInfoDTO = (data, user) => {
         dto = data.toObject()
         delete dto.isDeleted
         if (user?.userId !== dto.restaurant.manager || !user) {
-            delete dto.employee
             delete dto.restaurant.manager
             delete dto.restaurant.isDeleted
         }

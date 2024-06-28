@@ -3,23 +3,41 @@ import ModelDb from "../models/model.js"
 import { v2 as cloudinary } from 'cloudinary'
 import mongoose from "mongoose"
 import pageSplit from "../utils/pageSplit.util.js"
-import lowerCaseString from "../utils/lowerCaseString.js"
 import sortModelType from "../utils/sortModel.js"
 import restaurantInfoDTO from "../dto/restaurantInfo.dto.js"
 import returnError from "../errors/error.js"
 import dataResponse from "../dto/data.js"
 import restaurantDTO from "../dto/restaurant.dto.js"
 import sendEmail from "../utils/sendEmail.js"
+import cloudinaryUploader from "../utils/cloudinaryUploader.js"
 const restaurantController = {
     createRestaurant: async (req, res) => {
         try {
-            const { name } = req.body
+            const { name, address } = req.body
 
             const restaurantExist = await ModelDb.RestaurantModel.findOne({
-                name
+                name,
+                'address.province': address.province,
+                'address.district': address.district,
+                'address.subDistrict': address.subDistrict,
+                isDeleted: false
             })
 
             if (restaurantExist) throw new Error("Restaurant name already exist")
+
+            const user = req.user
+
+            const newRestaurant = await ModelDb.RestaurantModel.create({
+                ...req.body,
+                manager: user.userId,
+                // avatar: imageUrls.avatar ? imageUrls.avatar[0] : null
+            })
+
+            const newRestaurantInfo = await ModelDb.RestaurantInfoModel.create({
+                ...req.body,
+                restaurant: newRestaurant._id,
+
+            })
 
             const files = req.files
 
@@ -33,16 +51,10 @@ const restaurantController = {
                     let key = Object.keys(files)[i]
 
                     for (let file of files[key]) {
+                        const folder = `${baseFolder.RESTAURANT}/${name.replace(" ", "-")}/${key}`
 
-                        const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
-                        const fileName = `${Date.now()}-${file.originalname.replace(" ", "-").split('.')[0]}`
-                        const folder = key
+                        const result = await cloudinaryUploader(file, folder)
 
-                        const result = await cloudinary.uploader.upload(dataUrl, {
-                            public_id: fileName,
-                            resource_type: "auto",
-                            folder: `${baseFolder.RESTAURANT}/${folder}/${name.replace(" ", "-")}`
-                        })
                         if (!result) throw new Error("Error uploading file in: " + key)
                         listUrl.push(result.secure_url)
                         imageUrls[key] = listUrl
@@ -50,21 +62,14 @@ const restaurantController = {
                     i++;
                 }
             }
-            const user = req.user
+            newRestaurant.avatar = imageUrls.avatar ? imageUrls.avatar[0] : null
+            await newRestaurant.save()
 
-            const newRestaurant = await ModelDb.RestaurantModel.create({
-                ...req.body,
-                manager: user.userId,
-                avatar: imageUrls.avatar ? imageUrls.avatar[0] : null
-            })
+            newRestaurantInfo.restaurantImages = imageUrls.restaurantImages || null
+            newRestaurantInfo.menuImages = imageUrls.menuImages || null
+            newRestaurantInfo.foodImages = imageUrls.foodImages || null
+            await newRestaurantInfo.save()
 
-            const newRestaurantInfo = await ModelDb.RestaurantInfoModel.create({
-                ...req.body,
-                restaurant: newRestaurant._id,
-                restaurantImages: imageUrls.restaurantImages || null,
-                menuImages: imageUrls.menuImages || null,
-                foodImages: imageUrls.foodImages || null
-            })
             const message = "Create restaurant success, please wait for admin approve"
 
             dataResponse(res, 201, message, {
@@ -328,10 +333,15 @@ const restaurantController = {
                 _id: id,
                 isDeleted: false,
                 isVerified: false
-            })
+            }).populate('manager')
             if (!restaurant) throw new Error("Restaurant not found")
             restaurant.isVerified = true
             await restaurant.save()
+            const info = {
+                subject: `Restaurant Approved`,
+                textOption: `Your restaurant ${restaurant.name} has been approved successfully.`,
+            }
+            await sendEmail(restaurant.manager.email, undefined, info)
             const message = "Approve restaurant success"
             dataResponse(res, 200, message, restaurantDTO(restaurant))
         }
@@ -357,10 +367,46 @@ const restaurantController = {
             await restaurant.save()
             const info = {
                 subject: `Restaurant Activated`,
-                textOption: `Your restaurant has been activated successfully  ${user.role === 'admin' ? 'by admin' : 'you'}, if you have any questions, please contact us.`,
+                textOption: `Your restaurant ${restaurant.name} has been activated successfully.`,
             }
 
             await sendEmail(restaurant.manager.email, undefined, info)
+
+            const message = "Active restaurant success"
+
+            dataResponse(res, 200, message, restaurantDTO(restaurant))
+        }
+        catch (err) {
+            returnError(res, 403, err)
+        }
+    },
+    deactiveRestaurantById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const user = req.user
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                _id: id,
+                manager: user.userId,
+                isDeleted: false,
+                isVerified: true,
+                isActive: true
+            }).populate('manager')
+            if (!restaurant) throw new Error("Restaurant not found")
+
+            restaurant.isActive = false
+
+            await restaurant.save()
+
+            const info = {
+                subject: `Restaurant Deactivated`,
+                textOption: `Your restaurant ${restaurant.name} has been deactivated successfully.`,
+            }
+
+            await sendEmail(restaurant.manager.email, undefined, info)
+
+            const message = "Deactive restaurant success"
+
+            dataResponse(res, 200, message, restaurantDTO(restaurant))
         }
         catch (err) {
             returnError(res, 403, err)
@@ -385,6 +431,8 @@ const restaurantController = {
             })
 
             restaurant.isDeleted = true
+            restaurant.isActive = false
+
             restaurantInfo.isDeleted = true
 
             await restaurant.save()
@@ -408,3 +456,5 @@ const restaurantController = {
     }
 }
 export default restaurantController
+
+

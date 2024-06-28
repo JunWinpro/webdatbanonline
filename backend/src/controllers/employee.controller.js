@@ -1,27 +1,26 @@
 import ModelDb from "../models/model.js";
-import mongoose from "mongoose";
 import bcryptPassword from "../utils/bcrypt.util.js";
 import jwtToken from "../utils/jwtToken.util.js";
 import employeeDTO from "../dto/employee.dto.js";
 import dataResponse from "../dto/data.js";
+import returnError from "../errors/error.js";
+import duplicateErr from "../errors/duplicate.js";
 
 const employeeController = {
     register: async (req, res) => {
         try {
-            const { username, phone, password, } = req.body;
-            const { id } = req.params
+            const { username, phone, password, restaurantId } = req.body;
             const user = req.user
 
             const restaurant = await ModelDb.RestaurantModel.findOne({
-                _id: id,
+                _id: restaurantId,
                 manager: user.userId,
                 isDeleted: false,
-                isVerified: true
             })
 
             if (!restaurant) throw new Error("You don't have permission for this action")
 
-            const userExist = await ModelDb.EmployeeModel.findOne({
+            const employeeExist = await ModelDb.EmployeeModel.findOne({
                 $or: [
                     { username },
                     { phone },
@@ -29,14 +28,14 @@ const employeeController = {
                 isDeleted: false
             })
 
-            if (userExist?.username === username) throw new Error("Username already used")
-            if (userExist?.phone === phone) throw new Error("Phone already used")
+            if (employeeExist?.username === username) throw new Error("Username already used")
+            if (employeeExist?.phone === phone) throw new Error("Phone already used")
 
-            const userPhoneExist = await ModelDb.UserModel.findOne({
+            const userExist = await ModelDb.UserModel.findOne({
                 phone,
                 isDeleted: false
             })
-            if (userPhoneExist) throw new Error("Phone already used")
+            if (userExist) throw new Error("Phone already used")
 
             const getLatestEmployeeId = await ModelDb.EmployeeModel.findOne({
                 manager: user.userId,
@@ -54,22 +53,22 @@ const employeeController = {
                 employeeId: {
                     suffix: getLatestEmployeeId ? getLatestEmployeeId.employeeId.suffix + 1 : 1
                 },
-                restaurant: id
+                restaurant: restaurantId
             })
-
 
             const message = "Register success"
             dataResponse(res, 200, message, employeeDTO(newEployee))
         }
         catch (err) {
-            console.log("user register err: ", err)
-            returnError(err, 403)
+            console.log("employee register err: ", err)
+            returnError(res, 403, err)
         }
     },
 
     login: async (req, res) => {
         try {
             const { password } = req.body
+
             const loginMethod = req.loginMethod
             const employee = await ModelDb.EmployeeModel.findOne({
                 $or: [
@@ -77,37 +76,31 @@ const employeeController = {
                     { phone: loginMethod },
                 ],
                 isDeleted: false,
-            }).populate('restaurant')
-            const user = req.user
+            })
 
             if (!employee) throw new Error("Username/phone or password is wrong")
 
-            const checkPassword = bcryptPassword.comparePassword(password, user.password)
+            const checkPassword = bcryptPassword.comparePassword(password, employee.password)
             if (!checkPassword) throw new Error("Username/phone or password is wrong")
 
             const accessToken = jwtToken.createToken({
-                userId: user._id,
+                userId: employee._id,
                 username: employee.username,
                 role: employee.role
             }, "AT")
 
             const refreshToken = jwtToken.createToken({
-                userId: user._id,
+                userId: employee._id,
                 username: employee.username,
                 role: employee.role
             }, "RT")
+
             const message = "Login success"
-            employeeDTO(200, message, employee, { accessToken, refreshToken })
+            dataResponse(res, 200, message, { accessToken, refreshToken, ...employeeDTO(employee) })
         }
         catch (err) {
             console.log("user login err: ", err)
-
-            res.status(400).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            returnError(res, 401, err)
         }
     },
 
@@ -153,57 +146,65 @@ const employeeController = {
             })
             if (!employee) throw new Error("Employee not found")
 
-            res.status(200).json({
-                message: "Get Employee success",
-                data: employeeDTO(employee),
-                success: true
-            })
+            const message = "Get employee success"
+
+            dataResponse(res, 200, message, employeeDTO(employee))
         }
         catch (err) {
             console.log("get user by id err")
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            returnError(res, 403, err)
         }
     },
-    updateEmployeeById: async (req, res) => {
+    updateEmployeePasswordById: async (req, res) => {
         try {
             const { password, newPassword } = req.body
             const user = req.user
-            const currentUser = await ModelDb.EmployeeModel.findOne({
+            const employee = await ModelDb.EmployeeModel.findOne({
                 _id: user.userId,
                 isDeleted: false
             })
-            if (!currentUser) throw new Error("You don't have permission for this action")
+            if (!employee) throw new Error("You don't have permission for this action")
 
-            const checkPassword = bcryptPassword.comparePassword(password, currentUser.password)
-            if (!checkPassword) throw new Error("Password is wrong")
+            if (!bcryptPassword.comparePassword(password, employee.password)) throw new Error("Password is wrong")
 
-            const checkNewPassword = bcryptPassword.comparePassword(newPassword, currentUser.password)
-            if (!checkNewPassword) throw new Error("New password must be different from old password")
+            if (bcryptPassword.comparePassword(newPassword, employee.password)) throw new Error("New password must be different from old password")
+
 
             const hashPassword = bcryptPassword.hashPassword(newPassword)
 
-            currentUser.password = hashPassword
-            await currentUser.save()
-            res.status(201).json({
-                success: true,
-                data: null,
-                message: "Update password success"
-            })
+            employee.password = hashPassword
+
+            await employee.save()
+            const message = "Update password success"
+            dataResponse(res, 200, message, employeeDTO(employee))
         } catch (error) {
             console.log("update user by id err: ", error)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null
-            })
+            returnError(res, 403, error)
         }
     },
+    updateEmployeeInfoById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const user = req.user
+            const employee = await ModelDb.EmployeeModel.findOne({
+                _id: id,
+                manager: user.userId,
+                isDeleted: false
+            })
+            if (!employee) throw new Error("You don't have permission for action")
+            for (let key of Object.keys(req.body)) {
+                employee[key] = req.body[key]
+            }
+            await employee.save()
+            const message = "Update employee success"
 
+            dataResponse(res, 200, message, employeeDTO(employee))
+        }
+        catch (err) {
+            returnError(res, 403, duplicateErr(err))
+        }
+
+    },
     deleteEmployeeById: async (_, res) => {
         try {
             const { id } = req.params
@@ -218,19 +219,13 @@ const employeeController = {
             currentUser.isDeleted = true
 
             await currentUser.save()
-            res.status(201).json({
-                success: true,
-                data: null,
-                message: "Delete user success"
-            })
+            const message = "Delete employee success"
+
+            dataResponse(res, 200, message)
         }
         catch (err) {
             console.log("update user by id err: ", err)
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null
-            })
+            returnError(res, 403, err)
         }
     }
 

@@ -1,4 +1,7 @@
 import joi from "joi"
+import trimString from "../utils/trimString.js"
+import convertUnicode from "../utils/unidecode.js"
+import lowerCaseString from "../utils/lowerCaseString.js"
 
 const messages = {
     name: {
@@ -23,30 +26,29 @@ const messages = {
     price: {
         'any.required': "Price is required",
         'number.base': "Price must be a number",
-        'number.min': "Price must be greater than 0",
+        'number.min': "Price must be 0 or higher",
     },
 
     discount: {
         'any.required': "Discount is required",
         'number.base': "Discount must be a number",
-        'number.min': "Discount must be greater than 0",
+        'number.min': "Discount must be 0 or higher",
     },
 
-    isSelling: {
-        'any.required': "Is selling is required",
-        'boolean.base': "Is selling must be a boolean",
-    },
-
-    isDeleted: {
-        'any.required': "Is deleted is required",
-        'boolean.base': "Is deleted must be a boolean",
-    },
+    restaurantId: {
+        'string.hex': "Restaurant id must be a valid ObjectId",
+        'string.empty': 'Restaurant id is empty',
+        'any.required': 'Restaurant id is required'
+    }
 }
 
 
 const menuSchema = {
-    name: joi.string().regex(/^[a-zA-Z]+$/).min(1).messages({
+    name: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
         ...messages.name
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Name can't be empty")
+        return convertUnicode(lowerCaseString(trimString(value)))
     }),
 
     type: joi.string().valid("food", "drink").messages({
@@ -65,22 +67,31 @@ const menuSchema = {
         ...messages.discount
     }),
 
-    isSelling: joi.boolean().messages({
-        ...messages.isSelling
-    }),
-
-    isDeleted: joi.boolean().messages({
-        ...messages.isDeleted
-    }),
+    restaurantId: joi.string().hex().length(24).messages({
+        ...messages.restaurantId
+    })
 }
 
 const menuValidate = {
     createMenu: joi.object({
+        name: menuSchema.name.required(),
         type: menuSchema.type.required(),
         unit: menuSchema.unit.required(),
         price: menuSchema.price.required(),
-        discount: menuSchema.discount.required()
+        discount: menuSchema.discount.required(),
+        restaurantId: menuSchema.restaurantId.required()
     }),
+
+    updateMenu: joi.object({
+        name: menuSchema.name,
+        type: menuSchema.type,
+        unit: menuSchema.unit,
+        price: menuSchema.price,
+        discount: menuSchema.discount,
+        restaurantId: menuSchema.restaurantId.required()
+    })
+
+
 }
 
 export default menuValidate

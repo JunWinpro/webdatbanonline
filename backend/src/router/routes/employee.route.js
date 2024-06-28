@@ -7,14 +7,15 @@ import validateData from '../../middlewares/validate/index.js'
 
 const employeeRoute = express.Router()
 
-employeeRoute.post('/register/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.employee.register, employeeController.register)
+employeeRoute.post('/register', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.employee.register, employeeController.register)
 employeeRoute.post('/login', validateData.employee.login, employeeController.login)
 
 employeeRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.manager, employeeController.getEmployees)
-employeeRoute.get('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, employeeController.getEmployeeById)
+employeeRoute.get('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, employeeController.getEmployeeById)
 
-employeeRoute.put('/:id', tokenMiddleware.verifyAccessToken, validateData.employee.update, employeeController.updateEmployeeById)
+employeeRoute.put('/password/:id', tokenMiddleware.verifyAccessToken, authorization.employee, validateData.objectId, validateData.employee.updatePassword, employeeController.updateEmployeePasswordById)
+employeeRoute.put('/info/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.employee.updateInfo, employeeController.updateEmployeeInfoById)
 
-employeeRoute.delete('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, employeeController.deleteEmployeeById)
+employeeRoute.delete('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, employeeController.deleteEmployeeById)
 
 export default employeeRoute    

@@ -61,11 +61,6 @@ const restaurantInfo = new mongoose.Schema(
             ref: collection.RESTAURANTS,
             required: true
         },
-        employee: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: collection.EMPLOYEES,
-            default: null
-        }],
         maxim: {
             type: String,
             default: null

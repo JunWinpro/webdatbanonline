@@ -27,7 +27,6 @@ const authorization = {
     manager: async (req, res, next) => {
         try {
             const user = req.user
-
             const currentUser = await ModelDb.UserModel.findOne({
                 _id: user.userId,
                 role: "manager",

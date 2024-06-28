@@ -1,5 +1,6 @@
 import joi from "joi";
 import trimString from "../utils/trimString.js";
+import mongoose from 'mongoose'
 const messages = {
     username: {
         'string.alphanum': "Username cannot contain spaces or special characters",
@@ -19,6 +20,12 @@ const messages = {
         'string.max': "Password maximum length is 12 characters",
         'any.required': "Password is required"
     },
+    newPassword: {
+        'string.empty': "New password is empty",
+        'string.min': "New password minimum length is 8 characters",
+        'string.max': "New password maximum length is 12 characters",
+        'any.required': "New password is required"
+    },
     firstName: {
         'string.pattern.base': "First name cannot contain spaces or special characters or number",
         'string.min': "First name must have at least 1 character",
@@ -36,6 +43,12 @@ const messages = {
         'any.empty': "Gender is empty",
         'any.required': "Gender is required"
     },
+    restaurantId: {
+        'string.hex': "Restaurant id must be a valid ObjectId",
+        'string.empty': 'Restaurant id is empty',
+        'any.required': 'Restaurant id is required'
+    }
+
 }
 
 const employeeSchema = {
@@ -49,6 +62,10 @@ const employeeSchema = {
 
     password: joi.string().min(8).max(12).messages({
         ...messages.password
+    }),
+
+    newPassword: joi.string().min(8).max(12).messages({
+        ...messages.newPassword
     }),
 
     firstName: joi.string().regex(/^[a-zA-Z]+$/).min(1).messages({
@@ -69,9 +86,13 @@ const employeeSchema = {
         ...messages.gender
     }),
 
+    restaurantId: joi.string().hex().length(24).messages({
+        ...messages.restaurantId
+    }).custom((value, helpers) => {
+        if (trimString(value).length !== 24) return helpers.message("Restaurant id is invalid")
+        return trimString(value)
+    })
 }
-
-
 
 const employeeValidate = {
     register: joi.object({
@@ -80,7 +101,8 @@ const employeeValidate = {
         password: employeeSchema.password.required(),
         firstName: employeeSchema.firstName.required(),
         lastName: employeeSchema.lastName.required(),
-        gender: employeeSchema.gender.required()
+        gender: employeeSchema.gender.required(),
+        restaurantId: employeeSchema.restaurantId.required()
     }),
 
     login: joi.object({
@@ -95,10 +117,17 @@ const employeeValidate = {
             'object.xor': 'Please use only username or phone',
         }),
 
-    update: joi.object({
+    updatePassword: joi.object({
         password: employeeSchema.password.required(),
-        newPassword: employeeSchema.password.required(),
+        newPassword: employeeSchema.newPassword.required(),
     }),
+
+    updateInfo: joi.object({
+        firstName: employeeSchema.firstName,
+        lastName: employeeSchema.lastName,
+        gender: employeeSchema.gender,
+        phone: employeeSchema.phone,
+    })
 }
 
 export default employeeValidate

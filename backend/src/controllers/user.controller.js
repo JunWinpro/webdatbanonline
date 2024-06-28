@@ -9,6 +9,9 @@ import trimString from "../utils/trimString.js"
 import returnError from "../errors/error.js"
 import userDTO from "../dto/user.dto.js"
 import dataResponse from "../dto/data.js"
+import duplicateErr from "../errors/duplicate.js"
+import cloudinaryUploader from "../utils/cloudinaryUploader.js"
+import baseFolder from "../configs/cloudinaryFolder.config.js"
 const userController = {
     register: async (req, res) => {
         try {
@@ -18,14 +21,16 @@ const userController = {
                 $or: [
                     { email },
                     { phone },
-                ]
+                ],
+                isDeleted: false
             })
 
             if (userExist?.email === email) throw new Error("Email already used")
             if (userExist?.phone === phone) throw new Error("Phone already used")
 
             const employeeExist = await ModelDb.EmployeeModel.findOne({
-                phone
+                phone,
+                isDeleted: false
             })
             if (employeeExist) throw new Error("Phone already used")
 
@@ -293,13 +298,8 @@ const userController = {
             const file = req.file
             let avatar;
             if (file) {
-                const dataUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
-                const fileName = `${currentUser._id.toString()}-${new Date().getTime()}`
-                const result = await cloudinary.uploader.upload(dataUrl, {
-                    folder: `Avatar/${currentUser._id.toString()}`,
-                    public_id: fileName,
-                    resource_type: "auto"
-                })
+                const folder = `${baseFolder.USER}/${currentUser._id.toString()}/Avatar`
+                const result = await cloudinaryUploader(file, folder)
                 if (!result) throw new Error("Upload failed")
                 avatar = result.secure_url
             }
@@ -317,10 +317,8 @@ const userController = {
         }
         catch (err) {
             console.log("update user by id err: ", err.message)
-            if (err.code === 11000) {
-                err.message = `${Object.keys(err.keyPattern)[0]} is already exist`
-            }
-            returnError(res, 403, err)
+
+            returnError(res, 403, duplicateErr(err))
         }
     },
     deleteUserById: async (req, res) => {

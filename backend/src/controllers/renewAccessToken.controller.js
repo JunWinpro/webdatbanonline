@@ -1,3 +1,5 @@
+import dataResponse from "../dto/data.js"
+import returnError from "../errors/error.js"
 import jwtToken from "../utils/jwtToken.util.js"
 
 const renewAccessTokenController = (req, res) => {
@@ -7,25 +9,15 @@ const renewAccessTokenController = (req, res) => {
             email: req.user.email,
         }
 
-        const createdAccessToken = jwtToken.createToken(data, "AT")
+        const accessToken = jwtToken.createToken(data, "AT")
 
-        res.status(201).json({
-            data: {
-                accessToken: createdAccessToken
-            },
-            success: true,
-            message: "Renew access token success"
-        })
+        const message = "Renew access token success"
+        dataResponse(res, 201, message, { accessToken })
     }
     catch (err) {
         console.log('authentication controller err: ', err)
 
-        res.status(403).json({
-            message: err.message,
-            data: null,
-            success: false,
-            err
-        })
+        returnError(res, 403, err)
     }
 }
 export default renewAccessTokenController

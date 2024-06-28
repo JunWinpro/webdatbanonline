@@ -1,3 +1,4 @@
+import returnError from "../errors/error.js"
 import jwtToken from "../utils/jwtToken.util.js"
 
 const tokenMiddleware = {
@@ -38,13 +39,9 @@ const tokenMiddleware = {
                     break;
             }
 
-            res.status(401).json({
-                data: null,
-                err,
-                message: getMessage,
-                type,
-                success: false,
-            });
+            err.message = getMessage
+            err.type = type
+            returnError(res, 401, err)
 
         }
     },
@@ -83,14 +80,9 @@ const tokenMiddleware = {
                     type = 'UNAUTH';
                     break;
             }
-
-            res.status(401).json({
-                data: null,
-                err,
-                message: getMessage,
-                type,
-                success: false,
-            });
+            err.message = getMessage
+            err.type = type
+            returnError(res, 401, err)
 
         }
     },
