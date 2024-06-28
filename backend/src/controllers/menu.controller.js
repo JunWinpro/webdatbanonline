@@ -1,115 +1,147 @@
+import dataResponse from "../dto/data.js"
+import menuDTO from "../dto/menu.dto.js"
+import returnError from "../errors/error.js"
 import ModelDb from "../models/model.js"
-import mongoose from 'mongoose'
+import { v2 as cloudinary } from 'cloudinary'
+import cloudinaryUploader from "../utils/cloudinaryUploader.js"
+import baseFolder from "../configs/cloudinaryFolder.config.js"
+import duplicateErr from "../errors/duplicate.js"
+import getPublicId from "../utils/getPublicId.js"
 const menuController = {
     createMenu: async (req, res) => {
         try {
+            const { restaurantId } = req.body
             const user = req.user
-            const { id } = req.params
 
-            const findRestaurant = await ModelDb.RestaurantModel.findById(id)
-            if (!findRestaurant) throw new Error("Restaurant not found")
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                _id: restaurantId,
+                manager: user.userId,
+                isDeleted: false,
+            })
+            if (!restaurant) throw new Error("Restaurant not found")
 
-            const findMenu = await ModelDb.MenuModel.findOne({
+            const menuExist = await ModelDb.MenuModel.findOne({
                 name: req.body.name,
-                restaurant: id,
-                manager: user.userId
+                restaurant: restaurantId
             })
+            if (menuExist) throw new Error("Menu already exist")
 
-            if (findMenu) throw new Error("Menu is already exist")
+            const file = req.file
 
-            const createMenu = await ModelDb.MenuModel.create({
+            let image = null;
+            if (file) {
+                const folder = `${baseFolder.RESTAURANT}/${restaurant.name.replace(" ", "-")}/Menu`
+                const result = await cloudinaryUploader(file, folder)
+                if (!result) throw new Error("Upload failed")
+                image = result.secure_url
+            }
+
+            const menu = await ModelDb.MenuModel.create({
                 ...req.body,
-                restaurant: id,
-                manager: user.userId
+                restaurant: restaurantId,
+                image
             })
 
-            res.status(201).json({
-                message: "Create menu success",
-                success: true,
-                data: createMenu
-            })
+            const message = "Create menu success"
 
-        } catch (error) {
-            console.log('create menu error: ', error.message)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null,
-                err: error
-            })
-        }
-    },
+            dataResponse(res, 200, message, menuDTO(menu))
 
-    getMenus: async (req, res) => {
-        try {
-
-        } catch (error) {
-            console.log('get menus error: ', error.message)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null,
-                err: error
-            })
-        }
-    },
-
-    getMenuById: async (req, res) => {
-        try {
-            const menu = await ModelDb.MenuModel.findById(req.params.id)
-            if (!menu) throw new Error("Menu not found")
-            res.status(200).json({
-                message: "Get menu success",
-                success: true,
-                data: menu
-            })
-        } catch (error) {
-            console.log('get menu error: ', error.message)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null,
-                err: error
-            })
+        } catch (err) {
+            console.log('create menu error: ', err.message)
+            returnError(res, 403, err)
         }
     },
 
     getMenuByRestaurantId: async (req, res) => {
         try {
-            const restaurantMenu = await ModelDb.MenuModel.find({
-                restaurant: req.params.id
+            const { id } = req.params
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                _id: id,
+                isDeleted: false
             })
-            if (!restaurantMenu) throw new Error("Menu of the restaurant not found")
+            if (!restaurant) throw new Error("Restaurant not found")
 
-            res.status(200).json({
-                message: "Get menu success",
-                success: true,
-                data: restaurantMenu
+            const menus = await ModelDb.MenuModel.find({
+                restaurant: id
             })
+            if (!menus) throw new Error("Menus not found")
+
+            const message = "Get menus success"
+            const data = menus.map(menu => menuDTO(menu))
+            dataResponse(res, 200, message, data)
+
+        } catch (err) {
+            console.log('get menus err: ', err.message)
+            returnError(res, 403, err)
+        }
+    },
+
+    getMenuById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const menu = await ModelDb.MenuModel.findById(id).populate('restaurant')
+            if (!menu) throw new Error("Menu not found")
+            if (menu.restaurant.isDeleted) throw new Error('Restaurant not found')
+
+            const message = "Get menu success"
+            dataResponse(res, 200, message, menuDTO(menu.depopulate('restaurant')))
 
         } catch (error) {
             console.log('get menu error: ', error.message)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null,
-                err: error
-            })
+            returnError(res, 403, error)
         }
     },
 
     updateMenuById: async (req, res) => {
         try {
-            const menu = await ModelDb.MenuModel.findById(req.params.id)
-            if (!menu) throw new Error("Menu not found")
-            const updateMenu = await ModelDb.MenuModel.findByIdAndUpdate(req.params.id, req.body)
-            res.status(200).json({
-                message: "Update menu success",
-                success: true,
-                data: updateMenu
-            })
-        } catch (error) {
+            const { id } = req.params
+            const { restaurantId } = req.body
+            const user = req.user
 
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                _id: restaurantId,
+                manager: user.userId,
+                isDeleted: false
+            })
+            if (!restaurant) throw new Error("Restaurant not found")
+
+            const menu = await ModelDb.MenuModel.findById(id)
+            if (!menu) throw new Error("Menu not found")
+
+            if (req.body.name) {
+                const menuExist = await ModelDb.MenuModel.findOne({
+                    name: req.body.name,
+                    restaurant: restaurantId
+                })
+                if (menuExist) throw new Error("Menu name already exist")
+            }
+
+            const file = req.file
+            let image = null
+            if (file) {
+                const folder = `${baseFolder.RESTAURANT}/${restaurant.name.replace(" ", "-")}/Menu`
+                const result = await cloudinaryUploader(file, folder)
+                if (!result) throw new Error("Upload failed")
+                image = result.secure_url
+
+                const publicId = getPublicId(menu.image)
+
+                const deleteResult = await cloudinary.uploader.destroy(publicId)
+                if (deleteResult.result !== 'ok') throw new Error("Delete image failed")
+            }
+
+            for (let key of Object.keys(req.body)) {
+                menu[key] = req.body[key]
+            }
+            menu.image = image ? image : menu.image
+
+            await menu.save()
+            const message = "Update menu success"
+            dataResponse(res, 200, message, menuDTO(menu))
+
+        } catch (err) {
+            console.log('update menu error: ', err.message)
+            returnError(res, 403, duplicateErr(err))
         }
     },
 
@@ -117,24 +149,24 @@ const menuController = {
         try {
             const { id } = req.params
             const user = req.user
-            const restaurantId = req.body
 
-            const findMenu = await ModelDb.MenuModel.find({
+            const menu = await ModelDb.MenuModel.findOne({
                 _id: id,
-                isDeleted: false,
-                manager: user.userId,
-                restaurant: restaurantId
-            })
+            }).populate('restaurant')
 
-            if (!findMenu) throw new Error("Menu not found")
+            if (menu.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
+            if (!menu) throw new Error("Menu not found")
+            if (menu.restaurant.isDeleted) throw new Error('Restaurant not found')
+
+            menu.isDeleted = true
+            await menu.save()
+
+            const message = "Delete menu success"
+            dataResponse(res, 200, message)
+
         } catch (error) {
             console.log('delete menu error: ', error.message)
-            res.status(403).json({
-                message: error.message,
-                success: false,
-                data: null,
-                err: error
-            })
+            returnError(res, 403, error)
         }
     }
 }

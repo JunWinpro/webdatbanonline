@@ -7,10 +7,10 @@ const menuSchema = new mongoose.Schema(
             ref: collection.RESTAURANTS,
             required: true
         },
-        manager: {
-            type: mongoose.Schema.Types.ObjectId
+        image: {
+            type: String,
+            default: null
         },
-        image: String,
         name: {
             type: String,
             required: true
@@ -34,9 +34,13 @@ const menuSchema = new mongoose.Schema(
             type: Number,
             min: 0
         },
+        numberOfSold: {
+            type: Number,
+            default: 0
+        },
         isSelling: {
             type: Boolean,
-            default: true
+            default: false
         },
         isDeleted: {
             type: Boolean,
