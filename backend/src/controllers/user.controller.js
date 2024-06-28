@@ -1,17 +1,15 @@
 import ModelDb from "../models/model.js"
 import bcryptPassword from "../utils/bcrypt.util.js"
 import jwtToken from "../utils/jwtToken.util.js"
-import { v2 as cloudinary } from "cloudinary"
 import pageSplit from "../utils/pageSplit.util.js"
 import sendEmail from "../utils/sendEmail.js"
-import lowerCaseString from "../utils/lowerCaseString.js"
-import trimString from "../utils/trimString.js"
 import returnError from "../errors/error.js"
 import userDTO from "../dto/user.dto.js"
 import dataResponse from "../dto/data.js"
 import duplicateErr from "../errors/duplicate.js"
 import cloudinaryUploader from "../utils/cloudinaryUploader.js"
 import baseFolder from "../configs/cloudinaryFolder.config.js"
+import getPublicId from "../utils/getPublicId.js"
 const userController = {
     register: async (req, res) => {
         try {
@@ -260,7 +258,11 @@ const userController = {
             const { id } = req.params
             const { role } = req.body
 
-            const currentUser = await ModelDb.UserModel.findById(id)
+            const currentUser = await ModelDb.UserModel.findOne({
+                _id: id,
+                isDeleted: false,
+                isVerified: true
+            })
             if (!currentUser) throw new Error("User not found")
 
             currentUser.role = role
@@ -277,6 +279,7 @@ const userController = {
     },
     updateUserById: async (req, res) => {
         try {
+            if (!req.file) throw new Error("Please upload image")
             const { id } = req.params
             const { password, newPassword } = req.body
             const user = req.user
@@ -285,6 +288,7 @@ const userController = {
             const currentUser = await ModelDb.UserModel.findOne({
                 _id: id,
                 isDeleted: false,
+                isVerified: true
             })
             if (!currentUser) throw new Error("User not found")
             if (!bcryptPassword.comparePassword(password, currentUser.password)) throw new Error("Password is incorrect")
@@ -295,22 +299,15 @@ const userController = {
                 if (bcryptPassword.comparePassword(newPassword, currentUser.password)) throw new Error("Password is the same as current please change different password")
                 hashPassword = bcryptPassword.hashPassword(newPassword)
             }
-            const file = req.file
-            let avatar;
-            if (file) {
-                const folder = `${baseFolder.USER}/${currentUser._id.toString()}/Avatar`
-                const result = await cloudinaryUploader(file, folder)
-                if (!result) throw new Error("Upload failed")
-                avatar = result.secure_url
-            }
+
             for (let key of Object.keys(req.body)) {
                 if (key === "password") continue;
                 currentUser[key] = req.body[key]
             }
 
             if (hashPassword) currentUser.password = hashPassword
-            if (avatar) currentUser.avatar = avatar
-            const updatedUser = await ModelDb.UserModel.findByIdAndUpdate(id, currentUser, { new: true })
+            currentUser.save()
+
             const message = "Update success"
 
             dataResponse(res, 200, message, userDTO(updatedUser))
@@ -319,6 +316,43 @@ const userController = {
             console.log("update user by id err: ", err.message)
 
             returnError(res, 403, duplicateErr(err))
+        }
+    },
+    uploadAvatar: async (req, res) => {
+        try {
+            const { id } = req.params
+            if (req.user.userId !== id) throw new Error("You don't have permission for this action")
+
+            const user = await ModelDb.UserModel.findOne({
+                _id: id,
+                isDeleted: false,
+                isVerified: true
+            })
+            if (!user) throw new Error("User not found")
+
+            if (user.avatar) {
+                const publicId = getPublicId(user.avatar)
+                const destroyResult = await cloudinaryUploader.destroy(publicId)
+                if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
+            }
+
+            const file = req.file
+            const folder = `${baseFolder.USER}/${id}/Avatar`
+
+            const result = await cloudinaryUploader.upload(file, folder)
+            if (!result.secure_url) throw new Error("Upload failed")
+
+            const avatar = result.secure_url
+
+            user.avatar = avatar
+
+            await user.save()
+
+            const message = "Upload success"
+
+            dataResponse(res, 200, message, userDTO(user))
+        } catch (err) {
+            returnError(res, 500, err)
         }
     },
     deleteUserById: async (req, res) => {

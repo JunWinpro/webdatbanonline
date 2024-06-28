@@ -2,7 +2,6 @@ import dataResponse from "../dto/data.js"
 import menuDTO from "../dto/menu.dto.js"
 import returnError from "../errors/error.js"
 import ModelDb from "../models/model.js"
-import { v2 as cloudinary } from 'cloudinary'
 import cloudinaryUploader from "../utils/cloudinaryUploader.js"
 import baseFolder from "../configs/cloudinaryFolder.config.js"
 import duplicateErr from "../errors/duplicate.js"
@@ -26,20 +25,9 @@ const menuController = {
             })
             if (menuExist) throw new Error("Menu already exist")
 
-            const file = req.file
-
-            let image = null;
-            if (file) {
-                const folder = `${baseFolder.RESTAURANT}/${restaurant.name.replace(" ", "-")}/Menu`
-                const result = await cloudinaryUploader(file, folder)
-                if (!result) throw new Error("Upload failed")
-                image = result.secure_url
-            }
-
             const menu = await ModelDb.MenuModel.create({
                 ...req.body,
                 restaurant: restaurantId,
-                image
             })
 
             const message = "Create menu success"
@@ -91,7 +79,41 @@ const menuController = {
             returnError(res, 403, error)
         }
     },
+    uploadMenuImage: async (req, res) => {
+        try {
+            const { id } = req.params
+            const user = req.user
+            const { restaurantId } = req.body
+            const menu = await ModelDb.MenuModel.findOne({
+                _id: id,
+                restaurant: restaurantId,
+                isDeleted: false
+            }).populate('restaurant')
 
+            if (!menu) throw new Error("Menu not found")
+            if (menu.restaurant.isDeleted) throw new Error('Restaurant not found')
+            if (menu.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
+
+            if (menu.image) {
+                const publicId = getPublicId(menu.image)
+                const destroyResult = await cloudinaryUploader.destroy(publicId)
+                if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
+            }
+
+            const file = req.file
+            const result = await cloudinaryUploader.upload(file)
+
+            if (!result) throw new Error("Upload image failed")
+
+            menu.image = result.secure_url
+            await menu.save()
+
+            const message = "Upload image success"
+            dataResponse(res, 200, message, menuDTO(menu))
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
     updateMenuById: async (req, res) => {
         try {
             const { id } = req.params
@@ -120,14 +142,14 @@ const menuController = {
             let image = null
             if (file) {
                 const folder = `${baseFolder.RESTAURANT}/${restaurant.name.replace(" ", "-")}/Menu`
-                const result = await cloudinaryUploader(file, folder)
+                const result = await cloudinaryUploader.upload(file, folder)
                 if (!result) throw new Error("Upload failed")
                 image = result.secure_url
 
                 const publicId = getPublicId(menu.image)
 
-                const deleteResult = await cloudinary.uploader.destroy(publicId)
-                if (deleteResult.result !== 'ok') throw new Error("Delete image failed")
+                const destroyResult = await cloudinaryUploader.destroy(publicId)
+                if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
             }
 
             for (let key of Object.keys(req.body)) {

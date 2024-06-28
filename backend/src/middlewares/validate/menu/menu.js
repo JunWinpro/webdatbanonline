@@ -23,6 +23,16 @@ const menuValidateData = {
         } catch (err) {
             returnError(res, 403, err)
         }
+    },
+    uploadMenuImage: (req, res, next) => {
+        try {
+            const { error, value } = menuValidate.uploadMenuImage.validate(req.body)
+            if (error) throw new Error(error.details[0].message)
+            req.body = value
+            next()
+        } catch (error) {
+            returnError(res, 403, error)
+        }
     }
 }
 

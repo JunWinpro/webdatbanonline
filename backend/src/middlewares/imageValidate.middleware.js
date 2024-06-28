@@ -1,15 +1,35 @@
 import returnError from "../errors/error.js"
 
-const imageValidate = (req, res, next) => {
-    try {
-        const files = req.files
-        const file = req.file
-
-        if (file) {
+const imageValidate = {
+    file: (req, res, next) => {
+        try {
+            const file = req.file
+            if (!file) throw new Error("Please upload image")
             if (!file.mimetype.includes("image")) throw new Error("Invalid image file")
-        }
 
-        if (files) {
+            next()
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+    files: (req, res, next) => {
+        try {
+            const files = req.files
+            if (!files || files.length === 0) throw new Error("Please upload image")
+
+            for (let i = 0; i < files.length; i++) {
+                if (!files[i].mimetype.includes("image")) throw new Error(`Invalid image at index ${i}`)
+            }
+
+            next()
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+    fields: (req, res, next) => {
+        try {
+            const files = req.files
+            if (!files) throw new Error("Please upload image")
             let i = 0
             while (Object.keys(files)[i]) {
                 let key = Object.keys(files)[i]
@@ -19,10 +39,10 @@ const imageValidate = (req, res, next) => {
                 i++;
             }
         }
+        catch (err) {
+            returnError(res, 403, err)
+        }
 
-        next()
-    } catch (error) {
-        returnError(res, 403, error)
     }
 
 }

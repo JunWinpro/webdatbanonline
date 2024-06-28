@@ -89,6 +89,10 @@ const menuValidate = {
         price: menuSchema.price,
         discount: menuSchema.discount,
         restaurantId: menuSchema.restaurantId.required()
+    }),
+
+    uploadMenuImage: joi.object({
+        restaurantId: menuSchema.restaurantId.required()
     })
 
 
