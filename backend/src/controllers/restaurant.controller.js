@@ -1,6 +1,5 @@
 import baseFolder from "../configs/cloudinaryFolder.config.js"
 import ModelDb from "../models/model.js"
-import { v2 as cloudinary } from 'cloudinary'
 import mongoose from "mongoose"
 import pageSplit from "../utils/pageSplit.util.js"
 import sortModelType from "../utils/sortModel.js"
@@ -10,16 +9,14 @@ import dataResponse from "../dto/data.js"
 import restaurantDTO from "../dto/restaurant.dto.js"
 import sendEmail from "../utils/sendEmail.js"
 import cloudinaryUploader from "../utils/cloudinaryUploader.js"
+import getPublicId from "../utils/getPublicId.js"
 const restaurantController = {
     createRestaurant: async (req, res) => {
         try {
-            const { name, address } = req.body
+            const { name } = req.body
 
             const restaurantExist = await ModelDb.RestaurantModel.findOne({
                 name,
-                'address.province': address.province,
-                'address.district': address.district,
-                'address.subDistrict': address.subDistrict,
                 isDeleted: false
             })
 
@@ -30,7 +27,6 @@ const restaurantController = {
             const newRestaurant = await ModelDb.RestaurantModel.create({
                 ...req.body,
                 manager: user.userId,
-                // avatar: imageUrls.avatar ? imageUrls.avatar[0] : null
             })
 
             const newRestaurantInfo = await ModelDb.RestaurantInfoModel.create({
@@ -38,37 +34,6 @@ const restaurantController = {
                 restaurant: newRestaurant._id,
 
             })
-
-            const files = req.files
-
-            const imageUrls = {}
-            // restaurantImages, menuImages, foodImages, avatar
-            if (files) {
-                let i = 0;
-                while (Object.keys(files)[i]) {
-
-                    let listUrl = []
-                    let key = Object.keys(files)[i]
-
-                    for (let file of files[key]) {
-                        const folder = `${baseFolder.RESTAURANT}/${name.replace(" ", "-")}/${key}`
-
-                        const result = await cloudinaryUploader(file, folder)
-
-                        if (!result) throw new Error("Error uploading file in: " + key)
-                        listUrl.push(result.secure_url)
-                        imageUrls[key] = listUrl
-                    }
-                    i++;
-                }
-            }
-            newRestaurant.avatar = imageUrls.avatar ? imageUrls.avatar[0] : null
-            await newRestaurant.save()
-
-            newRestaurantInfo.restaurantImages = imageUrls.restaurantImages || null
-            newRestaurantInfo.menuImages = imageUrls.menuImages || null
-            newRestaurantInfo.foodImages = imageUrls.foodImages || null
-            await newRestaurantInfo.save()
 
             const message = "Create restaurant success, please wait for admin approve"
 
@@ -307,23 +272,114 @@ const restaurantController = {
                 restaurant: new mongoose.Type.ObjectId(id),
                 isDeleted: false
             }).populate('restaurant')
+
             if (!restaurantInfo) throw new Error("Restaurant not found")
-            if (restaurantInfo.restaurant.manager !== user.userId) throw new Error("You don't have permission for this action")
+            if (restaurantInfo.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
 
             for (let key of Object.keys(req.body)) {
                 restaurantInfo[key] = req.body[key]
             }
             await restaurantInfo.save()
             const message = "Update restaurant info success"
-            const depopulate = mongoose.models.RestaurantInfoModel.depopulate(restaurantInfo)
-            dataResponse(res, 200, message, restaurantInfoDTO(depopulate, user))
+
+            dataResponse(res, 200, message, restaurantInfoDTO(restaurantInfo.depopulate('restaurant'), user))
         }
         catch (err) {
             returnError(res, 403, err)
         }
     },
-    updateRestaurantImages: async (req, res) => {
+    uploadRestaurantAvatar: async (req, res) => {
+        try {
+            const { id } = req.params
 
+            const user = req.user
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                _id: id,
+                manager: user.userId,
+                isDeleted: false
+            })
+
+            if (!restaurant) throw new Error("Restaurant not found")
+
+            if (restaurant.avatar) {
+                const publicId = getPublicIdcId(restaurant.avatar)
+                const destroyResult = await cloudinaryUploader.destroy(publicId)
+                if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
+            }
+
+            const file = req.file
+
+            const folder = `${baseFolder.RESTAURANT}/${id}/Avatar`
+            const result = await cloudinary.uploader.upload(file, folder)
+
+            if (!result) throw new Error("Upload failed")
+
+            restaurant.avatar = result.secure_url
+
+            await restaurant.save()
+
+            const message = "Upload success"
+
+            dataResponse(res, 200, message, restaurantDTO(restaurant))
+
+        } catch (err) {
+            returnError(res, 500, err)
+        }
+    },
+    uploadRestaurantImages: async (req, res) => {
+        try {
+            const { id } = req.params
+
+            const user = req.user
+            const currentRestaurant = await ModelDb.RestaurantInfoModel.findOne({
+                restaurant: id,
+                isDeleted: false
+            }).populate('restaurant')
+
+            if (!currentRestaurant) throw new Error("Restaurant not found")
+            if (currentRestaurant.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
+            if (currentRestaurant.restaurant.isDeleted) throw new Error("Restaurant not found")
+
+            let field = null
+            const keyword = req.path.split('/')[2].split('-')[0]
+            switch (keyword) {
+                case 'food':
+                    field = 'foodImages'
+                    break;
+                case 'menu':
+                    field = 'menuImages'
+                    break;
+                case 'restaurant':
+                    field = 'restaurantImages'
+                    break;
+                default:
+                    break;
+            }
+
+            if (req.body[field].length > 0) {
+                for (let item of req.body[field]) {
+                    const publicId = getPublicId(item)
+                    const destroyResult = await cloudinaryUploader.destroy(publicId)
+                    if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
+                }
+            }
+
+            const folder = `${baseFolder.RESTAURANT}/${id}/${field}`
+            for (let item of req.body[field]) {
+                const result = await cloudinary.uploader.upload(item, folder)
+
+                if (!result.secure_url) throw new Error("Upload failed")
+
+                currentRestaurant[field].push(result.secure_url)
+            }
+
+            await currentRestaurant.save()
+            const message = "Upload success"
+            dataResponse(res, 200, message, restaurantDTO(currentRestaurant.depopulate('restaurant')))
+
+        } catch (err) {
+            returnError(res, 500, err)
+        }
     },
 
     approveRestaurantById: async (req, res) => {

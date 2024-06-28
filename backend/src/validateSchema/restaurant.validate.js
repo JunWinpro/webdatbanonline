@@ -377,12 +377,14 @@ const restaurantValidate = {
         name: restaurantSchema.name,
         address: restaurantSchema.address,
         category: restaurantSchema.category,
-        tableList: restaurantSchema.tableList,
+    }),
+
+    updateRestaurantInfo: joi.object({
         maxim: restaurantInfoSchema.maxim,
         description: restaurantInfoSchema.description,
         schedule: restaurantInfoSchema.schedule,
-    }),
-
+        tableList: restaurantSchema.tableList,
+    })
 
 }
 

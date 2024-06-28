@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
         },
         avatar: {
             type: String,
-            default: "https://med.virginia.edu/diabetes-technology/wp-content/uploads/sites/265/2020/10/Blank-Avatar.png"
+            default: null
         },
         firstName: {
             type: String,
