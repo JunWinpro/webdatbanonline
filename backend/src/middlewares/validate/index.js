@@ -1,3 +1,4 @@
+import bookingValidateData from './booking/booking.js';
 import employeeValidateData from './employee/employee.js';
 import menuValidateData from './menu/menu.js';
 import objectIdValidate from './params/objectId.js';
@@ -8,7 +9,8 @@ const validateData = {
     user: userValidateData,
     employee: employeeValidateData,
     restaurant: restaurantValidateData,
-    menu: menuValidateData
+    menu: menuValidateData,
+    booking: bookingValidateData
 }
 
 export default validateData

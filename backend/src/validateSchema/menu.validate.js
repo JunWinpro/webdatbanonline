@@ -6,11 +6,14 @@ import lowerCaseString from "../utils/lowerCaseString.js"
 const messages = {
     name: {
         'string.pattern.base': "Name cannot contain spaces or special characters or number",
-        'string.min': "Name must have at least 1 character",
-        'string.empty': "Name  is empty",
+        'string.empty': "Name is empty",
         'any.required': "Name is required"
     },
-
+    description: {
+        'string.pattern.base': "Description cannot contain spaces or special character",
+        'string.empty': "Description  is empty",
+        'any.required': "Description is required"
+    },
     type: {
         'any.required': "Type is required",
         'string.empty': "Type is empty",
@@ -50,7 +53,12 @@ const menuSchema = {
         if (trimString(value).length === 0) return helpers.message("Name can't be empty")
         return convertUnicode(lowerCaseString(trimString(value)))
     }),
-
+    description: joi.string().regex(/^[A-Za-z0-9\s]+$/).messages({
+        ...messages.description
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Description can't be empty")
+        return convertUnicode(lowerCaseString(trimString(value)))
+    }),
     type: joi.string().valid("food", "drink").messages({
         ...messages.type
     }),

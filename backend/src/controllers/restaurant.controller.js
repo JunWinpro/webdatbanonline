@@ -10,6 +10,7 @@ import restaurantDTO from "../dto/restaurant.dto.js"
 import sendEmail from "../utils/sendEmail.js"
 import cloudinaryUploader from "../utils/cloudinaryUploader.js"
 import getPublicId from "../utils/getPublicId.js"
+import trimString from "../utils/trimString.js"
 const restaurantController = {
     createRestaurant: async (req, res) => {
         try {
@@ -355,22 +356,39 @@ const restaurantController = {
                 default:
                     break;
             }
+            if (!req.body[field] && !req.files) throw new Error("Please upload image")
+            if (req.body[field]) {
+                if (req.body[field].length === 0) throw new Error("Please select image to delete")
 
-            if (req.body[field].length > 0) {
                 for (let item of req.body[field]) {
+                    if (!item || typeof (item) !== 'string') throw new Error("Invalid image url")
+                    if (trimString(item).length === 0) throw new Error("Invalid image url")
+
                     const publicId = getPublicId(item)
+
+                    if (!publicId) throw new Error("Invalid image url")
+
                     const destroyResult = await cloudinaryUploader.destroy(publicId)
-                    if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
+
+                    if (destroyResult.result === "not found") throw new Error("Delete image failed: Image not found")
+                    if (destroyResult.result !== 'ok') throw new Error("Delete image failed: Server error")
                 }
+                currentRestaurant[field] = currentRestaurant[field].filter(image => !req.body[field].includes(image))
+
             }
+            if (req.files) {
+                if (req.files.length === 0) throw new Error("Please upload image")
 
-            const folder = `${baseFolder.RESTAURANT}/${id}/${field}`
-            for (let item of req.body[field]) {
-                const result = await cloudinary.uploader.upload(item, folder)
+                const files = req.files
+                const folder = `${baseFolder.RESTAURANT}/${id}/${field}`
+                for (let file of files) {
+                    const result = await cloudinaryUploader.upload(file, folder)
 
-                if (!result.secure_url) throw new Error("Upload failed")
+                    if (!result.secure_url) throw new Error("Upload failed")
 
-                currentRestaurant[field].push(result.secure_url)
+                    currentRestaurant[field].push(result.secure_url)
+                }
+
             }
 
             await currentRestaurant.save()
