@@ -52,7 +52,7 @@ const messages = {
         },
 
         note: {
-            'string.base': "Note must be a string",
+            'string.base.pattern': "Note must be a string",
             'string.empty': "Note can't be empty",
         }
     },
@@ -105,7 +105,7 @@ const bookingSchema = {
         numberOfUnit: joi.number().integer().min(1).messages({
             ...messages.menu.numberOfUnit
         }),
-        note: joi.string().regex().messages({
+        note: joi.string().regex(/^[A-Za-z0-9 ]+$/).messages({
             ...messages.menu.note
         })
     })).messages({

@@ -99,9 +99,15 @@ const bookingController = {
             if (!currentRestaurant.restaurant.isActive) throw new Error("Restaurant not active")
 
             const { second, minutes, hour, day } = date(checkinTime)
+
             const acceptMinute = [0, 15, 30, 45]
             if (!acceptMinute.includes(minutes)) throw new Error("Minutes are not correct")
             if (second !== 0) throw new Error("Second is not correct")
+
+            const { schedule } = currentRestaurant
+
+            if (!schedule[day].isWorkingDay) throw new Error("Restaurant not working day")
+            if (hour < schedule[day].openTime || hour > schedule[day].closeTime) throw new Error("Restaurant not working time")
 
             const filter = {
                 checkinTime: checkinTime,
@@ -113,7 +119,73 @@ const bookingController = {
                 }
             }
 
+            let totalOfTables = 0
+            let list = []
+            const { tableList } = currentRestaurant
 
+            const findCheckin = await ModelDb.BookingModel.findOne(filter)
+            if (findCheckin) throw new Error("Table already booked")
+
+            const lastIndex = table[table.length - 1]
+            if (!tableList[lastIndex - 1]) throw new Error("Last table is not exist")
+
+            list = table
+            totalOfTables = table.length
+
+            const booking = await ModelDb.BookingModel.create({
+                ...req.body,
+                restaurant: restaurantId,
+                table: list,
+                numberOfTable: totalOfTables
+            })
+
+            const message = "Create booking success"
+            dataResponse(res, 201, message, bookingDTO(booking))
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+
+    getBookingList: async (req, res) => {
+        try {
+
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+
+    getBookingById: async (req, res) => {
+        try {
+
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+
+    updateBookingStatusById: async (req, res) => {
+        try {
+
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+
+    deleteBookingById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const findBooking = await ModelDb.BookingModel.findOne({
+                _id: id,
+                isCheckin: true,
+                isFinished: true,
+                isDeleted: false
+            })
+            if (!findBooking) throw new Error("Booking not found")
+
+            findBooking.isDeleted = true
+            await findBooking.save()
+
+            const message = "Delete booking success"
+            dataResponse(res, 200, message)
         } catch (error) {
             returnError(res, 403, error)
         }
