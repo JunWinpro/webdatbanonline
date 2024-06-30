@@ -4,7 +4,7 @@ const imageValidate = {
     file: (req, res, next) => {
         try {
             const file = req.file
-            if (!file) throw new Error("Please upload image")
+
             if (!file.mimetype.includes("image")) throw new Error("Invalid image file")
 
             next()
@@ -15,12 +15,11 @@ const imageValidate = {
     files: (req, res, next) => {
         try {
             const files = req.files
-            if (!files || files.length === 0) throw new Error("Please upload image")
-
-            for (let i = 0; i < files.length; i++) {
-                if (!files[i].mimetype.includes("image")) throw new Error(`Invalid image at index ${i}`)
+            if (files) {
+                for (let i = 0; i < files.length; i++) {
+                    if (!files[i].mimetype.includes("image")) throw new Error(`Invalid image at index ${i}`)
+                }
             }
-
             next()
         } catch (error) {
             returnError(res, 403, error)

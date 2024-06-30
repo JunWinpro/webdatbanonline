@@ -1,54 +1,47 @@
 import mongoose from "mongoose"
 import { collection } from "../../database/collection.js"
+const menuSchema = new mongoose.Schema({
+    menuItem: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: collection.MENUS
+    },
+    numberOfUnit: Number,
+    note: String
+},
+    {
+        _id: false
+    })
+
 const bookingSchema = new mongoose.Schema(
     {
         firstName: {
             type: String,
-            required: true
         },
         lastName: {
             type: String,
-            required: true
         },
         phone: {
             type: String,
-            required: true
         },
         restaurant: {
             type: mongoose.Schema.Types.ObjectId,
             ref: collection.RESTAURANTS,
             required: true
         },
-        table: {
-            numberOfTable: {
-                type: Number,
-                required: () => {
-                    return !this.table.tableList || this.table.tableList.length === 0;
-                }
-            },
-            tableList: {
-                type: [{
-                    type: String
-                }],
-                validate: {
-                    validator: (v) => {
-                        return v.length > 0 || this.table.numberOfTable;
-                    },
-                    message: "At least one of numberOfTable or tableList must be provided"
-                }
-            }
-        },
-        menu: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: collection.MENUS,
-        }],
+        table: [Number],
+        numberOfTable: Number,
+        menu: [menuSchema],
         checkinTime: {
             type: Number,
             required: true
         },
         isCheckin: {
             type: Boolean,
-            default: false,
+            default: false
+        },
+        isFinished: {
+            type: Boolean,
+            default: false
         },
         isDeleted: {
             type: Boolean,

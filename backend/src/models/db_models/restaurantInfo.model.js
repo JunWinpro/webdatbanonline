@@ -45,10 +45,6 @@ const tableListSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        isEmpty: {
-            type: Boolean,
-            required: true,
-        },
     },
     {
         _id: false
@@ -70,15 +66,15 @@ const restaurantInfo = new mongoose.Schema(
         tableList: [tableListSchema],
         foodImages: [{
             type: String,
-            default: null
+            default: []
         }],
         menuImages: [{
             type: String,
-            default: null
+            default: []
         }],
         restaurantImages: [{
             type: String,
-            default: null
+            default: []
         }],
         isDeleted: {
             type: Boolean,

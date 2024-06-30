@@ -11,9 +11,23 @@ const menuSchema = new mongoose.Schema(
             type: String,
             default: null
         },
+        code: {
+            prefix: {
+                type: String,
+                default: "I",
+                enum: ["I"]
+            },
+            suffix: {
+                type: String,
+                required: true
+            }
+        },
         name: {
             type: String,
             required: true
+        },
+        description: {
+            type: String
         },
         type: {
             type: String,

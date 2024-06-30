@@ -25,9 +25,19 @@ const menuController = {
             })
             if (menuExist) throw new Error("Menu already exist")
 
+            const latestMenu = await ModelDb.MenuModel.findOne({
+                restaurant: restaurantId,
+                isDeleted: false
+            }).sort({ code: -1 })
+
+            let code = null
+            if (latestMenu) {
+                code = Number(latestMenu.code.suffix).toString().padStart(3, '0')
+            }
             const menu = await ModelDb.MenuModel.create({
                 ...req.body,
                 restaurant: restaurantId,
+                'code.suffix': code ? code : "001"
             })
 
             const message = "Create menu success"
@@ -52,7 +62,7 @@ const menuController = {
             const menus = await ModelDb.MenuModel.find({
                 restaurant: id
             })
-            if (!menus) throw new Error("Menus not found")
+            if (!menus.length) throw new Error("Menus not found")
 
             const message = "Get menus success"
             const data = menus.map(menu => menuDTO(menu))

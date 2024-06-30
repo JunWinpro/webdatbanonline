@@ -112,26 +112,19 @@ const employeeController = {
                 isDeleted: false,
                 manager: user.userId
             })
-            if (!employees) throw new Error("User not found")
+
+            if (!employees.length === 0) throw new Error("User not found")
 
             const employeeDTOs = employees.map(employee => employeeDTO(employee));
 
-            res.status(200).json({
-                message: "Get all users success",
-                data: employeeDTOs,
-                success: true
-            })
+            const message = "Get employees success"
+            dataResponse(res, 200, message, employeeDTOs)
         }
 
         catch (err) {
             console.log("get all users err: ", err)
 
-            res.status(403).json({
-                message: err.message,
-                success: false,
-                data: null,
-                err
-            })
+            returnError(res, 403, err)
         }
     },
 
