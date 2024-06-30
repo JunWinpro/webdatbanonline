@@ -18,4 +18,4 @@ const autoDeleteBooking = async () => {
         }
     )
 }
-cron.schedule('0 0,15,30,45 * * * *', autoDeleteBooking)
+export default autoDeleteBooking
