@@ -3,12 +3,13 @@ import ModelDb from "../models/model.js"
 import dataResponse from "../dto/data.js"
 import bookingDTO from "../dto/booking.dto.js"
 import date from "../utils/date.util.js"
+import pageSplit from "../utils/pageSplit.util.js"
 const bookingController = {
     userBooking: async (req, res) => {
         try {
             const { restaurantId, checkinTime, table, numberOfTable } = req.body
 
-            const currentRestaurant = await ModelDb.RestaurantInfoModel.findOne({
+            const currentRestaurant = await RestaurantInfoModel.findOne({
                 restaurant: restaurantId,
                 isDeleted: false,
             }).populate("restaurant")
@@ -16,16 +17,16 @@ const bookingController = {
             if (!currentRestaurant) throw new Error("Restaurant not found")
             if (!currentRestaurant.restaurant.isActive) throw new Error("Restaurant not active")
 
-            const { second, minutes, hour, day } = date(checkinTime)
-            const acceptMinute = [0, 15, 30, 45]
-            if (!acceptMinute.includes(minutes)) throw new Error("Minutes are not correct")
-            if (second !== 0) throw new Error("Second is not correct")
-
+            const { hour, day } = date(checkinTime)
             const { schedule } = currentRestaurant
 
             if (!schedule[day].isWorkingDay) throw new Error("Restaurant not working day")
 
             if (hour < schedule[day].openTime || hour > schedule[day].closeTime) throw new Error("Restaurant not working time")
+
+            const currentDate = Date.now()
+
+            if (currentDate + 3 * 24 * 60 * 60 * 1000 > checkinTime) throw new Error("Can not booking more over 3 days")
 
             const filter = {
                 restaurant: restaurantId,
@@ -44,7 +45,7 @@ const bookingController = {
                 filter.table = {
                     $in: table
                 }
-                const findCheckin = await ModelDb.BookingModel.findOne(filter)
+                const findCheckin = await BookingModel.findOne(filter)
                 if (findCheckin) throw new Error("Table already booked")
 
                 const lastIndex = table[table.length - 1]
@@ -57,7 +58,7 @@ const bookingController = {
             if (numberOfTable) {
                 if (numberOfTable > tableList.length) throw new Error("Number of table is over than table list length")
 
-                const findCheckin = await ModelDb.BookingModel.find(filter)
+                const findCheckin = await BookingModel.find(filter)
 
                 const totalTable = tableList.length
 
@@ -71,11 +72,11 @@ const bookingController = {
                 totalOfTables = numberOfTable
             }
 
-            const booking = await ModelDb.BookingModel.create({
+            const booking = await BookingModel.create({
                 ...req.body,
                 restaurant: restaurantId,
                 table: list,
-                numberOfTable: totalOfTables
+                numberOfTable: totalOfTables,
             })
 
             const message = "Create booking success"
@@ -90,7 +91,7 @@ const bookingController = {
         try {
             const { restaurantId, checkinTime, table } = req.body
 
-            const currentRestaurant = await ModelDb.RestaurantInfoModel.findOne({
+            const currentRestaurant = await RestaurantInfoModel.findOne({
                 restaurant: restaurantId,
                 isDeleted: false,
             }).populate("restaurant")
@@ -98,11 +99,7 @@ const bookingController = {
             if (!currentRestaurant) throw new Error("Restaurant not found")
             if (!currentRestaurant.restaurant.isActive) throw new Error("Restaurant not active")
 
-            const { second, minutes, hour, day } = date(checkinTime)
-
-            const acceptMinute = [0, 15, 30, 45]
-            if (!acceptMinute.includes(minutes)) throw new Error("Minutes are not correct")
-            if (second !== 0) throw new Error("Second is not correct")
+            const { hour, day } = date(checkinTime)
 
             const { schedule } = currentRestaurant
 
@@ -123,7 +120,7 @@ const bookingController = {
             let list = []
             const { tableList } = currentRestaurant
 
-            const findCheckin = await ModelDb.BookingModel.findOne(filter)
+            const findCheckin = await BookingModel.findOne(filter)
             if (findCheckin) throw new Error("Table already booked")
 
             const lastIndex = table[table.length - 1]
@@ -132,11 +129,11 @@ const bookingController = {
             list = table
             totalOfTables = table.length
 
-            const booking = await ModelDb.BookingModel.create({
+            const booking = await BookingModel.create({
                 ...req.body,
                 restaurant: restaurantId,
                 table: list,
-                numberOfTable: totalOfTables
+                numberOfTable: totalOfTables,
             })
 
             const message = "Create booking success"
@@ -145,38 +142,172 @@ const bookingController = {
             returnError(res, 403, error)
         }
     },
-
-    getBookingList: async (req, res) => {
+    getBookingListByRestaurantId: async (req, res) => {
         try {
+            const { id } = req.params
+            const { page, pageSize, date } = req.query
+            const user = req.user
+            const filterModel = {
+                restaurant: id,
+                isDeleted: false,
+            }
+            if (date) {
+                filterModel.checkinTime = date
+            }
+            const populate = {
+                path: 'restaurant',
+                populate: {
+                    path: 'manager',
+                    match: {
+                        _id: user.userId,
+                        isDeleted: false
+                    }
+                }
+            }
+            const booking = await pageSplit(BookingModel, filterModel, page, pageSize, {}, populate)
+            if (booking.data.length === 0) throw new Error("No booking found")
+
+            const data = {
+                data: booking.data.map(booking => bookingDTO(booking)),
+                totalItems: booking.totalItems,
+                totalPages: booking.totalPages,
+                page: booking.page
+            }
+            const message = "Get booking list success"
+            dataResponse(res, 200, message, data)
 
         } catch (error) {
             returnError(res, 403, error)
         }
     },
-
-    getBookingById: async (req, res) => {
+    updateBookingById: async (req, res) => {
         try {
+            const { restaurantId, checkinTime } = req.body
+            const { id } = req.params
+            const user = req.user
+
+            if (user.role === "employee") {
+                const employee = await EmployeeModel.findOne({
+                    restaurant: restaurantId,
+                    isDeleted: false,
+                    _id: user.userId
+                }).populate("restaurant")
+
+                if (!employee) throw new Error("You don't have permission for this action")
+                if (employee.restaurant.isDeleted) throw new Error("Restaurant not found")
+
+            }
+            const restaurantInfo = await RestaurantInfoModel.findOne({
+                restaurant: restaurantId,
+                isDeleted: false,
+                isFinished: false,
+            })
+
+            if (!restaurantInfo) throw new Error("Restaurant Info is deleted")
+            const { hour, day } = date(checkinTime)
+            const { schedule } = restaurantInfo
+
+            if (!schedule[day].isWorkingDay) throw new Error("Restaurant not working day")
+
+            if (hour < schedule[day].openTime || hour > schedule[day].closeTime) throw new Error("Restaurant not working time")
+
+            const bookingFilter = {
+                _id: id,
+                restaurant: restaurantId,
+                isDeleted: false,
+            }
+
+            const booking = await BookingModel.findOne(bookingFilter)
+
+            if (!booking) throw new Error("Booking not found")
+
+            for (let key of Object.keys(req.body)) {
+                booking[key] = req.body[key]
+            }
+            await booking.save()
+
+            const message = "Update booking success"
+            dataResponse(res, 200, message, bookingDTO(booking))
 
         } catch (error) {
             returnError(res, 403, error)
         }
     },
-
-    updateBookingStatusById: async (req, res) => {
+    bookingCheckinById: async (req, res) => {
         try {
+            const { id, restaurantId } = req.params
+            const user = req.user
 
+            const employee = await EmployeeModel.findOne({
+                restaurant: restaurantId,
+                isDeleted: false,
+                _id: user.userId
+            }).populate('restaurant')
+
+            if (!employee) throw new Error("You don't have permission for this action")
+            if (employee.restaurant.isDeleted) throw new Error("Restaurant not found")
+
+            const booking = await BookingModel.findOne({
+                _id: id,
+                restaurant: restaurantId,
+                isDeleted: false,
+                isCheckin: false,
+                isFinished: false
+            })
+
+            if (!booking) throw new Error("Booking not found")
+
+            booking.isCheckin = true
+
+            await booking.save()
+
+            const message = "Checkin booking success"
+            dataResponse(res, 200, message, bookingDTO(booking))
         } catch (error) {
             returnError(res, 403, error)
         }
     },
+    bookingFinishById: async (req, res) => {
+        try {
+            const { id, restaurantId } = req.params
+            const user = req.user
 
+            const employee = await EmployeeModel.findOne({
+                restaurant: restaurantId,
+                isDeleted: false,
+                _id: user.userId
+            }).populate('restaurant')
+
+            if (!employee) throw new Error("You don't have permission for this action")
+            if (employee.restaurant.isDeleted) throw new Error("Restaurant not found")
+
+            const booking = await BookingModel.findOne({
+                _id: id,
+                restaurant: restaurantId,
+                isDeleted: false,
+                isCheckin: true,
+                isFinished: false
+            })
+
+            if (!booking) throw new Error("Booking not found")
+
+            booking.isFinished = true
+
+            await booking.save()
+
+            const message = "Checkin booking success"
+            dataResponse(res, 200, message, bookingDTO(booking))
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
     deleteBookingById: async (req, res) => {
         try {
             const { id } = req.params
-            const findBooking = await ModelDb.BookingModel.findOne({
+            const findBooking = await BookingModel.findOne({
                 _id: id,
-                isCheckin: true,
-                isFinished: true,
+                isCheckin: false,
+                isFinished: false,
                 isDeleted: false
             })
             if (!findBooking) throw new Error("Booking not found")

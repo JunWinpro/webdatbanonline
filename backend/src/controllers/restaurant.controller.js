@@ -207,11 +207,16 @@ const restaurantController = {
                 }
 
                 const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
-
-                const dataDTO = restaurants.data.map(restaurant => restaurantDTO(restaurant))
+                if (restaurants.data.length === 0) throw new Error("Restaurant not found")
+                const data = {
+                    data: restaurants.data.map(restaurant => restaurantDTO(restaurant)),
+                    total: restaurants.total,
+                    page: restaurants.page,
+                    pageSize: restaurants.pageSize
+                }
 
                 const message = "Get restaurants success"
-                dataResponse(res, 200, message, dataDTO)
+                dataResponse(res, 200, message, data)
             }
             catch (err) {
                 console.log('get restaurant error: ', err.message)

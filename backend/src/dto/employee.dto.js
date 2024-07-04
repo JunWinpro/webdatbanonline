@@ -6,7 +6,6 @@ const employeeDTO = (data) => {
         delete dto.password
         delete dto.isDeleted
     }
-    console.log(dto)
     return dto
 }
 

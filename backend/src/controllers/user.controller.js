@@ -70,7 +70,7 @@ const userController = {
             await user.save()
             const message = "Verify success, you can login now"
 
-            dataResponse(res, 200, message, null)
+            dataResponse(res, 200, message)
         } catch (err) {
             console.log("verify user err: ", err.message)
             returnError(res, 403, err)
@@ -126,53 +126,45 @@ const userController = {
         }
     },
     getUsers: async (req, res) => {
-        // try {
-        //     const { page, pageSize, email, name, sortBy } = req.query
+        try {
+            const { page, pageSize, email, name, sortBy } = req.query
 
-        //     const filterModel = {}
-        //     if (name) {
-        //         filterModel.name = {
-        //             $regex: lowerCaseString(trimString(name)),
-        //             $options: 'i'
-        //         }
-        //     }
-        //     if (email) {
-        //         filterModel.email = {
-        //             $regex: lowerCaseString(trimString(email)),
-        //             $options: 'i'
-        //         }
-        //     }
+            const filterModel = {}
+            if (name) {
+                filterModel.name = {
+                    $regex: lowerCaseString(trimString(name)),
+                    $options: 'i'
+                }
+            }
+            if (email) {
+                filterModel.email = {
+                    $regex: lowerCaseString(trimString(email)),
+                    $options: 'i'
+                }
+            }
 
-        //     const sortModel = {}
-        //     // Notice: need sort later
+            const sortModel = {}
+            // Notice: need sort later
 
-        //     const users = await pageSplit(ModelDb.UserModel, filterModel, page, pageSize, sortModel, undefined)
-        //     if (!users) throw new Error("User not found")
+            const users = await pageSplit(ModelDb.UserModel, {}, page, pageSize, {}, undefined)
+            if (users.data.length === 0) throw new Error("User not found")
 
+            const data = {
+                data: users.data.map(user => userDTO(user)),
+                totalItems: users.totalItems,
+                page: users.page,
+                totalPages: users.totalPages
+            }
 
-        //     const data = users.data.map(data => {
-        //         return userDTO(data)
-        //     });
+            const message = "Get all users success"
+            dataResponse(res, 200, message, data)
+        }
 
-        //     users.data = data
+        catch (err) {
+            console.log("get all users err: ", err.message)
 
-        //     res.status(200).json({
-        //         message: "Get all users success",
-        //         data: users,
-        //         success: true
-        //     })
-        // }
-
-        // catch (err) {
-        //     console.log("get all users err: ", err.message)
-
-        //     res.status(403).json({
-        //         message: err.message,
-        //         success: false,
-        //         data: null,
-        //         err
-        //     })
-        // }
+            returnError(res, 403, err)
+        }
     },
 
     getUserById: async (req, res) => {
@@ -217,7 +209,7 @@ const userController = {
 
             const message = "Please check your email for reset password"
 
-            dataResponse(res, 201, message, null)
+            dataResponse(res, 201, message)
         }
         catch (err) {
             console.log("forgot password err: ", err.message)
@@ -246,7 +238,7 @@ const userController = {
             await user.save()
             const message = "Reset password success"
 
-            dataResponse(res, 200, message, null)
+            dataResponse(res, 200, message)
         }
         catch (err) {
             console.log("reset password err: ", err.message)

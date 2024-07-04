@@ -5,7 +5,6 @@ const restaurantDTO = (data) => {
         delete dto.manager
         delete dto.isDeleted
     }
-
     return dto
 }
 

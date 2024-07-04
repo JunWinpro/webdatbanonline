@@ -1,5 +1,5 @@
 import returnError from "../../../errors/error.js"
-import userValidate from "../../../validateSchema/user.validate.js"
+import userValidate from "../../../validateSchema/user/user.validate.js"
 
 const userValidateData = {
     register: (req, res, next) => {
