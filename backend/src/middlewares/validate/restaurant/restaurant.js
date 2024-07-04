@@ -1,5 +1,5 @@
 import returnError from "../../../errors/error.js"
-import restaurantValidate from "../../../validateSchema/restaurant.validate.js"
+import restaurantValidate from "../../../validateSchema/restaurant/restaurant.validate.js"
 
 const restaurantValidateData = {
     createRestaurant: (req, res, next) => {

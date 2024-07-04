@@ -12,6 +12,9 @@ const billSchema = new mongoose.Schema(
             ref: collection.EMPLOYEES,
             required: true
         },
+        booking: {
+            type: mongoose.Schema.Types.ObjectId,
+        },
         billMenu: [{
             menu: {
                 type: mongoose.Schema.Types.ObjectId,

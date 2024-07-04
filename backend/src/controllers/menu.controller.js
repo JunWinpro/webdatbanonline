@@ -6,6 +6,7 @@ import cloudinaryUploader from "../utils/cloudinaryUploader.js"
 import baseFolder from "../configs/cloudinaryFolder.config.js"
 import duplicateErr from "../errors/duplicate.js"
 import getPublicId from "../utils/getPublicId.js"
+import pageSplit from "../utils/pageSplit.util.js"
 const menuController = {
     createMenu: async (req, res) => {
         try {
@@ -53,16 +54,22 @@ const menuController = {
     getMenuByRestaurantId: async (req, res) => {
         try {
             const { id } = req.params
+            const { name, page, pageSize } = req.query
             const restaurant = await ModelDb.RestaurantModel.findOne({
                 _id: id,
                 isDeleted: false
             })
             if (!restaurant) throw new Error("Restaurant not found")
 
-            const menus = await ModelDb.MenuModel.find({
-                restaurant: id
-            })
-            if (!menus.length) throw new Error("Menus not found")
+            const filterModel = {
+                restaurant: id,
+                isDeleted: false,
+            }
+            if (name) {
+                filterModel.name = { $regex: name, $options: 'i' }
+            }
+            const menus = pageSplit(ModelDb.MenuModel, filterModel, page, pageSize, {}, undefined)
+            if (menus.data.length === 0) throw new Error("Menu not found")
 
             const message = "Get menus success"
             const data = menus.map(menu => menuDTO(menu))

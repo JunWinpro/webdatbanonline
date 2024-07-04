@@ -1,5 +1,5 @@
 import returnError from "../../../errors/error.js";
-import menuValidate from "../../../validateSchema/menu.validate.js";
+import menuValidate from "../../../validateSchema/menu/menu.validate.js";
 
 const menuValidateData = {
     createMenu: (req, res, next) => {
