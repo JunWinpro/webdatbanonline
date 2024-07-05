@@ -1,4 +1,4 @@
-import dataResponse from "../dto/data.js"
+import dataResponse from "../dataResponse/data.response.js"
 import returnError from "../errors/error.js"
 import jwtToken from "../utils/jwtToken.util.js"
 

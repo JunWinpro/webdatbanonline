@@ -1,5 +1,5 @@
-import dataResponse from "../dto/data.js"
-import menuDTO from "../dto/menu.dto.js"
+import dataResponse from "../dataResponse/data.response.js"
+import menuResponse from "../dataResponse/menu.js"
 import returnError from "../errors/error.js"
 import ModelDb from "../models/model.js"
 import cloudinaryUploader from "../utils/cloudinaryUploader.js"
@@ -43,7 +43,7 @@ const menuController = {
 
             const message = "Create menu success"
 
-            dataResponse(res, 200, message, menuDTO(menu))
+            dataResponse(res, 200, message, menuResponse(menu))
 
         } catch (err) {
             console.log('create menu error: ', err.message)
@@ -72,7 +72,7 @@ const menuController = {
             if (menus.data.length === 0) throw new Error("Menu not found")
 
             const message = "Get menus success"
-            const data = menus.map(menu => menuDTO(menu))
+            const data = menus.map(menu => menuResponse(menu))
             dataResponse(res, 200, message, data)
 
         } catch (err) {
@@ -89,7 +89,7 @@ const menuController = {
             if (menu.restaurant.isDeleted) throw new Error('Restaurant not found')
 
             const message = "Get menu success"
-            dataResponse(res, 200, message, menuDTO(menu.depopulate('restaurant')))
+            dataResponse(res, 200, message, menuResponse(menu.depopulate('restaurant')))
 
         } catch (error) {
             console.log('get menu error: ', error.message)
@@ -126,7 +126,7 @@ const menuController = {
             await menu.save()
 
             const message = "Upload image success"
-            dataResponse(res, 200, message, menuDTO(menu))
+            dataResponse(res, 200, message, menuResponse(menu))
         } catch (error) {
             returnError(res, 403, error)
         }
@@ -176,7 +176,7 @@ const menuController = {
 
             await menu.save()
             const message = "Update menu success"
-            dataResponse(res, 200, message, menuDTO(menu))
+            dataResponse(res, 200, message, menuResponse(menu))
 
         } catch (err) {
             console.log('update menu error: ', err.message)

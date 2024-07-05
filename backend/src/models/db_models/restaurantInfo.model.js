@@ -39,17 +39,7 @@ const scheduleSchema = new mongoose.Schema(
         _id: false
     }
 )
-const tableListSchema = new mongoose.Schema(
-    {
-        tableId: {
-            type: Number,
-            required: true
-        },
-    },
-    {
-        _id: false
-    }
-)
+
 const restaurantInfo = new mongoose.Schema(
     {
         restaurant: {
@@ -63,7 +53,7 @@ const restaurantInfo = new mongoose.Schema(
         },
         description: [descriptionSchema],
         schedule: [scheduleSchema],
-        tableList: [tableListSchema],
+        totalTable: Number,
         foodImages: [{
             type: String,
             default: []

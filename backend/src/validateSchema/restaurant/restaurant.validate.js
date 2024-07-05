@@ -50,16 +50,8 @@ const restaurantSchema = {
                 ...messages.category
             }),
 
-    tableList: joi.array().items(joi.object({
-        tableId: joi.number().required().messages({
-            ...messages.tableList.tableId
-        }),
-
-        isEmpty: joi.boolean().required().messages({
-            ...messages.tableList.isEmpty
-        })
-    })).unique((a, b) => a.tableId === b.tableId).messages({
-        ...messages.tableList.tableList
+    totalTable: joi.number().integer().min(1).messages({
+        ...messages.totalTable
     }),
 }
 const restaurantInfoSchema = {
@@ -230,7 +222,7 @@ const restaurantValidate = {
         name: restaurantSchema.name.required(),
         address: restaurantSchema.address.required(),
         category: restaurantSchema.category.required(),
-        tableList: restaurantSchema.tableList.required(),
+        totalTable: restaurantSchema.totalTable.required(),
         maxim: restaurantInfoSchema.maxim,
         description: restaurantInfoSchema.description,
         schedule: restaurantInfoSchema.schedule.required(),
@@ -256,7 +248,7 @@ const restaurantValidate = {
         maxim: restaurantInfoSchema.maxim,
         description: restaurantInfoSchema.description,
         schedule: restaurantInfoSchema.schedule,
-        tableList: restaurantSchema.tableList,
+        totalTable: restaurantSchema.totalTable,
     })
 
 }

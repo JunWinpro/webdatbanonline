@@ -4,8 +4,8 @@ import jwtToken from "../utils/jwtToken.util.js"
 import pageSplit from "../utils/pageSplit.util.js"
 import sendEmail from "../utils/sendEmail.js"
 import returnError from "../errors/error.js"
-import userDTO from "../dto/user.dto.js"
-import dataResponse from "../dto/data.js"
+import userResponse from "../dataResponse/user.js"
+import dataResponse from "../dataResponse/data.response.js"
 import duplicateErr from "../errors/duplicate.js"
 import cloudinaryUploader from "../utils/cloudinaryUploader.js"
 import baseFolder from "../configs/cloudinaryFolder.config.js"
@@ -49,7 +49,7 @@ const userController = {
             await sendEmail(email, veryficationToken, info)
 
             const message = "Please check your email for verify account"
-            dataResponse(res, 201, message, userDTO(newUser))
+            dataResponse(res, 201, message, userResponse(newUser))
         }
         catch (err) {
             console.log("user register err: ", err.message)
@@ -118,7 +118,7 @@ const userController = {
 
             const message = "Login success"
 
-            dataResponse(res, 200, message, { accessToken, refreshToken, ...userDTO(user) })
+            dataResponse(res, 200, message, { accessToken, refreshToken, ...userResponse(user) })
         }
         catch (err) {
             console.log("user login err: ", err.message)
@@ -150,7 +150,7 @@ const userController = {
             if (users.data.length === 0) throw new Error("User not found")
 
             const data = {
-                data: users.data.map(user => userDTO(user)),
+                data: users.data.map(user => userResponse(user)),
                 totalItems: users.totalItems,
                 page: users.page,
                 totalPages: users.totalPages
@@ -180,7 +180,7 @@ const userController = {
 
             const message = "Get user success"
 
-            dataResponse(res, 200, message, userDTO(user))
+            dataResponse(res, 200, message, userResponse(user))
         }
         catch (err) {
             console.log("get user by id err: ", err.message)
@@ -197,7 +197,7 @@ const userController = {
             })
             if (!user) throw new Error("User not found")
 
-            user.resetPasswordToken = crypto.randomUUID()
+            user.resetPassworken = crypto.randomUUID()
             user.resetPasswordExpireIn = Date.now() + 3600000
             const info = {
                 path: 'reset-password',
@@ -205,7 +205,7 @@ const userController = {
                 action: 'reset your password'
             }
             await user.save()
-            await sendEmail(email, user.resetPasswordToken, info)
+            await sendEmail(email, user.resetPassworken, info)
 
             const message = "Please check your email for reset password"
 
@@ -223,7 +223,7 @@ const userController = {
 
             const user = await ModelDb.UserModel.findOne({
                 isDeleted: false,
-                resetPasswordToken: token,
+                resetPassworken: token,
             })
 
             if (!user) throw new Error(`You don't have permission for this action`)
@@ -232,7 +232,7 @@ const userController = {
             const hashPassword = bcryptPassword.hashPassword(newPassword)
 
             user.password = hashPassword
-            user.resetPasswordToken = null
+            user.resetPassworken = null
             user.resetPasswordExpireIn = null
 
             await user.save()
@@ -262,7 +262,7 @@ const userController = {
 
             const message = "Change role success"
 
-            dataResponse(res, 200, message, userDTO(currentUser))
+            dataResponse(res, 200, message, userResponse(currentUser))
         }
         catch (err) {
             console.log("update user by id err: ", err.message)
@@ -302,7 +302,7 @@ const userController = {
 
             const message = "Update success"
 
-            dataResponse(res, 200, message, userDTO(updatedUser))
+            dataResponse(res, 200, message, userResponse(updatedUser))
         }
         catch (err) {
             console.log("update user by id err: ", err.message)
@@ -342,7 +342,7 @@ const userController = {
 
             const message = "Upload success"
 
-            dataResponse(res, 200, message, userDTO(user))
+            dataResponse(res, 200, message, userResponse(user))
         } catch (err) {
             returnError(res, 500, err)
         }
