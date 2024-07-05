@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -20,12 +20,22 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu.jsx";
 
-const Navbar = ({ navItems, username, avatarSrc, onSignOut }) => {
+const Navbar = ({ navItems, currentUser, onSignOut, updateUserAvatar }) => {
   const navigate = useNavigate();
+  const [isChangingAvatar, setIsChangingAvatar] = useState(false);
+  const [newAvatarUrl, setNewAvatarUrl] = useState("");
 
   const handleSignOut = () => {
     onSignOut();
-    navigate('/');
+    navigate("/");
+  };
+
+  const handleAvatarChange = () => {
+    if (newAvatarUrl) {
+      updateUserAvatar(newAvatarUrl);
+      setIsChangingAvatar(false);
+      setNewAvatarUrl("");
+    }
   };
 
   return (
@@ -60,27 +70,48 @@ const Navbar = ({ navItems, username, avatarSrc, onSignOut }) => {
       </NavigationMenu>
 
       <div className="flex items-center text-black">
-        {username ? (
+        {currentUser ? (
           <>
             <Avatar>
-              <AvatarImage src={avatarSrc} />
+              <AvatarImage
+                src={
+                  currentUser.avatar ||
+                  "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png"
+                }
+              />
               <AvatarFallback>
-                {username.charAt(0).toUpperCase()}
+                {currentUser.firstName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <span className="ml-2 cursor-pointer">{username}</span>
+                <span className="ml-2 cursor-pointer">{`${currentUser.firstName} ${currentUser.lastName}`}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>User</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setIsChangingAvatar(true)}>
+                  Change Avatar
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={handleSignOut}>
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {isChangingAvatar && (
+              <div className="ml-4">
+                <input
+                  type="text"
+                  value={newAvatarUrl}
+                  onChange={(e) => setNewAvatarUrl(e.target.value)}
+                  placeholder="New avatar URL"
+                  className="mr-2 p-1 border rounded"
+                />
+                <Button onClick={handleAvatarChange}>Update Avatar</Button>
+              </div>
+            )}
           </>
         ) : (
           <div>

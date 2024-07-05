@@ -70,14 +70,14 @@ export const ProductPage = () => {
         </div>
       </div>
       <div className="mt-2">
-            <button
-              id="sub_btn"
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              Booking now
-            </button>
-          </div>
+        <button
+          id="sub_btn"
+          type="submit"
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          Booking now
+        </button>
+      </div>
     </div>
   );
 
@@ -111,7 +111,80 @@ export const ProductPage = () => {
                   14:00
                 </p>
               </div>
-              <div className="bg-white w-full h-96 rounded-lg mt-10"></div>
+
+
+
+              <div
+                className="bg-white w-full rounded-lg mt-10 p-6"
+
+              >
+                <h2 className="text-2xl font-bold mb-4">Thông tin chi tiết</h2>
+
+                <section className="mb-4">
+                  <h3 className="text-xl font-semibold mb-2">Phù hợp:</h3>
+                  <p>
+                    Văn phòng, gia đình, tụ họp, gặp mặt liên hoan bạn bè, khách
+                    du lịch,...
+                  </p>
+                </section>
+
+                <section className="mb-4">
+                  <h3 className="text-xl font-semibold mb-2">Món đặc sắc:</h3>
+                  <ul className="list-disc pl-5">
+                    <li>
+                      Hải sản nướng: Tôm nướng, Sò nướng, Cá hồi tẩm nướng muối
+                      ớt,...
+                    </li>
+                    <li>Lagu/cà ri bò gà, Gà/heo/bò quay, rô ti,...</li>
+                    <li>
+                      Món thuần Việt: Món cuốn các loại, lẩu, các loại bánh bèo,
+                      nậm, lọc,...
+                    </li>
+                  </ul>
+                </section>
+
+                <section className="mb-4">
+                  <h3 className="text-xl font-semibold mb-2">Không gian:</h3>
+                  <ul className="list-disc pl-5">
+                    <li>
+                      Rộng, thoáng mát, kiến trúc hiện đại và ấm cúng. View toàn
+                      thành phố
+                    </li>
+                    <li>
+                      Lầu 9 sức chứa 170 khách. Phục vụ Buffet trưa T5-CN (11h -
+                      13h30), phục vụ Gọi món thời gian còn lại.
+                    </li>
+                    <li>
+                      Phòng riêng tại lầu 2: 01 phòng (10 - 30 khách/phòng),
+                      chuyên phục vụ Gọi món.
+                    </li>
+                  </ul>
+                </section>
+
+                <section className="mb-4">
+                  <h3 className="text-xl font-semibold mb-2">Để ô tô:</h3>
+                  <p>
+                    <strong>Tại Khách sạn:</strong> Phí gửi: 8000đ/chiếc
+                  </p>
+                  <p>
+                    <strong>Số 2 Phạm Ngũ Lão:</strong> Phí gửi phụ thuộc đơn vị
+                    trông giữ xe
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-xl font-semibold mb-2">
+                    Điểm đặc trưng:
+                  </h3>
+                  <ul className="list-disc pl-5">
+                    <li>Đội ngũ đầu bếp giàu kinh nghiệm</li>
+                    <li>
+                      Nguyên liệu tại đây đều được tuyển chọn kỹ lưỡng từ các
+                      nhà cung cấp có giấy xác nhận an toàn vệ sinh thực phẩm.
+                    </li>
+                  </ul>
+                </section>
+              </div>
             </div>
           </div>
 
