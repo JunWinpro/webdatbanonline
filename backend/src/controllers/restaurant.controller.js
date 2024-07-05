@@ -3,10 +3,10 @@ import ModelDb from "../models/model.js"
 import mongoose from "mongoose"
 import pageSplit from "../utils/pageSplit.util.js"
 import sortModelType from "../utils/sortModel.js"
-import restaurantInfoDTO from "../dto/restaurantInfo.dto.js"
+import restaurantInfoResponse from "../dataResponse/restaurantInfo.js"
 import returnError from "../errors/error.js"
-import dataResponse from "../dto/data.js"
-import restaurantDTO from "../dto/restaurant.dto.js"
+import dataResponse from "../dataResponse/data.response.js"
+import restaurantResponse from "../dataResponse/restaurant.js"
 import sendEmail from "../utils/sendEmail.js"
 import cloudinaryUploader from "../utils/cloudinaryUploader.js"
 import getPublicId from "../utils/getPublicId.js"
@@ -39,8 +39,8 @@ const restaurantController = {
             const message = "Create restaurant success, please wait for admin approve"
 
             dataResponse(res, 201, message, {
-                ...restaurantDTO(newRestaurant),
-                ...restaurantInfoDTO(newRestaurantInfo, user)
+                ...restaurantResponse(newRestaurant),
+                ...restaurantInfoResponse(newRestaurantInfo, user)
             })
         }
         catch (err) {
@@ -121,10 +121,10 @@ const restaurantController = {
 
             const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
 
-            const dataDTO = restaurants.data.map(restaurant => restaurantDTO(restaurant))
+            const data = restaurants.data.map(restaurant => restaurantResponse(restaurant))
 
             const message = "Get restaurants success"
-            dataResponse(res, 200, message, dataDTO)
+            dataResponse(res, 200, message, data)
         }
         catch (err) {
             console.log('get restaurant error: ', err.message)
@@ -209,7 +209,7 @@ const restaurantController = {
                 const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
                 if (restaurants.data.length === 0) throw new Error("Restaurant not found")
                 const data = {
-                    data: restaurants.data.map(restaurant => restaurantDTO(restaurant)),
+                    data: restaurants.data.map(restaurant => restaurantResponse(restaurant)),
                     total: restaurants.total,
                     page: restaurants.page,
                     pageSize: restaurants.pageSize
@@ -236,7 +236,7 @@ const restaurantController = {
             const user = req.user
 
             const message = "Get restaurant success"
-            dataResponse(res, 200, message, restaurantInfoDTO(currentRestaurant), user)
+            dataResponse(res, 200, message, restaurantInfoResponse(currentRestaurant), user)
         }
         catch (err) {
             returnError(res, 403, err)
@@ -261,7 +261,7 @@ const restaurantController = {
 
             await restaurant.save()
             const message = "Update restaurant success"
-            dataResponse(res, 200, message, restaurantDTO(restaurant))
+            dataResponse(res, 200, message, restaurantResponse(restaurant))
 
         } catch (err) {
             console.log("update restaurant err: ", err)
@@ -288,7 +288,7 @@ const restaurantController = {
             await restaurantInfo.save()
             const message = "Update restaurant info success"
 
-            dataResponse(res, 200, message, restaurantInfoDTO(restaurantInfo.depopulate('restaurant'), user))
+            dataResponse(res, 200, message, restaurantInfoResponse(restaurantInfo.depopulate('restaurant'), user))
         }
         catch (err) {
             returnError(res, 403, err)
@@ -326,7 +326,7 @@ const restaurantController = {
 
             const message = "Upload success"
 
-            dataResponse(res, 200, message, restaurantDTO(restaurant))
+            dataResponse(res, 200, message, restaurantResponse(restaurant))
 
         } catch (err) {
             returnError(res, 500, err)
@@ -398,7 +398,7 @@ const restaurantController = {
 
             await currentRestaurant.save()
             const message = "Upload success"
-            dataResponse(res, 200, message, restaurantDTO(currentRestaurant.depopulate('restaurant')))
+            dataResponse(res, 200, message, restaurantResponse(currentRestaurant.depopulate('restaurant')))
 
         } catch (err) {
             returnError(res, 500, err)
@@ -422,7 +422,7 @@ const restaurantController = {
             }
             await sendEmail(restaurant.manager.email, undefined, info)
             const message = "Approve restaurant success"
-            dataResponse(res, 200, message, restaurantDTO(restaurant))
+            dataResponse(res, 200, message, restaurantResponse(restaurant))
         }
         catch (err) {
             returnError(res, 403, err)
@@ -453,7 +453,7 @@ const restaurantController = {
 
             const message = "Active restaurant success"
 
-            dataResponse(res, 200, message, restaurantDTO(restaurant))
+            dataResponse(res, 200, message, restaurantResponse(restaurant))
         }
         catch (err) {
             returnError(res, 403, err)
@@ -485,7 +485,7 @@ const restaurantController = {
 
             const message = "Deactive restaurant success"
 
-            dataResponse(res, 200, message, restaurantDTO(restaurant))
+            dataResponse(res, 200, message, restaurantResponse(restaurant))
         }
         catch (err) {
             returnError(res, 403, err)

@@ -15,8 +15,6 @@ const billController = {
 
             if (!booking) throw new Error("This booking does not exist")
 
-
-
         } catch (error) {
             returnError(res, 403, error)
         }

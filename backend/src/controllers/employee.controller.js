@@ -1,8 +1,8 @@
 import ModelDb from "../models/model.js";
 import bcryptPassword from "../utils/bcrypt.util.js";
 import jwtToken from "../utils/jwtToken.util.js";
-import employeeDTO from "../dto/employee.dto.js";
-import dataResponse from "../dto/data.js";
+import employeeResponse from "../dataResponse/employee.js";
+import dataResponse from "../dataResponse/data.response.js";
 import returnError from "../errors/error.js";
 import duplicateErr from "../errors/duplicate.js";
 
@@ -57,7 +57,7 @@ const employeeController = {
             })
 
             const message = "Register success"
-            dataResponse(res, 200, message, employeeDTO(newEployee))
+            dataResponse(res, 200, message, employeeResponse(newEployee))
         }
         catch (err) {
             console.log("employee register err: ", err)
@@ -96,7 +96,7 @@ const employeeController = {
             }, "RT")
 
             const message = "Login success"
-            dataResponse(res, 200, message, { accessToken, refreshToken, ...employeeDTO(employee) })
+            dataResponse(res, 200, message, { accessToken, refreshToken, ...employeeResponse(employee) })
         }
         catch (err) {
             console.log("user login err: ", err)
@@ -115,10 +115,10 @@ const employeeController = {
 
             if (!employees.length === 0) throw new Error("User not found")
 
-            const employeeDTOs = employees.map(employee => employeeDTO(employee));
+            const data = employees.map(employee => employeeResponse(employee));
 
             const message = "Get employees success"
-            dataResponse(res, 200, message, employeeDTOs)
+            dataResponse(res, 200, message, data)
         }
 
         catch (err) {
@@ -141,7 +141,7 @@ const employeeController = {
 
             const message = "Get employee success"
 
-            dataResponse(res, 200, message, employeeDTO(employee))
+            dataResponse(res, 200, message, employeeResponse(employee))
         }
         catch (err) {
             console.log("get user by id err")
@@ -169,7 +169,7 @@ const employeeController = {
 
             await employee.save()
             const message = "Update password success"
-            dataResponse(res, 200, message, employeeDTO(employee))
+            dataResponse(res, 200, message, employeeResponse(employee))
         } catch (error) {
             console.log("update user by id err: ", error)
             returnError(res, 403, error)
@@ -191,7 +191,7 @@ const employeeController = {
             await employee.save()
             const message = "Update employee success"
 
-            dataResponse(res, 200, message, employeeDTO(employee))
+            dataResponse(res, 200, message, employeeResponse(employee))
         }
         catch (err) {
             returnError(res, 403, duplicateErr(err))

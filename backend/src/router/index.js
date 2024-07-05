@@ -10,6 +10,9 @@ import restaurantRoute from "./routes/restaurant.route.js";
 import reviewRoute from "./routes/review.route.js";
 
 const rootRouter = express.Router();
+rootRouter.get('/', (_, res) => {
+    res.send('Taste Tripper 2024')
+})
 rootRouter.use('/renew-access-token', renewAccessToken)
 rootRouter.use('/users', userRoute);
 rootRouter.use('/reviews', reviewRoute);

@@ -36,21 +36,12 @@ const messages = {
         'string.alphanum': "Category must not include special characters or spaces"
     },
 
-    tableList: {
-        tableList: {
-            'array.base': "Table list is an array of objects with tableId and isEmpty",
-            'array.unique': "Table ID is duplicated"
-        },
-        tableId: {
-            'any.required': "Table ID is required",
-            'number.base': "Table ID must be a number",
-            'number.empty': "Table ID can't be empty"
-        },
-        isEmpty: {
-            'any.required': "Table status is required",
-            'boolean.base': "Table status must be a boolean",
-            'boolean.empty': "Table status can't be empty"
-        }
+    totalTable: {
+        'any.required': "Total table is required",
+        'number.base': "Total table must be a number",
+        'number.empty': "Total table can't be empty",
+        'number.min': "Total table must be at least 1",
+        'number.integer': "Total table must be an integer"
     },
 
     maxim: {

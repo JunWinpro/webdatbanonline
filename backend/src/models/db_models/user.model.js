@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
-        resetPasswordToken: {
+        resetPassworken: {
             type: String,
             default: null
         },
