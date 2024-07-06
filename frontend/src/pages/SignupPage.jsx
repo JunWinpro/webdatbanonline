@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const SignupPage = ({ onSignup }) => {
   const [formData, setFormData] = useState({
@@ -8,13 +9,10 @@ export const SignupPage = ({ onSignup }) => {
     password: "",
     firstName: "",
     lastName: "",
-    dateOfBirth: "",
     gender: "",
-    streetAddress: "",
-    district: "",
-    city: "",
   });
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,33 +20,40 @@ export const SignupPage = ({ onSignup }) => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!termsAccepted) {
-      alert("Please accept the terms of service.");
+      setError("Please accept the terms of service.");
       return;
     }
-    const newUser = {
-      email: formData.email,
-      phone: formData.phone,
-      avatar: "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png",
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      dateOfBirth: new Date(formData.dateOfBirth),
-      gender: formData.gender,
-      address: {
-        streetAddress: formData.streetAddress,
-        district: formData.district,
-        city: formData.city,
-      },
-      role: "user",
-      isVerified: false,
-    };
-    onSignup(newUser);
-    navigate("/");
+    setError("");
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/users/register",
+        formData
+      );
+
+      if (response.data.success) {
+        onSignup(response.data.data);
+        alert(response.data.message);
+        navigate("/");
+      } else {
+        setError(
+          response.data.message || "Registration failed. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error details:", error);
+      if (error.response) {
+        setError(
+          error.response.data.message || "An error occurred. Please try again."
+        );
+      } else {
+        setError("An error occurred. Please try again.");
+      }
+    }
   };
-  
-  
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -61,7 +66,6 @@ export const SignupPage = ({ onSignup }) => {
           Create your personal account
         </p>
       </div>
-
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
@@ -86,8 +90,8 @@ export const SignupPage = ({ onSignup }) => {
                 />
               </div>
             </div>
+
             <div>
-              <div></div>
               <label
                 htmlFor="phone"
                 className="block text-sm font-medium text-gray-700"
@@ -107,6 +111,7 @@ export const SignupPage = ({ onSignup }) => {
                 />
               </div>
             </div>
+
             <div>
               <label
                 htmlFor="password"
@@ -127,6 +132,7 @@ export const SignupPage = ({ onSignup }) => {
                 />
               </div>
             </div>
+
             <div>
               <label
                 htmlFor="firstName"
@@ -147,6 +153,7 @@ export const SignupPage = ({ onSignup }) => {
                 />
               </div>
             </div>
+
             <div>
               <label
                 htmlFor="lastName"
@@ -167,6 +174,7 @@ export const SignupPage = ({ onSignup }) => {
                 />
               </div>
             </div>
+
             <div>
               <label
                 htmlFor="gender"
@@ -188,74 +196,7 @@ export const SignupPage = ({ onSignup }) => {
                 <option value="other">Other</option>
               </select>
             </div>
-            <div>
-              <label
-                htmlFor="dateOfBirth"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Date of Birth
-              </label>
-              <input
-                id="dateOfBirth"
-                name="dateOfBirth"
-                type="date"
-                required
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="streetAddress"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Street Address
-              </label>
-              <input
-                id="streetAddress"
-                name="streetAddress"
-                type="text"
-                required
-                value={formData.streetAddress}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="district"
-                className="block text-sm font-medium text-gray-700"
-              >
-                District
-              </label>
-              <input
-                id="district"
-                name="district"
-                type="text"
-                required
-                value={formData.district}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="city"
-                className="block text-sm font-medium text-gray-700"
-              >
-                City
-              </label>
-              <input
-                id="city"
-                name="city"
-                type="text"
-                required
-                value={formData.city}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-              />
-            </div>
+
             <div>
               <input
                 type="checkbox"
@@ -265,22 +206,18 @@ export const SignupPage = ({ onSignup }) => {
                 onChange={(e) => setTermsAccepted(e.target.checked)}
                 required
               />
-              <label htmlFor="terms">
-                {" "}
-                I agree to all statements in
-                <b
-                  className="ml-1"
-                  href="https://google.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+              <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+                I agree to all statements in the{" "}
+                <span className="font-medium text-red-600 hover:text-red-500 cursor-pointer">
                   terms of service
-                </b>
+                </span>
               </label>
-            </div>{" "}
-            <div className="mt-6">
+            </div>
+
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+
+            <div>
               <button
-                id="sub_btn"
                 type="submit"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >

@@ -11,6 +11,7 @@ import React, { useState, useEffect } from "react";
 import SearchBanner from "./components/HomePage/SearchBanner";
 import { ProductPage } from "./pages/ProductPage";
 import UserPage from "./pages/UserPage";
+import { ForgetPassPage } from "./pages/ForgetPassPage";
 
 function App() {
   const [showFixedNavBar, setShowFixedNavBar] = useState(false);
@@ -83,7 +84,6 @@ function App() {
   };
   const updateUser = (updatedUserInfo) => {
     setCurrentUser(updatedUserInfo);
-
   };
   const handleLogin = (user) => {
     setCurrentUser(user);
@@ -184,12 +184,21 @@ function App() {
               />
             }
           />
-
           <Route
             path="/signup"
             element={<SignupPage onSignup={handleSignup} />}
           />
-          <Route path="/user" element={<UserPage currentUser={currentUser} updateUser={updateUser} />}/>
+          <Route
+            path="/user"
+            element={
+              <UserPage currentUser={currentUser} updateUser={updateUser} />
+            }
+          />
+          <Route path="/forget-password" element={<ForgetPassPage />} />
+          {/* <Route
+            path="/reset-password/:token"
+            element={<ResetPasswordPage />}
+          /> */}
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </div>
