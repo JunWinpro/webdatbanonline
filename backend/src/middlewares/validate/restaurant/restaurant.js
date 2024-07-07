@@ -31,9 +31,9 @@ const restaurantValidateData = {
 
     updateRestaurantById: (req, res, next) => {
         try {
-            const { error, value } = restaurantValidate.updateRestaurant.validate(req.query)
+            const { error, value } = restaurantValidate.updateRestaurant.validate(req.body)
             if (error) throw new Error(error.details[0].message)
-
+            if (Object.keys(value).length === 0) throw new Error("Please input a valid value")
             req.body = value
             next()
         }

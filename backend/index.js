@@ -6,7 +6,8 @@ import { v2 as cloudinary } from "cloudinary"
 import connectDb from "./src/database/db.js";
 import cron from "node-cron"
 import autoDeleteBooking from "./src/cron/bookingChecker.js";
-import multerError from "./src/router/routes/multerError.route.js";
+import multer from "multer"
+import returnError from "./src/errors/error.js";
 dotenv.config()
 const app = express()
 app.use(cors());
@@ -24,7 +25,18 @@ connectDb()
 
 app.use(rootRouter)
 cron.schedule('0 0,15,30,45 * * * *', autoDeleteBooking)
-app.use(multerError);
+app.use((err, _, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_UNEXPECTED_FILE") {
+            err.message = "Too many files uploaded"
+            returnError(res, 400, err)
+        } else {
+            returnError(res, 500, err)
+        }
+    } else {
+        next(err);
+    }
+});
 
 app.listen(process.env.PORT || 8000, () => {
     console.log(`App is running on ${process.env.PORT || 8000}`);

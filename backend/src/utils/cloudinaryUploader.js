@@ -11,7 +11,9 @@ const cloudinaryUploader = {
         return result
     },
     destroy: async (publicId) => {
-        const destroyResult = await cloudinary.uploader.destroy(publicId)
+        const destroyResult = await cloudinary.uploader.destroy(publicId, {
+            resource_type: 'image'
+        })
         return destroyResult
     }
 }

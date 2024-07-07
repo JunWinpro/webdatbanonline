@@ -1,4 +1,4 @@
-import returnError from "../../errors/error";
+import returnError from "../../errors/error.js";
 
 const multerError = (err, _, res, next) => {
     if (err instanceof multer.MulterError) {

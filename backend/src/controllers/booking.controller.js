@@ -16,6 +16,7 @@ const bookingController = {
 
             if (!currentRestaurant) throw new Error("Restaurant not found")
             if (!currentRestaurant.restaurant.isActive) throw new Error("Restaurant not active")
+            currentRestaurant.depopulate()
 
             const { hour, day } = date(checkinTime)
             const { schedule } = currentRestaurant
@@ -39,34 +40,34 @@ const bookingController = {
 
             let totalOfTables = 0
             let list = []
-            const { tableList } = currentRestaurant
+            const { totalTable } = currentRestaurant
 
             if (table) {
                 filter.table = {
                     $in: table
                 }
-                const findCheckin = await ModelDb.BookingModel.findOne(filter)
-                if (findCheckin) throw new Error("Table already booked")
+                const findBooking = await ModelDb.BookingModel.findOne(filter).lean()
+                if (findBooking) throw new Error("Table already booked")
 
-                const lastIndex = table[table.length - 1]
-                if (!tableList[lastIndex - 1]) throw new Error("Last table is not exist")
+                if (table.length > totalTable || table[length - 1] > totalTable) throw new Error("Not enough tables, please try again")
 
                 list = table
                 totalOfTables = table.length
             }
 
             if (numberOfTable) {
-                if (numberOfTable > tableList.length) throw new Error("Number of table is over than table list length")
+                if (numberOfTable > totalTable) throw new Error("Not enough tables, please try again")
 
-                const findCheckin = await ModelDb.BookingModel.find(filter)
+                const findBooking = await ModelDb.BookingModel.find(filter).lean()
 
-                const totalTable = tableList.length
-
-                if (numberOfTable > totalTable - findCheckin.length) {
-                    throw new Error(`Sorry, we don't have enough table for ${numberOfTable} tables, please try again`)
+                if (numberOfTable > totalTable - findBooking.length) {
+                    throw new Error(`Not enough tables, please try again`)
                 }
 
-                const emptyTables = tableList.filter(table => !findCheckin.includes(table))
+                const bookedTables = findBooking.reduce((acc, booking) => {
+                    return acc.concat(booking.table)
+                }, [])
+                const emptyTables = Array.from({ length: totalTable }, (_, i) => i + 1).filter(table => !bookedTables.includes(table))
 
                 list = emptyTables.slice(0, numberOfTable)
                 totalOfTables = numberOfTable
@@ -98,7 +99,7 @@ const bookingController = {
 
             if (!currentRestaurant) throw new Error("Restaurant not found")
             if (!currentRestaurant.restaurant.isActive) throw new Error("Restaurant not active")
-
+            currentRestaurant.depopulate()
             const { hour, day } = date(checkinTime)
 
             const { schedule } = currentRestaurant
@@ -118,16 +119,20 @@ const bookingController = {
 
             let totalOfTables = 0
             let list = []
-            const { tableList } = currentRestaurant
+            const { totalTable } = currentRestaurant
 
-            const findCheckin = await ModelDb.BookingModel.findOne(filter)
-            if (findCheckin) throw new Error("Table already booked")
+            if (table) {
+                filter.table = {
+                    $in: table
+                }
+                const findBooking = await ModelDb.BookingModel.findOne(filter).lean()
+                if (findBooking) throw new Error("Table already booked")
 
-            const lastIndex = table[table.length - 1]
-            if (!tableList[lastIndex - 1]) throw new Error("Last table is not exist")
+                if (table.length > totalTable || table[length - 1] > totalTable) throw new Error("Not enough tables, please try again")
 
-            list = table
-            totalOfTables = table.length
+                list = table
+                totalOfTables = table.length
+            }
 
             const booking = await ModelDb.BookingModel.create({
                 ...req.body,
