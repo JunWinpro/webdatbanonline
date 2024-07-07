@@ -272,7 +272,6 @@ const userController = {
     },
     updateUserById: async (req, res) => {
         try {
-            if (!req.file) throw new Error("Please upload image")
             const { id } = req.params
             const { password, newPassword } = req.body
             const user = req.user
@@ -303,7 +302,7 @@ const userController = {
 
             const message = "Update success"
 
-            dataResponse(res, 200, message, userResponse(updatedUser))
+            dataResponse(res, 200, message, userResponse(currentUser))
         }
         catch (err) {
             console.log("update user by id err: ", err.message)
@@ -321,7 +320,10 @@ const userController = {
                 isDeleted: false,
                 isVerified: true
             })
+
+
             if (!user) throw new Error("User not found")
+
 
             if (user.avatar) {
                 const publicId = getPublicId(user.avatar)
@@ -329,13 +331,17 @@ const userController = {
                 if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
             }
 
+
             const file = req.file
             const folder = `${baseFolder.USER}/${id}/Avatar`
+
 
             const result = await cloudinaryUploader.upload(file, folder)
             if (!result.secure_url) throw new Error("Upload failed")
 
+
             const avatar = result.secure_url
+
 
             user.avatar = avatar
 

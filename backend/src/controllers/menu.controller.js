@@ -147,28 +147,6 @@ const menuController = {
             const menu = await ModelDb.MenuModel.findById(id)
             if (!menu) throw new Error("Menu not found")
 
-            if (req.body.name) {
-                const menuExist = await ModelDb.MenuModel.findOne({
-                    name: req.body.name,
-                    restaurant: restaurantId
-                })
-                if (menuExist) throw new Error("Menu name already exist")
-            }
-
-            const file = req.file
-            let image = null
-            if (file) {
-                const folder = `${baseFolder.RESTAURANT}/${restaurant.name.replace(" ", "-")}/Menu`
-                const result = await cloudinaryUploader.upload(file, folder)
-                if (!result) throw new Error("Upload failed")
-                image = result.secure_url
-
-                const publicId = getPublicId(menu.image)
-
-                const destroyResult = await cloudinaryUploader.destroy(publicId)
-                if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
-            }
-
             for (let key of Object.keys(req.body)) {
                 menu[key] = req.body[key]
             }

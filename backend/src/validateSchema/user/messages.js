@@ -64,7 +64,7 @@ const messages = {
         },
     },
     role: {
-        'any.only': "Role must be one of 'manager', 'admin' or 'customer",
+        'any.only': "Role must be one of 'manager', 'admin' or 'user",
         'any.empty': "Role is empty",
         'any.required': "Role is required"
     }

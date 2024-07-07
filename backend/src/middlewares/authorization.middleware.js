@@ -75,7 +75,6 @@ const authorization = {
             })
 
             if (!currentUser) throw new Error("You don't have permission for this action")
-
             next()
         }
         catch (err) {
