@@ -14,7 +14,6 @@ const tokenMiddleware = {
             const data = jwtToken.verifyToken(accessToken, "AT")
 
             req.user = data
-
             next()
         }
         catch (err) {

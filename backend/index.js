@@ -6,7 +6,7 @@ import { v2 as cloudinary } from "cloudinary"
 import connectDb from "./src/database/db.js";
 import cron from "node-cron"
 import autoDeleteBooking from "./src/cron/bookingChecker.js";
-
+import multerError from "./src/router/routes/multerError.route.js";
 dotenv.config()
 const app = express()
 app.use(cors());
@@ -24,6 +24,7 @@ connectDb()
 
 app.use(rootRouter)
 cron.schedule('0 0,15,30,45 * * * *', autoDeleteBooking)
+app.use(multerError);
 
 app.listen(process.env.PORT || 8000, () => {
     console.log(`App is running on ${process.env.PORT || 8000}`);

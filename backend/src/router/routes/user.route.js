@@ -16,7 +16,7 @@ userRoute.post('/login', validateData.user.login, userController.login)
 
 userRoute.post('/forget-password', validateData.user.forgetPassword, userController.forgetPassword)
 
-userRoute.get('/', tokenMiddleware.verifyAccessToken, userController.getUsers)
+userRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.admin, userController.getUsers)
 
 userRoute.get('/:id', tokenMiddleware.verifyAccessToken, validateData.objectId, userController.getUserById)
 

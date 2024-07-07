@@ -121,7 +121,12 @@ const restaurantController = {
 
             const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
 
-            const data = restaurants.data.map(restaurant => restaurantResponse(restaurant))
+            const data = {
+                data: restaurants.data.map(restaurant => restaurantResponse(restaurant)),
+                totalPages: restaurants.totalPages,
+                page: restaurants.page,
+                totalItems: restaurants.totalItems
+            }
 
             const message = "Get restaurants success"
             dataResponse(res, 200, message, data)
@@ -210,9 +215,9 @@ const restaurantController = {
                 if (restaurants.data.length === 0) throw new Error("Restaurant not found")
                 const data = {
                     data: restaurants.data.map(restaurant => restaurantResponse(restaurant)),
-                    total: restaurants.total,
+                    totalPages: restaurants.totalPages,
                     page: restaurants.page,
-                    pageSize: restaurants.pageSize
+                    totalItems: restaurants.totalItems
                 }
 
                 const message = "Get restaurants success"
@@ -496,27 +501,46 @@ const restaurantController = {
             const { id } = req.params
             const user = req.user
 
-            const restaurant = await ModelDb.RestaurantModel.findOne({
+            const restaurant = await ModelDb.RestaurantModel.updateOne({
                 manager: user.userId,
                 isDeleted: false,
                 _id: id,
-            }).populate('manager')
+            },
+                {
+                    $set: {
+                        isDeleted: true,
+                    }
+                }
+            )
 
             if (!restaurant) throw new Error("Restaurant not found")
 
-            const restaurantInfo = await ModelDb.RestaurantInfoModel.findOne({
+            const restaurantInfo = await ModelDb.RestaurantInfoModel.updateOne({
                 restaurant: id,
                 isDeleted: false,
-            })
-
-            restaurant.isDeleted = true
-            restaurant.isActive = false
-
-            restaurantInfo.isDeleted = true
-
-            await restaurant.save()
-            await restaurantInfo.save()
-
+            },
+                {
+                    $set: {
+                        isDeleted: true,
+                    }
+                }
+            )
+            await ModelDb.MenuModel.updateMany(
+                { restaurant: id },
+                { $set: { isDeleted: true } }
+            )
+            await ModelDb.BookingModel.updateMany(
+                { restaurant: id },
+                { $set: { isDeleted: true } }
+            )
+            await ModelDb.ReviewModel.updateMany(
+                { restaurant: id },
+                { $set: { isDeleted: true } }
+            )
+            await ModelDb.BillModel.updateMany(
+                { restaurant: id },
+                { $set: { isDeleted: true } }
+            )
             const info = {
                 subject: `Restaurant Deleted`,
                 textOption: `Your restaurant has been deleted successfully by ${user.role === 'admin' ? `Admin ${user.email}` : 'you'}, if you have any questions, please contact us.`,

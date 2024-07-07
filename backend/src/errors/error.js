@@ -1,9 +1,9 @@
-const returnError = (res, status, err) => {
+const returnError = (res, status, error) => {
     return res.status(status).json({
-        message: err.message,
+        message: error.message,
         success: false,
         data: null,
-        err
+        error
     })
 }
 
