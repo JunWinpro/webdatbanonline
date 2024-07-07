@@ -24,13 +24,18 @@ restaurantRoute.get('/restaurant/:id', validateData.objectId, restaurantControll
 restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.restaurant.getRestaurants, restaurantController.getOwnedRestaurants)
 
 restaurantRoute.put('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantById, restaurantController.updateRestaurantById)
-restaurantRoute.put('/info/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantInfoById, restaurantController.updateRestaurantInfoById)
 
-restaurantRoute.put('/approve/:id', tokenMiddleware.verifyAccessToken, authorization.admin, restaurantController.approveRestaurantById)
+restaurantRoute.put('/info/validateData.objectId,', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantInfoById, restaurantController.updateRestaurantInfoById)
 
-restaurantRoute.put('/active/:id', tokenMiddleware.verifyAccessToken, authorization.manager, restaurantController.activeRestaurantById)
+restaurantRoute.put('/approve/:id', tokenMiddleware.verifyAccessToken, authorization.admin, validateData.objectId, restaurantController.approveRestaurantById)
 
-restaurantRoute.put('/deactive/:id', tokenMiddleware.verifyAccessToken, authorization.manager, restaurantController.deactiveRestaurantById)
+restaurantRoute.put('/active/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, restaurantController.activeRestaurantById)
+
+restaurantRoute.put('/deactive/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, restaurantController.deactiveRestaurantById)
+
+restaurantRoute.put('/open/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, restaurantController.openRestaurantById)
+
+restaurantRoute.put('/close/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, restaurantController.closeRestaurantById)
 
 restaurantRoute.delete('/:id', tokenMiddleware.verifyAccessToken, authorization.managerOrAdmin, validateData.objectId, restaurantController.deleteRestaurantById)
 

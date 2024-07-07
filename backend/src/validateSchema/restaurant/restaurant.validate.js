@@ -48,6 +48,9 @@ const restaurantSchema = {
         .items(
             joi.string().alphanum()).messages({
                 ...messages.category
+            }).custom((value, helpers) => {
+                if (value.length === 0) return helpers.message("Category can't be empty")
+                return value
             }),
 
     totalTable: joi.number().integer().min(1).messages({

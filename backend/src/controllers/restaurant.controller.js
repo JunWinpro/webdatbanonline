@@ -254,7 +254,7 @@ const restaurantController = {
             const user = req.user
 
             const restaurant = await ModelDb.RestaurantModel.findOne({
-                manager: new mongoose.Type.ObjectId(user.userId),
+                manager: user.userId,
                 isDeleted: false,
                 _id: id
             })
@@ -280,20 +280,20 @@ const restaurantController = {
             const user = req.user
 
             const restaurantInfo = await ModelDb.RestaurantInfoModel.findOne({
-                restaurant: new mongoose.Type.ObjectId(id),
+                restaurant: id,
                 isDeleted: false
             }).populate('restaurant')
 
             if (!restaurantInfo) throw new Error("Restaurant not found")
             if (restaurantInfo.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
-
+            restaurantInfo.depopulate()
             for (let key of Object.keys(req.body)) {
                 restaurantInfo[key] = req.body[key]
             }
             await restaurantInfo.save()
             const message = "Update restaurant info success"
 
-            dataResponse(res, 200, message, restaurantInfoResponse(restaurantInfo.depopulate('restaurant'), user))
+            dataResponse(res, 200, message, restaurantInfoResponse(restaurantInfo, user))
         }
         catch (err) {
             returnError(res, 403, err)
@@ -313,7 +313,7 @@ const restaurantController = {
             if (!restaurant) throw new Error("Restaurant not found")
 
             if (restaurant.avatar) {
-                const publicId = getPublicIdcId(restaurant.avatar)
+                const publicId = getPublicId(restaurant.avatar)
                 const destroyResult = await cloudinaryUploader.destroy(publicId)
                 if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
             }
@@ -321,7 +321,7 @@ const restaurantController = {
             const file = req.file
 
             const folder = `${baseFolder.RESTAURANT}/${id}/Avatar`
-            const result = await cloudinary.uploader.upload(file, folder)
+            const result = await cloudinaryUploader.upload(file, folder)
 
             if (!result) throw new Error("Upload failed")
 
@@ -334,7 +334,7 @@ const restaurantController = {
             dataResponse(res, 200, message, restaurantResponse(restaurant))
 
         } catch (err) {
-            returnError(res, 500, err)
+            returnError(res, 403, err)
         }
     },
     uploadRestaurantImages: async (req, res) => {
@@ -366,8 +366,9 @@ const restaurantController = {
                 default:
                     break;
             }
-            if (!req.body[field] && !req.files) throw new Error("Please upload image")
+            if (!req.body[field] && req.files.length === 0) throw new Error("Please select image(s) to upload or delete")
             if (req.body[field]) {
+
                 if (req.body[field].length === 0) throw new Error("Please select image to delete")
 
                 for (let item of req.body[field]) {
@@ -377,7 +378,6 @@ const restaurantController = {
                     const publicId = getPublicId(item)
 
                     if (!publicId) throw new Error("Invalid image url")
-
                     const destroyResult = await cloudinaryUploader.destroy(publicId)
 
                     if (destroyResult.result === "not found") throw new Error("Delete image failed: Image not found")
@@ -386,9 +386,7 @@ const restaurantController = {
                 currentRestaurant[field] = currentRestaurant[field].filter(image => !req.body[field].includes(image))
 
             }
-            if (req.files) {
-                if (req.files.length === 0) throw new Error("Please upload image")
-
+            if (req.files.length > 0) {
                 const files = req.files
                 const folder = `${baseFolder.RESTAURANT}/${id}/${field}`
                 for (let file of files) {
@@ -398,9 +396,7 @@ const restaurantController = {
 
                     currentRestaurant[field].push(result.secure_url)
                 }
-
             }
-
             await currentRestaurant.save()
             const message = "Upload success"
             dataResponse(res, 200, message, restaurantResponse(currentRestaurant.depopulate('restaurant')))
@@ -433,7 +429,52 @@ const restaurantController = {
             returnError(res, 403, err)
         }
     },
-
+    openRestaurantById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const user = req.user
+            const restaurant = await ModelDb.RestaurantModel.findOneAndUpdate({
+                manager: user.userId,
+                _id: id,
+                isDeleted: false,
+                isOpening: false,
+                isVerified: true,
+                isActive: true
+            }, {
+                $set: {
+                    isOpening: true
+                }
+            })
+            if (!restaurant) throw new Error("Restaurant not found")
+            dataResponse(res, 200, "Restaurant is opening now", restaurantResponse(restaurant))
+        }
+        catch (err) {
+            returnError(res, 403, err)
+        }
+    },
+    closeRestaurantById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const user = req.user
+            const restaurant = await ModelDb.RestaurantModel.findOneAndUpdate({
+                manager: user.userId,
+                _id: id,
+                isDeleted: false,
+                isOpening: true,
+                isVerified: true,
+                isActive: true
+            }, {
+                $set: {
+                    isOpening: false
+                }
+            })
+            if (!restaurant) throw new Error("Restaurant not found")
+            dataResponse(res, 200, "Restaurant is closing now", restaurantResponse(restaurant))
+        }
+        catch (err) {
+            returnError(res, 403, err)
+        }
+    },
     activeRestaurantById: async (req, res) => {
         try {
             const { id } = req.params
@@ -455,7 +496,7 @@ const restaurantController = {
             }
 
             await sendEmail(restaurant.manager.email, undefined, info)
-
+            restaurant.depopulate()
             const message = "Active restaurant success"
 
             dataResponse(res, 200, message, restaurantResponse(restaurant))
