@@ -18,7 +18,7 @@ const schedule = Array.from({ length: 7 }, (_, i) => ({
 }))
 const create = async () => {
     try {
-        await axios.post('http://localhost:6000/restaurants', {
+        await axios.post('http://localhost:8000/restaurants', {
             name: generateRandomName(),
             address: {
                 streetAddress: '123 Main St',

@@ -3,10 +3,10 @@ import menuResponse from "../dataResponse/menu.js"
 import returnError from "../errors/error.js"
 import ModelDb from "../models/model.js"
 import cloudinaryUploader from "../utils/cloudinaryUploader.js"
-import baseFolder from "../configs/cloudinaryFolder.config.js"
 import duplicateErr from "../errors/duplicate.js"
 import getPublicId from "../utils/getPublicId.js"
 import pageSplit from "../utils/pageSplit.util.js"
+import baseFolder from "../configs/cloudinaryFolder.config.js"
 const menuController = {
     createMenu: async (req, res) => {
         try {
@@ -40,7 +40,16 @@ const menuController = {
                 restaurant: restaurantId,
                 'code.suffix': code ? code : "001"
             })
-
+            if (menu.type === "food") {
+                if (menu.price < restaurant.minPrice || restaurant.minPrice === null) {
+                    restaurant.minPrice = menu.price
+                    await restaurant.save()
+                }
+                if (menu.price > restaurant.maxPrice) {
+                    restaurant.maxPrice = menu.price
+                    await restaurant.save()
+                }
+            }
             const message = "Create menu success"
 
             dataResponse(res, 200, message, menuResponse(menu))
@@ -118,7 +127,8 @@ const menuController = {
             }
 
             const file = req.file
-            const result = await cloudinaryUploader.upload(file)
+            const folder = `${baseFolder.MENU}/${id}/Image`
+            const result = await cloudinaryUploader.upload(file, folder)
 
             if (!result) throw new Error("Upload image failed")
 
@@ -134,7 +144,7 @@ const menuController = {
     updateMenuById: async (req, res) => {
         try {
             const { id } = req.params
-            const { restaurantId } = req.body
+            const { restaurantId, price } = req.body
             const user = req.user
 
             const restaurant = await ModelDb.RestaurantModel.findOne({
@@ -147,12 +157,41 @@ const menuController = {
             const menu = await ModelDb.MenuModel.findById(id)
             if (!menu) throw new Error("Menu not found")
 
+            if (menu.type === "food") {
+                const menus = await ModelDb.MenuModel.find({
+                    type: "food"
+                }).sort({
+                    price: 1
+                }).lean()
+
+                const otherMenus = menus.filter(item => item.name !== menu.name)
+
+                if (price < restaurant.minPrice) {
+                    restaurant.minPrice = price
+                }
+                if (price > restaurant.minPrice && price < restaurant.maxPrice && price > otherMenus[0].price) {
+                    restaurant.minPrice = otherMenus[0].price
+                }
+                if (price > restaurant.maxPrice) {
+                    restaurant.maxPrice = price
+                }
+                if (price < otherMenus[0].price) {
+                    restaurant.minPrice = price
+                }
+                if (price > otherMenus[otherMenus.length - 1].price) {
+                    restaurant.maxPrice = price
+                }
+                if (price < otherMenus[otherMenus.length - 1].price) {
+                    restaurant.maxPrice = otherMenus[otherMenus.length - 1].price
+                }
+            }
             for (let key of Object.keys(req.body)) {
                 menu[key] = req.body[key]
             }
-            menu.image = image ? image : menu.image
 
             await menu.save()
+            await restaurant.save()
+
             const message = "Update menu success"
             dataResponse(res, 200, message, menuResponse(menu))
 

@@ -2,6 +2,6 @@ const baseFolder = {
     USER: "User",
     RESTAURANT: "Restaurant",
     REVIEW: "Review",
-    MENU: "Menu"
+    MENU: "Menu",
 }
 export default baseFolder

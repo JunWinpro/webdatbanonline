@@ -15,7 +15,7 @@ menuRoute.post('/', tokenMiddleware.verifyAccessToken, authorization.manager, va
 menuRoute.get('/:id', validateData.objectId, menuController.getMenuById)
 menuRoute.get('/restaurant/:id', validateData.objectId, menuController.getMenuByRestaurantId)
 
-menuRoute.put('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, memoryUploader.single('file'), imageValidate.file, validateData.objectId, validateData.menu.updateMenu, menuController.updateMenuById)
+menuRoute.put('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.menu.updateMenu, menuController.updateMenuById)
 
 menuRoute.delete('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, menuController.deleteMenuById)
 export default menuRoute
