@@ -25,18 +25,21 @@ const messages = {
         'any.required': "Price is required",
         'number.base': "Price must be a number",
         'number.min': "Price must be 0 or higher",
+
     },
 
     discount: {
         'any.required': "Discount is required",
         'number.base': "Discount must be a number",
         'number.min': "Discount must be 0 or higher",
+        'number.max': "Discount must be lower or equal to 100"
     },
 
     restaurantId: {
         'string.hex': "Restaurant id must be a valid ObjectId",
         'string.empty': 'Restaurant id is empty',
-        'any.required': 'Restaurant id is required'
+        'any.required': 'Restaurant id is required',
+        'string.length': 'Restaurant id must be 24 characters long'
     }
 }
 

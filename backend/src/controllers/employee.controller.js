@@ -106,14 +106,18 @@ const employeeController = {
 
     getEmployees: async (req, res) => {
         try {
-            const { page, pageSize, filter, search, sortBy } = req.query
+            const { page, pageSize, filter, search, sortBy, restaurant } = req.query
             const user = req.user
-            const employees = await ModelDb.UserModel.find({
+
+            const filterModel = {}
+
+            const employees = await ModelDb.EmployeeModel.find({
                 isDeleted: false,
                 manager: user.userId
             })
+            console.log(employees);
 
-            if (!employees.length === 0) throw new Error("User not found")
+            if (employees.length === 0) throw new Error("User not found")
 
             const data = employees.map(employee => employeeResponse(employee));
 

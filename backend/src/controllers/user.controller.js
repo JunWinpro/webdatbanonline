@@ -33,7 +33,7 @@ const userController = {
             if (employeeExist) throw new Error("Phone already used")
 
             const hashPassword = bcryptPassword.hashPassword(password)
-            
+
             const veryficationToken = crypto.randomUUID()
             console.log(veryficationToken)
 

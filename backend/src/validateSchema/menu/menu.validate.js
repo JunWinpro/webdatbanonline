@@ -52,9 +52,6 @@ const menuValidate = {
     }),
 
     updateMenu: joi.object({
-        name: menuSchema.name,
-        type: menuSchema.type,
-        unit: menuSchema.unit,
         price: menuSchema.price,
         discount: menuSchema.discount,
         restaurantId: menuSchema.restaurantId.required()
