@@ -46,7 +46,7 @@ const messages = {
             'string.empty': 'Menu item is empty',
             'any.required': 'Menu item is required'
         },
-        numberOfUnit: {
+        quantity: {
             'number.base': "Number of unit must be a number",
             'number.min': "Number of unit must be greater than 0",
             'number.empty': "Number of unit can't be empty",
