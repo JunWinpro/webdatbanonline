@@ -5,7 +5,7 @@ const menuSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: collection.MENUS
     },
-    numberOfUnit: Number,
+    quantity: Number,
     note: String
 },
     {
@@ -30,6 +30,7 @@ const bookingSchema = new mongoose.Schema(
         },
         table: [Number],
         numberOfTable: Number,
+        note: String,
         menu: [menuSchema],
         checkinTime: {
             type: Number,

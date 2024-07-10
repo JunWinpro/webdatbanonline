@@ -7,7 +7,7 @@ import pageSplit from "../utils/pageSplit.util.js"
 const bookingController = {
     userBooking: async (req, res) => {
         try {
-            const { restaurantId, checkinTime, table, numberOfTable } = req.body
+            const { restaurantId, checkinTime, table, numberOfTable, menu } = req.body
 
             const currentRestaurant = await ModelDb.RestaurantInfoModel.findOne({
                 restaurant: restaurantId,
@@ -72,6 +72,21 @@ const bookingController = {
                 list = emptyTables.slice(0, numberOfTable)
                 totalOfTables = numberOfTable
             }
+            /* menu = [
+            {
+                menuItem:Id,
+                quantity: number
+                note: string
+            }
+            ] */
+            if (menu) {
+                const checkMenus = ModelDb.MenuModel.find({
+                    _id: { $in: menu.map(item => item.menuItem) },
+                    restaurant: restaurantId,
+                    isDeleted: false,
+                })
+                if (checkMenus.length !== menu.length) throw new Error("Some menu items don't exist")
+            }
 
             const booking = await ModelDb.BookingModel.create({
                 ...req.body,
@@ -121,18 +136,18 @@ const bookingController = {
             let list = []
             const { totalTable } = currentRestaurant
 
-            if (table) {
-                filter.table = {
-                    $in: table
-                }
-                const findBooking = await ModelDb.BookingModel.findOne(filter).lean()
-                if (findBooking) throw new Error("Table already booked")
 
-                if (table.length > totalTable || table[length - 1] > totalTable) throw new Error("Not enough tables, please try again")
-
-                list = table
-                totalOfTables = table.length
+            filter.table = {
+                $in: table
             }
+            const findBooking = await ModelDb.BookingModel.findOne(filter).lean()
+            if (findBooking) throw new Error("Table already booked")
+
+            if (table.length > totalTable || table[length - 1] > totalTable) throw new Error("Not enough tables, please try again")
+
+            list = table
+            totalOfTables = table.length
+
 
             const booking = await ModelDb.BookingModel.create({
                 ...req.body,
@@ -234,6 +249,30 @@ const bookingController = {
             const message = "Update booking success"
             dataResponse(res, 200, message, bookingResponse(booking))
 
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+    updateBookingMenuById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const { restaurantId, menu } = req.body
+            const booking = await ModelDb.BookingModel.findOneAndUpdate(
+                {
+                    _id: id,
+                    restaurant: restaurantId,
+                    isDeleted: false,
+                    isCheckin: true
+                },
+                {
+                    $set: {
+                        menu
+                    }
+                },
+            )
+            if (!booking) throw new Error('Booking not found')
+            const message = "Update booking menu success"
+            dataResponse(res, 200, message, bookingResponse(booking))
         } catch (error) {
             returnError(res, 403, error)
         }

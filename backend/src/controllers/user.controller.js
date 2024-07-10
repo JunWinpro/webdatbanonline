@@ -35,7 +35,6 @@ const userController = {
             const hashPassword = bcryptPassword.hashPassword(password)
 
             const veryficationToken = crypto.randomUUID()
-            console.log(veryficationToken)
 
             const newUser = await ModelDb.UserModel.create({
                 ...req.body,
@@ -321,16 +320,13 @@ const userController = {
                 isVerified: true
             })
 
-
             if (!user) throw new Error("User not found")
-
 
             if (user.avatar) {
                 const publicId = getPublicId(user.avatar)
                 const destroyResult = await cloudinaryUploader.destroy(publicId)
                 if (destroyResult.result !== 'ok') throw new Error("Delete image failed")
             }
-
 
             const file = req.file
             const folder = `${baseFolder.USER}/${id}/Avatar`

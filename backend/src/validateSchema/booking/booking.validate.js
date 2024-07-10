@@ -34,13 +34,15 @@ const bookingSchema = {
     numberOfTable: joi.number().integer().min(1).messages({
         ...messages.numberOfTable
     }),
-
+    note: joi.string().regex(/^[A-Za-z0-9 ]+$/).messages({
+        ...messages.menu.note
+    }),
     menu: joi.array().items(joi.object({
         menuItem: joi.string().hex().length(24).messages({
             ...messages.menu.menuItem
         }),
-        numberOfUnit: joi.number().integer().min(1).messages({
-            ...messages.menu.numberOfUnit
+        quantity: joi.number().integer().min(1).messages({
+            ...messages.menu.quantity
         }),
         note: joi.string().regex(/^[A-Za-z0-9 ]+$/).messages({
             ...messages.menu.note
@@ -59,10 +61,11 @@ const bookingValidate = {
         firstName: bookingSchema.firstName,
         lastName: bookingSchema.lastName,
         phone: bookingSchema.phone,
-        restaurantId: bookingSchema.restaurantId,
+        restaurantId: bookingSchema.restaurantId.required(),
         table: bookingSchema.table,
         numberOfTable: bookingSchema.numberOfTable,
         menu: bookingSchema.menu,
+        notes: bookingSchema.note,
         checkinTime: bookingSchema.checkinTime.required()
     }).xor('table', 'numberOfTable').messages({
         "array.includesRequiredUnknowns": "Table or number of table is required"
@@ -72,7 +75,7 @@ const bookingValidate = {
         firstName: bookingSchema.firstName,
         lastName: bookingSchema.lastName,
         phone: bookingSchema.phone,
-        restaurantId: bookingSchema.restaurantId,
+        restaurantId: bookingSchema.restaurantId.required(),
         table: bookingSchema.table,
         menu: bookingSchema.menu,
         checkinTime: bookingSchema.checkinTime.required()

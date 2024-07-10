@@ -15,21 +15,6 @@ const billSchema = new mongoose.Schema(
         booking: {
             type: mongoose.Schema.Types.ObjectId,
         },
-        billMenu: [{
-            menu: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: collection.MENUS,
-                required: true
-            },
-            totalUnit: {
-                type: Number,
-                required: true,
-            },
-            lastPrice: {
-                type: Number,
-                required: true
-            },
-        }],
         paymentMethod: {
             type: String,
             enum: ["transfer", "cash"],
