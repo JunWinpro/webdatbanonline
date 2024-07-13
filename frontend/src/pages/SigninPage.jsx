@@ -1,11 +1,19 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import axios from "axios";
+import { UserContext } from "../context/UserContext";
 
-export const SigninPage = ({ onLogin }) => {
+export const SigninPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { user, login } = useContext(UserContext);
+
+
+  if (user) {
+    return <Navigate to="/" />;
+  }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,21 +22,21 @@ export const SigninPage = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-  
+    setIsLoading(true);
+
     try {
-      console.log('Sending request with data:', formData);
       const response = await axios.post(
         "http://localhost:8000/users/login",
         formData
       );
-      console.log('Response:', response);
-  
+
       if (response.data.success) {
+
         localStorage.setItem("accessToken", response.data.data.accessToken);
         localStorage.setItem("refreshToken", response.data.data.refreshToken);
-  
-        onLogin(response.data.data);
-   
+
+
+        login(response.data.data);
         navigate("/");
       } else {
         setError("Login failed. Please try again.");
@@ -38,15 +46,12 @@ export const SigninPage = ({ onLogin }) => {
       if (error.response) {
         console.error('Response data:', error.response.data);
         console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Error setting up request:', error.message);
       }
       setError(
         error.response?.data?.message || "An error occurred. Please try again."
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,9 +124,10 @@ export const SigninPage = ({ onLogin }) => {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                disabled={isLoading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
               >
-                Sign in
+                {isLoading ? "Signing in..." : "Sign in"}
               </button>
             </div>
           </form>

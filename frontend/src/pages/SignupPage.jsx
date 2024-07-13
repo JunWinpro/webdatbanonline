@@ -27,7 +27,6 @@ export const SignupPage = ({ onSignup }) => {
       return;
     }
     setError("");
-
     try {
       const response = await axios.post(
         "http://localhost:8000/users/register",

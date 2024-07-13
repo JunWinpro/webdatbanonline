@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserContext } from "../../context//UserContext";
 
 import {
   NavigationMenu,
@@ -20,23 +21,26 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu.jsx";
 
-const Navbar = ({ navItems, currentUser, onSignOut, updateUserAvatar }) => {
+const Navbar = ({ navItems }) => {
   const navigate = useNavigate();
+  const { user, logout, updateUser } = useContext(UserContext);
   const [isChangingAvatar, setIsChangingAvatar] = useState(false);
   const [newAvatarUrl, setNewAvatarUrl] = useState("");
 
   const handleSignOut = () => {
-    onSignOut();
+    logout();
     navigate("/");
   };
 
   const handleAvatarChange = () => {
     if (newAvatarUrl) {
-      updateUserAvatar(newAvatarUrl);
+      updateUser({ ...user, avatar: newAvatarUrl });
       setIsChangingAvatar(false);
       setNewAvatarUrl("");
     }
   };
+
+  const defaultAvatarUrl = "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png";
 
   return (
     <div className="bg-white flex justify-between items-center px-4">
@@ -70,27 +74,27 @@ const Navbar = ({ navItems, currentUser, onSignOut, updateUserAvatar }) => {
       </NavigationMenu>
 
       <div className="flex items-center text-black">
-        {currentUser ? (
+        {user ? (
           <>
             <Avatar>
               <AvatarImage
-                src={
-                  currentUser.avatar ||
-                  "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png"
-                }
+                src={user.avatar || defaultAvatarUrl}
               />
               <AvatarFallback>
-                {currentUser.firstName.charAt(0).toUpperCase()}
+                {user.firstName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <span className="ml-2 cursor-pointer">{`${currentUser.firstName} ${currentUser.lastName}`}</span>
+                <span className="ml-2 cursor-pointer">{`${user.firstName} ${user.lastName}`}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>User</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => navigate("/profile")}>
+                  Profile
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setIsChangingAvatar(true)}>
                   Change Avatar
                 </DropdownMenuItem>

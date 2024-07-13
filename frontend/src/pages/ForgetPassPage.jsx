@@ -29,7 +29,7 @@ export const ForgetPassPage = () => {
       setMessage(response.data.message);
       setIsError(!response.data.success);
       if (response.data.success) {
-        setCountdown(90); // Start 1 minute 30 seconds countdown
+        setCountdown(90);
       }
     } catch (error) {
       setMessage(error.response?.data?.message || 'An error occurred');
