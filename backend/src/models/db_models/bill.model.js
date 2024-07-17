@@ -14,8 +14,6 @@ const billSchema = new mongoose.Schema(
         },
         booking: {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            ref: collection.BOOKINGS
         },
         paymentMethod: {
             type: String,
@@ -36,13 +34,17 @@ const billSchema = new mongoose.Schema(
                 required: true
             }
         },
-        table: [{
-            type: Number,
+        tableId: {
+            type: String,
             required: true
-        }],
+        },
         totalPrice: {
             type: Number,
             required: true
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false
         }
     },
     {

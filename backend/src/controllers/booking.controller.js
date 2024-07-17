@@ -27,7 +27,7 @@ const bookingController = {
 
             const currentDate = Date.now()
 
-            if (currentDate + 3 * 24 * 60 * 60 * 1000 < checkinTime) throw new Error("Can not booking more over 3 days")
+            if (currentDate + 3 * 24 * 60 * 60 * 1000 > checkinTime) throw new Error("Can not booking more over 3 days")
 
             const filter = {
                 restaurant: restaurantId,
@@ -48,7 +48,9 @@ const bookingController = {
                 }
                 const findBooking = await ModelDb.BookingModel.findOne(filter).lean()
                 if (findBooking) throw new Error("Table already booked")
-                if (table.length > totalTable || table[table.length - 1] > totalTable) throw new Error("Not enough tables, please try again")
+
+                if (table.length > totalTable || table[length - 1] > totalTable) throw new Error("Not enough tables, please try again")
+
                 list = table
                 totalOfTables = table.length
             }
@@ -70,8 +72,15 @@ const bookingController = {
                 list = emptyTables.slice(0, numberOfTable)
                 totalOfTables = numberOfTable
             }
+            /* menu = [
+            {
+                menuItem:Id,
+                quantity: number
+                note: string
+            }
+            ] */
             if (menu) {
-                const checkMenus = await ModelDb.MenuModel.find({
+                const checkMenus = ModelDb.MenuModel.find({
                     _id: { $in: menu.map(item => item.menuItem) },
                     restaurant: restaurantId,
                     isDeleted: false,
@@ -139,14 +148,6 @@ const bookingController = {
             list = table
             totalOfTables = table.length
 
-            if (menu) {
-                const checkMenus = ModelDb.MenuModel.find({
-                    _id: { $in: menu.map(item => item.menuItem) },
-                    restaurant: restaurantId,
-                    isDeleted: false,
-                })
-                if (checkMenus.length !== menu.length) throw new Error("Some menu items don't exist")
-            }
 
             const booking = await ModelDb.BookingModel.create({
                 ...req.body,
@@ -261,8 +262,7 @@ const bookingController = {
                     _id: id,
                     restaurant: restaurantId,
                     isDeleted: false,
-                    isCheckin: true,
-                    isFinished: false
+                    isCheckin: true
                 },
                 {
                     $set: {
@@ -345,29 +345,6 @@ const bookingController = {
             returnError(res, 403, error)
         }
     },
-    cancelBookingById: async (req, res) => {
-        try {
-            const { id } = req.params
-            const findBooking = await ModelDb.BookingModel.findOne({
-                _id: id,
-                isCheckin: false,
-                isFinished: false,
-                isCanceled: false,
-                isDeleted: false
-            }).populate('restaurant')
-            if (!findBooking) throw new Error("Booking not found")
-            const user = req.user
-            if (findBooking.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
-            findBooking.depopulate()
-            findBooking.isCanceled = true
-            await findBooking.save()
-
-            const message = "Delete booking success"
-            dataResponse(res, 200, message)
-        } catch (error) {
-            returnError(res, 403, error)
-        }
-    },
     deleteBookingById: async (req, res) => {
         try {
             const { id } = req.params
@@ -376,11 +353,9 @@ const bookingController = {
                 isCheckin: false,
                 isFinished: false,
                 isDeleted: false
-            }).populate('restaurant')
+            })
             if (!findBooking) throw new Error("Booking not found")
-            const user = req.user
-            if (findBooking.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
-            findBooking.depopulate()
+
             findBooking.isDeleted = true
             await findBooking.save()
 
