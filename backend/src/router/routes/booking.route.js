@@ -13,4 +13,5 @@ bookingRoute.post('/user', tokenMiddleware.verifyAccessToken, authorization.user
 bookingRoute.post('/employee', tokenMiddleware.verifyAccessToken, authorization.employee, validateData.booking.employeeBooking, bookingController.employeeBooking)
 
 bookingRoute.get('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, bookingController.getBookingListByRestaurantId)
+
 export default bookingRoute

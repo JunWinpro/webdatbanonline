@@ -4,8 +4,7 @@ import cors from "cors"
 import rootRouter from "./src/router/index.js";
 import { v2 as cloudinary } from "cloudinary"
 import connectDb from "./src/database/db.js";
-import cron from "node-cron"
-import autoDeleteBooking from "./src/cron/bookingChecker.js";
+import autoDeleteBooking from "./src/scheduleMongoDB/bookingChecker.js";
 import multer from "multer"
 import returnError from "./src/errors/error.js";
 dotenv.config()
@@ -22,9 +21,9 @@ cloudinary.config({
 })
 
 connectDb()
-
+setInterval(autoDeleteBooking, 60 * 1000)
 app.use(rootRouter)
-cron.schedule('0 0,15,30,45 * * * *', autoDeleteBooking)
+
 app.use((err, _, res, next) => {
     if (err instanceof multer.MulterError) {
         if (err.code === "LIMIT_UNEXPECTED_FILE") {
