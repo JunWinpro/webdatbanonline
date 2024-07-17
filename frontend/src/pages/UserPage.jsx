@@ -1,11 +1,14 @@
 import React, { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import axiosInstance from "../utils/axiosInstance";
 
 export const UserPage = () => {
-  const { user, updateUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  const { user, updateUser, logout } = useContext(UserContext);
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState(user || {});
+  const [error, setError] = useState("");
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -23,12 +26,43 @@ export const UserPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Updated data:", editedData);
-    updateUser(editedData);
-    setIsEditing(false);
+    const changedData = {};
+    for (const key in editedData) {
+      if (editedData[key] !== user[key]) {
+        changedData[key] = editedData[key];
+      }
+    }
+
+    if (Object.keys(changedData).length === 0) {
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.put(
+        `/users/${user._id}`,
+        changedData
+      );
+      if (response.data.success) {
+        await updateUser(changedData);
+        setIsEditing(false);
+        setError("");
+      } else {
+        setError("Failed to update profile. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      if (error.response && error.response.status === 401) {
+        logout();
+        navigate("/signin");
+      } else {
+        setError("An error occurred while updating the profile.");
+      }
+    }
   };
 
-  const defaultAvatarUrl = "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png";
+  const defaultAvatarUrl =
+    "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png";
 
   if (!user) {
     return (
@@ -36,7 +70,10 @@ export const UserPage = () => {
         <div className="bg-white p-8 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">No User Data Available</h2>
           <p>Please sign in to view your profile.</p>
-          <Link to="/signin" className="mt-4 inline-block text-red-600 hover:text-red-800">
+          <Link
+            to="/signin"
+            className="mt-4 inline-block text-red-600 hover:text-red-800"
+          >
             Sign In
           </Link>
         </div>
@@ -48,7 +85,9 @@ export const UserPage = () => {
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
         <div className="px-4 py-5 sm:px-6 bg-red-600 flex justify-between items-center">
-          <h3 className="text-lg leading-6 font-medium text-white">User Profile</h3>
+          <h3 className="text-lg leading-6 font-medium text-white">
+            User Profile
+          </h3>
           {!isEditing && (
             <button
               onClick={handleEdit}
@@ -61,10 +100,14 @@ export const UserPage = () => {
         <div className="border-t border-gray-200">
           <form onSubmit={handleSubmit}>
             <dl>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 ">
                 <dt className="text-sm font-medium text-gray-500">Avatar</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <img src={user.avatar || defaultAvatarUrl} alt="User Avatar" className="w-24 h-24 rounded-full" />
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 ">
+                  <img
+                    src={user.avatar || defaultAvatarUrl}
+                    alt="User Avatar"
+                    className="ml-10 w-40 h-40 rounded-full"
+                  />
                 </dd>
               </div>
               {renderField("First name", "firstName")}
@@ -72,21 +115,28 @@ export const UserPage = () => {
               {renderField("Email address", "email")}
               {renderField("Phone number", "phone")}
               {renderField("Gender", "gender")}
-              
+
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">Role</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "N/A"}
+                  {user.role
+                    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                    : "N/A"}
                 </dd>
               </div>
 
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Account created</dt> 
+                <dt className="text-sm font-medium text-gray-500">
+                  Account created
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
+                  {user.createdAt
+                    ? new Date(user.createdAt).toLocaleDateString()
+                    : "N/A"}
                 </dd>
               </div>
             </dl>
+            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
             {isEditing && (
               <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
                 <button
@@ -117,7 +167,11 @@ export const UserPage = () => {
 
   function renderField(label, field) {
     return (
-      <div className={`bg-${field === "email" ? "gray-50" : "white"} px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6`}>
+      <div
+        className={`bg-${
+          field === "email" ? "gray-50" : "white"
+        } px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6`}
+      >
         <dt className="text-sm font-medium text-gray-500">{label}</dt>
         <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {isEditing && field !== "email" ? (

@@ -1,7 +1,8 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserContext } from "../../context//UserContext";
+import { UserContext } from "../../context/UserContext";
+import axiosInstance from '../../utils/axiosInstance';
 
 import {
   NavigationMenu,
@@ -14,8 +15,8 @@ import {
 import { Button } from "../ui/button.jsx";
 import {
   DropdownMenu,
-  DropdownMenuItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -26,17 +27,27 @@ const Navbar = ({ navItems }) => {
   const { user, logout, updateUser } = useContext(UserContext);
   const [isChangingAvatar, setIsChangingAvatar] = useState(false);
   const [newAvatarUrl, setNewAvatarUrl] = useState("");
+  const [error, setError] = useState("");
 
   const handleSignOut = () => {
     logout();
     navigate("/");
   };
 
-  const handleAvatarChange = () => {
+  const handleAvatarChange = async () => {
     if (newAvatarUrl) {
-      updateUser({ ...user, avatar: newAvatarUrl });
-      setIsChangingAvatar(false);
-      setNewAvatarUrl("");
+      try {
+        const response = await axiosInstance.put(`/users/${user._id}`, { avatar: newAvatarUrl });
+        if (response.data.success) {
+          await updateUser({ ...user, avatar: newAvatarUrl });
+          setIsChangingAvatar(false);
+          setNewAvatarUrl("");
+          setError("");
+        }
+      } catch (error) {
+        console.error("Error updating avatar:", error);
+        setError("Failed to update avatar. Please try again.");
+      }
     }
   };
 
@@ -77,12 +88,8 @@ const Navbar = ({ navItems }) => {
         {user ? (
           <>
             <Avatar>
-              <AvatarImage
-                src={user.avatar || defaultAvatarUrl}
-              />
-              <AvatarFallback>
-                {user.firstName.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              <AvatarImage src={user.avatar || defaultAvatarUrl} />
+              <AvatarFallback>{user.firstName.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
 
             <DropdownMenu>
@@ -114,12 +121,13 @@ const Navbar = ({ navItems }) => {
                   className="mr-2 p-1 border rounded"
                 />
                 <Button onClick={handleAvatarChange}>Update Avatar</Button>
+                {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
               </div>
             )}
           </>
         ) : (
           <div>
-            <Button>
+            <Button className="mr-2">
               <Link to="/signin">Sign In</Link>
             </Button>
             <Button>

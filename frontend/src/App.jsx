@@ -4,7 +4,7 @@ import { HomePage } from "./pages/HomePage.jsx";
 import { SigninPage } from "./pages/SigninPage";
 import { SignupPage } from "./pages/SignupPage";
 import { ErrorPage } from "./pages/ErrorPage.jsx";
-import { ContactPage } from "./pages/Contact.jsx";
+
 import FixedNavBar from "./components/HomePage/FixedNavBar.jsx";
 import Navbar from "./components/HomePage/Navbar";
 import React, { useState, useEffect } from "react";
@@ -55,13 +55,12 @@ function App() {
       {showFixedNavBar && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <FixedNavBar navItems={navItems} />
-        </div>
+        </div>  
       )}
       <SearchBanner />
       <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/contact" element={<ContactPage />} />
           <Route path="/product" element={<ProductPage />} />
           <Route path="/signin" element={<SigninPage />} />
           <Route path="/signup" element={<SignupPage />} />
