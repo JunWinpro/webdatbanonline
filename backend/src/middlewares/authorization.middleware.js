@@ -8,37 +8,20 @@ const role = {
 }
 
 const authorization = {
-    user: async (req, res, next) => {
+    user: (req, res, next) => {
         try {
             const user = req.user
             if (user.role !== role.user) throw new Error("You don't have permission for this action")
-            // const currentUser = await ModelDb.UserModel.findOne({
-            //     _id: user.userId,
-            //     role: "user",
-            //     isDeleted: false,
-            //     isVerified: true
-            // })
-
-            // if (!currentUser) throw new Error("You don't have permission for this action")
-
             next()
         }
         catch (err) {
             returnError(res, 403, err)
         }
     },
-    employee: async (req, res, next) => {
+    employee: (req, res, next) => {
         try {
             const user = req.user
             if (user.role !== role.employee) throw new Error("You don't have permission for this action")
-            // const currentUser = await ModelDb.EmployeeModel.findOne({
-            //     _id: user.userId,
-            //     role: "employee",
-            //     isDeleted: false,
-            // })
-
-            // if (!currentUser) throw new Error("You don't have permission for this action")
-
             next()
         }
         catch (err) {
@@ -47,42 +30,19 @@ const authorization = {
             returnError(res, 403, err)
         }
     },
-    userOrEmployee: async (req, res, next) => {
+    userOrEmployee: (req, res, next) => {
         try {
             const user = req.user
             if (user.role !== role.user || user.role !== role.employee) throw new Error("You don't have permission for this action")
-            // const currentUser = await ModelDb.UserModel.findOne({
-            //     _id: user.userId,
-            //     role: ["user"],
-            //     isDeleted: false,
-            //     isVerified: true
-            // })
-
-            // const currentEpmloyee = await ModelDb.EmployeeModel.findOne({
-            //     _id: user.userId,
-            //     role: "employee",
-            //     isDeleted: false
-            // })
-            // if (!currentUser && !currentEpmloyee) throw new Error("You don't have permission for this action")
-
             next()
-
         } catch (error) {
             returnError(res, 403, error)
         }
     },
-    manager: async (req, res, next) => {
+    manager: (req, res, next) => {
         try {
             const user = req.user
             if (user.role !== role.manager) throw new Error(`You don't have permission for this action`)
-            // const currentUser = await ModelDb.UserModel.findOne({
-            //     _id: user.userId,
-            //     role: "manager",
-            //     isDeleted: false,
-            //     isVerified: true
-            // })
-
-            // if (!currentUser) throw new Error("You don't have permission for this action")
             next()
         }
         catch (err) {
@@ -92,19 +52,10 @@ const authorization = {
         }
     },
 
-    admin: async (req, res, next) => {
+    admin: (req, res, next) => {
         try {
             const user = req.user
             if (user.role !== role.admin) throw new Error("You don't have permission for this action")
-            // const currentUser = await ModelDb.UserModel.findOne({
-            //     _id: user.userId,
-            //     role: "admin",
-            //     isDeleted: false,
-            //     isVerified: true
-            // })
-
-            // if (!currentUser) throw new Error("You don't have permission for this action")
-
             next()
         }
         catch (err) {
@@ -114,23 +65,24 @@ const authorization = {
         }
     },
 
-    managerOrAdmin: async (req, res, next) => {
+    managerOrAdmin: (req, res, next) => {
         try {
             const user = req.user
             if (user.role !== role.admin || user.role !== role.manager) throw new Error("You don't have permission for this action")
-            // const currentUser = await ModelDb.UserModel.findOne({
-            //     _id: user.userId,
-            //     role: { $in: ["manager", "admin"] },
-            //     isDeleted: false,
-            //     isVerified: true
-            // })
-            // if (!currentUser) throw new Error("You don't have permission for this action")
-
             next()
         }
         catch (err) {
             console.log("Authorization err: ", err)
             returnError(res, 403, err)
+        }
+    },
+    employeeOrManager: (req, res, next) => {
+        try {
+            const user = req.user
+            if (user.role !== role.employee || user.role !== role.manager) throw new Error("You don't have permission for this action")
+            next()
+        } catch (error) {
+            returnError(res, 403, error)
         }
     }
 }

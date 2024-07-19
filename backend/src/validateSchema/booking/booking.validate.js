@@ -1,9 +1,6 @@
 import joi from 'joi'
 import messages from "./messages.js";
 
-
-
-
 const bookingSchema = {
     restaurantId: joi.string().hex().length(24).messages({
         ...messages.restaurantId
@@ -21,73 +18,66 @@ const bookingSchema = {
     restaurantId: joi.string().hex().length(24).messages({
         ...messages.restaurantId
     }),
-    table: joi.array().items(joi.number().integer().min(1).required().messages({
-        ...messages.table
-    })).messages({
-        'array.base': "Table is an array of table number"
-    }).custom((value, helpers) => {
-        const setValue = new Set(value)
+    info: joi.array().items(joi.object({
+        menu: joi.array().items(joi.object({
+            menuItem: joi.string().hex().length(24).messages({
+                ...messages.menu.menuItem
+            }).required(),
+            quantity: joi.number().integer().min(1).messages({
+                ...messages.menu.quantity
+            }).required(),
+            note: joi.string().regex(/^[A-Za-z0-9 ]+$/).messages({
+                ...messages.menu.note
+            })
+        })),
+        tableNumber: joi.number().integer().min(1).required()
+    })).custom((value, helpers) => {
+        const setValue = new Set(value.map(item => item.tableNumber))
         if (setValue.size !== value.length) return helpers.message("Table number must be unique")
-        return value.sort((a, b) => a - b)
+        return value.sort((a, b) => a.tableNumber - b.tableNumber)
     }),
 
-    numberOfTable: joi.number().integer().min(1).messages({
-        ...messages.numberOfTable
-    }),
     note: joi.string().regex(/^[A-Za-z0-9 ]+$/).messages({
         ...messages.menu.note
     }),
-    menu: joi.array().items(joi.object({
-        menuItem: joi.string().hex().length(24).messages({
-            ...messages.menu.menuItem
-        }),
-        quantity: joi.number().integer().min(1).messages({
-            ...messages.menu.quantity
-        }),
-        note: joi.string().regex(/^[A-Za-z0-9 ]+$/).messages({
-            ...messages.menu.note
-        })
-    })).messages({
-        ...messages.menu.menu
-    }),
 
-    checkinTime: joi.number().min(Date.now()).max(Date.now() + 14 * 86400000).integer().messages({
+    checkinTime: joi.number().min(Date.now()).max(Date.now() + 3 * 86400000).integer().messages({
         ...messages.checkinTime
     }),
 }
+const bookingQuerySchema = {
+    restaurantId: joi.string().hex().length(24).messages({
+        ...messages.restaurantId
+    }),
+    status: joi.string().valid('cancel', 'accepted', 'rejected', 'cancelled').messages({
+        ...messages.status
+    }),
+    checkinTime: joi.number().min(Date.now()).max(Date.now() + 3 * 86400000).integer().messages({
+        ...messages.checkinTime
+    }),
+    page: joi.number().integer().min(1),
+    pageSize: joi.number().integer().min(1).max(36),
+    tableNumber: joi.number().integer().min(1)
+}
 
 const bookingValidate = {
-    userBooking: joi.object({
+    createBooking: joi.object({
         firstName: bookingSchema.firstName,
         lastName: bookingSchema.lastName,
         phone: bookingSchema.phone,
         restaurantId: bookingSchema.restaurantId.required(),
-        table: bookingSchema.table,
-        numberOfTable: bookingSchema.numberOfTable,
-        menu: bookingSchema.menu,
+        info: bookingSchema.info,
         notes: bookingSchema.note,
         checkinTime: bookingSchema.checkinTime.required()
-    }).xor('table', 'numberOfTable').messages({
-        "array.includesRequiredUnknowns": "Table or number of table is required"
     }),
+    getBookings: joi.object(bookingQuerySchema),
 
-    employeeBooking: joi.object({
-        firstName: bookingSchema.firstName,
-        lastName: bookingSchema.lastName,
-        phone: bookingSchema.phone,
-        restaurantId: bookingSchema.restaurantId.required(),
-        table: bookingSchema.table,
-        menu: bookingSchema.menu,
-        checkinTime: bookingSchema.checkinTime.required()
-    })
-    ,
     updateBooking: joi.object({
         firstName: bookingSchema.firstName,
         lastName: bookingSchema.lastName,
         phone: bookingSchema.phone,
+        info: bookingSchema.info,
         restaurantId: bookingSchema.restaurantId.required(),
-        table: bookingSchema.table,
-        menu: bookingSchema.menu,
         checkinTime: bookingSchema.checkinTime
     }),
 }

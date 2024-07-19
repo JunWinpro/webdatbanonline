@@ -47,10 +47,10 @@ const messages = {
             'any.required': 'Menu item is required'
         },
         quantity: {
-            'number.base': "Number of unit must be a number",
-            'number.min': "Number of unit must be greater than 0",
-            'number.empty': "Number of unit can't be empty",
-            'any.required': "Number of unit is required"
+            'number.base': "Number of quantity must be a number",
+            'number.min': "Number of quantity must be greater than 0",
+            'number.empty': "Number of quantity can't be empty",
+            'any.required': "Number of quantity is required"
         },
         note: {
             'string.base.pattern': "Note must be a string",
@@ -65,7 +65,7 @@ const messages = {
         'any.required': "Checkin time is required",
         'number.integer': "Checkin time must be an integer",
         'number.min': "Checkin time must be greater than current time",
-        'number.max': "Checkin time must be less than 14 days"
+        'number.max': "Checkin time must be less than 3 days"
     }
 }
 export default messages
