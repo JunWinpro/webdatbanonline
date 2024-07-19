@@ -1,37 +1,55 @@
 import mongoose from "mongoose"
 import { collection } from "../../database/collection.js"
+
 const menuSchema = new mongoose.Schema({
     menuItem: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: collection.MENUS
+        ref: collection.MENUS,
     },
-    quantity: Number,
-    note: String
-},
-    {
-        _id: false
-    })
+    quantity: {
+        type: Number,
+    },
+    note: {
+        type: String,
+    },
+}, {
+    _id: false,
+})
+
+const infoSchema = new mongoose.Schema({
+    menu: [menuSchema],
+    tableNumber: {
+        type: Number,
+        required: true
+    },
+}, {
+    _id: false
+})
 
 const bookingSchema = new mongoose.Schema(
     {
         firstName: {
             type: String,
+            default: null
         },
         lastName: {
             type: String,
+            default: null
         },
         phone: {
             type: String,
+            default: null
         },
         restaurant: {
             type: mongoose.Schema.Types.ObjectId,
             ref: collection.RESTAURANTS,
             required: true
         },
-        table: [Number],
-        numberOfTable: Number,
-        note: String,
-        menu: [menuSchema],
+        note: {
+            type: String,
+            default: null
+        },
+        info: [infoSchema],
         checkinTime: {
             type: Number,
             required: true

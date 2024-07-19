@@ -18,4 +18,4 @@ const ModelDb = {
     BillModel: BillModel,
     BookingModel: BookingModel
 }
-export default { ...ModelDb }
+export default ModelDb

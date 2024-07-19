@@ -53,7 +53,10 @@ const restaurantInfo = new mongoose.Schema(
         },
         description: [descriptionSchema],
         schedule: [scheduleSchema],
-        totalTable: Number,
+        totalTable: {
+            type: Number,
+            required: true
+        },
         foodImages: [{
             type: String,
             default: []

@@ -5,18 +5,17 @@ import bookingResponse from "../dataResponse/booking.js"
 import date from "../utils/date.util.js"
 import pageSplit from "../utils/pageSplit.util.js"
 const bookingController = {
-    userBooking: async (req, res) => {
+    createBooking: async (req, res) => {
         try {
-            const { restaurantId, checkinTime, table, numberOfTable, menu } = req.body
+            const { restaurantId, checkinTime, info } = req.body
 
             const currentRestaurant = await ModelDb.RestaurantInfoModel.findOne({
                 restaurant: restaurantId,
                 isDeleted: false,
-            }).populate("restaurant")
+            }).populate("restaurant").lean()
 
             if (!currentRestaurant) throw new Error("Restaurant not found")
             if (!currentRestaurant.restaurant.isActive) throw new Error("Restaurant not active")
-            currentRestaurant.depopulate()
 
             const { hour, day } = date(checkinTime)
             const { schedule } = currentRestaurant
@@ -25,225 +24,190 @@ const bookingController = {
 
             if (hour < schedule[day].openTime || hour > schedule[day].closeTime) throw new Error("Restaurant not working time")
 
-            const currentDate = Date.now()
+            const infoMenuList = info.filter(item => item.menu?.length > 0)
 
-            if (currentDate + 3 * 24 * 60 * 60 * 1000 < checkinTime) throw new Error("Can not booking more over 3 days")
-
-            const filter = {
-                restaurant: restaurantId,
-                checkinTime: {
-                    $gte: checkinTime - 30 * 60 * 1000,
-                    $lte: checkinTime
-                },
-                isFinished: false
-            }
-
-            let totalOfTables = 0
-            let list = []
-            const { totalTable } = currentRestaurant
-
-            if (table) {
-                filter.table = {
-                    $in: table
-                }
-                const findBooking = await ModelDb.BookingModel.findOne(filter).lean()
-                if (findBooking) throw new Error("Table already booked")
-                if (table.length > totalTable || table[table.length - 1] > totalTable) throw new Error("Not enough tables, please try again")
-                list = table
-                totalOfTables = table.length
-            }
-
-            if (numberOfTable) {
-                if (numberOfTable > totalTable) throw new Error("Not enough tables, please try again")
-
-                const findBooking = await ModelDb.BookingModel.find(filter).lean()
-
-                if (numberOfTable > totalTable - findBooking.length) {
-                    throw new Error(`Not enough tables, please try again`)
-                }
-
-                const bookedTables = findBooking.reduce((acc, booking) => {
-                    return acc.concat(booking.table)
-                }, [])
-                const emptyTables = Array.from({ length: totalTable }, (_, i) => i + 1).filter(table => !bookedTables.includes(table))
-
-                list = emptyTables.slice(0, numberOfTable)
-                totalOfTables = numberOfTable
-            }
-            if (menu) {
+            if (infoMenuList.length !== 0) {
+                const menuItems = [...new Set(infoMenuList.map(item =>
+                    item.menu?.map(item => [item.menuItem])).join(',').split(','))]
                 const checkMenus = await ModelDb.MenuModel.find({
-                    _id: { $in: menu.map(item => item.menuItem) },
+                    _id: { $in: menuItems },
                     restaurant: restaurantId,
                     isDeleted: false,
                 })
-                if (checkMenus.length !== menu.length) throw new Error("Some menu items don't exist")
+                if (checkMenus.length !== menuItems.length) throw new Error("Some menus can't be served or not found, please select again")
             }
 
-            const booking = await ModelDb.BookingModel.create({
-                ...req.body,
-                restaurant: restaurantId,
-                table: list,
-                numberOfTable: totalOfTables,
-            })
+            const tableList = info.map(item => item.tableNumber)
 
-            const message = "Create booking success"
-            dataResponse(res, 201, message, bookingResponse(booking))
-
-        } catch (error) {
-            returnError(res, 403, error)
-        }
-    },
-
-    employeeBooking: async (req, res) => {
-        try {
-            const { restaurantId, checkinTime, table } = req.body
-
-            const currentRestaurant = await ModelDb.RestaurantInfoModel.findOne({
-                restaurant: restaurantId,
-                isDeleted: false,
-            }).populate("restaurant")
-
-            if (!currentRestaurant) throw new Error("Restaurant not found")
-            if (!currentRestaurant.restaurant.isActive) throw new Error("Restaurant not active")
-            currentRestaurant.depopulate()
-            const { hour, day } = date(checkinTime)
-
-            const { schedule } = currentRestaurant
-
-            if (!schedule[day].isWorkingDay) throw new Error("Restaurant not working day")
-            if (hour < schedule[day].openTime || hour > schedule[day].closeTime) throw new Error("Restaurant not working time")
+            const { totalTable } = currentRestaurant
+            if (tableList[tableList.length - 1] > totalTable) throw new Error(`Table number ${tableList[tableList.length - 1]} is out of range, please select again`)
+            if (tableList.length > totalTable) throw new Error("Not enough table, please select again")
+            const user = req.user
 
             const filter = {
-                checkinTime: checkinTime,
-                isFinished: false,
+                restaurant: restaurantId,
+                'info.tableNumber': { $in: tableList },
                 isDeleted: false,
                 isCheckin: false,
-                table: {
-                    $in: table
+                isCanceled: false
+            }
+
+            if (user.role === 'user') {
+                filter.checkinTime = {
+                    $gte: checkinTime - 30 * 60 * 1000,
+                    $lte: checkinTime + 30 * 60 * 1000,
+                }
+            } else if (user.role === "employee" || user.role === "manager") {
+                if (user.role === "employee") {
+                    const employee = await ModelDb.EmployeeModel.findOne({
+                        _id: user.userId,
+                        restaurant: restaurantId,
+                        isDeleted: false
+                    }).lean()
+                    if (!employee) throw new Error("You don't have permission for this action")
+                }
+                if (user.role === "manager") {
+                    const restaurant = await ModelDb.RestaurantModel.findOne({
+                        _id: restaurantId,
+                        manager: user.userId,
+                        isDeleted: false
+                    }).lean()
+                    if (!restaurant) throw new Error("You don't have permission for this action")
+                }
+                filter.checkinTime = {
+                    $lte: checkinTime + 3 * 60 * 60 * 1000,
                 }
             }
 
-            let totalOfTables = 0
-            let list = []
-            const { totalTable } = currentRestaurant
-
-
-            filter.table = {
-                $in: table
-            }
-            const findBooking = await ModelDb.BookingModel.findOne(filter).lean()
-            if (findBooking) throw new Error("Table already booked")
-
-            if (table.length > totalTable || table[length - 1] > totalTable) throw new Error("Not enough tables, please try again")
-
-            list = table
-            totalOfTables = table.length
-
-            if (menu) {
-                const checkMenus = ModelDb.MenuModel.find({
-                    _id: { $in: menu.map(item => item.menuItem) },
-                    restaurant: restaurantId,
-                    isDeleted: false,
-                })
-                if (checkMenus.length !== menu.length) throw new Error("Some menu items don't exist")
-            }
+            const checkBooking = await ModelDb.BookingModel.findOne(filter)
+            if (checkBooking) throw new Error(`Table is not available at this checkin time, please select again`)
 
             const booking = await ModelDb.BookingModel.create({
                 ...req.body,
                 restaurant: restaurantId,
-                table: list,
-                numberOfTable: totalOfTables,
             })
 
             const message = "Create booking success"
             dataResponse(res, 201, message, bookingResponse(booking))
-        } catch (error) {
-            returnError(res, 403, error)
-        }
-    },
-    getBookingListByRestaurantId: async (req, res) => {
-        try {
-            const { id } = req.params
-            const { page, pageSize, date } = req.query
-            const user = req.user
-            const filterModel = {
-                restaurant: id,
-                isDeleted: false,
-            }
-            if (date) {
-                filterModel.checkinTime = date
-            }
-            const populate = {
-                path: 'restaurant',
-                populate: {
-                    path: 'manager',
-                    match: {
-                        _id: user.userId,
-                        isDeleted: false
-                    }
-                }
-            }
-            const booking = await pageSplit(ModelDb.BookingModel, filterModel, page, pageSize, {}, populate)
-            if (booking.data.length === 0) throw new Error("No booking found")
-
-            const data = {
-                data: booking.data.map(booking => bookingResponse(booking)),
-                totalItems: booking.totalItems,
-                totalPages: booking.totalPages,
-                page: booking.page
-            }
-            const message = "Get booking list success"
-            dataResponse(res, 200, message, data)
 
         } catch (error) {
             returnError(res, 403, error)
         }
     },
-    updateBookingById: async (req, res) => {
+    getBookings: async (req, res) => {
         try {
-            const { restaurantId, checkinTime } = req.body
-            const { id } = req.params
+            const { restaurantId } = req.params
+            const { page, pageSize } = req.query
             const user = req.user
 
             if (user.role === "employee") {
                 const employee = await ModelDb.EmployeeModel.findOne({
+                    _id: user.userId,
                     restaurant: restaurantId,
-                    isDeleted: false,
-                    _id: user.userId
-                }).populate("restaurant")
-
+                    isDeleted: false
+                }).lean()
                 if (!employee) throw new Error("You don't have permission for this action")
-                if (employee.restaurant.isDeleted) throw new Error("Restaurant not found")
-
             }
+            if (user.role === "manager") {
+                const restaurant = await ModelDb.RestaurantModel.findOne({
+                    _id: restaurantId,
+                    manager: user.userId,
+                    isDeleted: false
+                }).lean()
+                if (!restaurant) throw new Error("You don't have permission for this action")
+            }
+
+            const filterModel = {}
+
+            for (let key of Object.keys(req.query)) {
+                if (key === 'tableNumber') {
+                    filterModel['info.tableNumber'] = req.query[key]
+                }
+                if (key === "restaurantId") {
+                    filterModel.restaurant = req.query[key]
+                }
+                filterModel[key] = req.query[key]
+            }
+            const sortModel = {
+                createdAt: -1
+            }
+
+            const bookings = await pageSplit(ModelDb.BookingModel, filterModel, page, pageSize, sortModel, populated)
+            if (bookings.length === 0) throw new Error("No booking found")
+
+            const message = "Get bookings success"
+            dataResponse(res, 200, message, {
+                ...bookings,
+                data: bookings.data.map(booking => bookingResponse(booking))
+            })
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+    getBookingById: async (req, res) => {
+        try {
+            const { id } = req.params
+            const booking = await ModelDb.BookingModel.findOne({
+                _id: id,
+                isDeleted: false
+            }).populate('restaurant').lean()
+            if (!booking) throw new Error("Booking not found")
+            const user = req.user
+            if (user.role === "employee") {
+                const employee = await ModelDb.EmployeeModel.findOne({
+                    _id: user.userId,
+                    restaurant: booking.restaurant._id,
+                    isDeleted: false
+                }).lean()
+                if (!employee) throw new Error("You don't have permission for this action")
+            }
+            if (user.role === "manager") {
+                const restaurant = await ModelDb.RestaurantModel.findOne({
+                    _id: booking.restaurant._id,
+                    isDeleted: false,
+                    manager: user.userId
+                }).populate('manager').lean()
+                if (!restaurant || restaurant.manager.isDeleted) throw new Error("You don't have permission for this action")
+            }
+
+            const message = "Get booking success"
+            dataResponse(res, 200, message, bookingResponse(booking))
+
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
+    updateBookingInfo: async (req, res) => {
+        try {
+            const { restaurantId } = req.body
+            const { id } = req.params
+
+            const user = req.user
+            const employee = await ModelDb.EmployeeModel.findOne({
+                restaurant: restaurantId,
+                isDeleted: false,
+                _id: user.userId
+            }).lean()
+            if (!employee) throw new Error("You don't have permission for this action")
+
             const restaurantInfo = await ModelDb.RestaurantInfoModel.findOne({
                 restaurant: restaurantId,
-                isDeleted: false,
-                isFinished: false,
-            })
+                isDeleted: false
+            }).populate('restaurant').lean()
+            if (!restaurantInfo.restaurant.isActive || restaurantInfo.restaurant.isDeleted) throw new Error("No booking found")
 
-            if (!restaurantInfo) throw new Error("Restaurant Info is deleted")
-            const { hour, day } = date(checkinTime)
-            const { schedule } = restaurantInfo
-
-            if (!schedule[day].isWorkingDay) throw new Error("Restaurant not working day")
-
-            if (hour < schedule[day].openTime || hour > schedule[day].closeTime) throw new Error("Restaurant not working time")
-
-            const bookingFilter = {
+            const booking = await ModelDb.BookingModel.findOneAndUpdate({
                 _id: id,
                 restaurant: restaurantId,
-                isDeleted: false,
-            }
-
-            const booking = await ModelDb.BookingModel.findOne(bookingFilter)
+                isDeleted: false
+            }, {
+                $set: {
+                    ...req.body,
+                    restaurant: restaurantId
+                }
+            })
 
             if (!booking) throw new Error("Booking not found")
-
-            for (let key of Object.keys(req.body)) {
-                booking[key] = req.body[key]
-            }
-            await booking.save()
 
             const message = "Update booking success"
             dataResponse(res, 200, message, bookingResponse(booking))
@@ -252,140 +216,55 @@ const bookingController = {
             returnError(res, 403, error)
         }
     },
-    updateBookingMenuById: async (req, res) => {
+    updateBookingStatus: async (req, res) => {
         try {
             const { id } = req.params
-            const { restaurantId, menu } = req.body
-            const booking = await ModelDb.BookingModel.findOneAndUpdate(
-                {
-                    _id: id,
+            const { restaurantId } = req.body
+            const user = req.user
+
+            if (user.role === 'employee') {
+                const employee = await ModelDb.EmployeeModel.findOne({
                     restaurant: restaurantId,
                     isDeleted: false,
-                    isCheckin: true,
-                    isFinished: false
-                },
-                {
-                    $set: {
-                        menu
-                    }
-                },
-            )
-            if (!booking) throw new Error('Booking not found')
-            const message = "Update booking menu success"
-            dataResponse(res, 200, message, bookingResponse(booking))
-        } catch (error) {
-            returnError(res, 403, error)
-        }
-    },
-    bookingCheckinById: async (req, res) => {
-        try {
-            const { id, restaurantId } = req.params
-            const user = req.user
-
-            const employee = await ModelDb.EmployeeModel.findOne({
-                restaurant: restaurantId,
-                isDeleted: false,
-                _id: user.userId
-            }).populate('restaurant')
-
-            if (!employee) throw new Error("You don't have permission for this action")
-            if (employee.restaurant.isDeleted) throw new Error("Restaurant not found")
+                    _id: user.userId
+                }).lean()
+                if (!employee) throw new Error("You don't have permission for this action")
+            }
+            if (user.role === "manager") {
+                const restaurant = await ModelDb.RestaurantModel.findOne({
+                    manager: user.userId,
+                    _id: restaurantId,
+                    isDeleted: false
+                }).lean()
+                if (!restaurant) throw new Error("You don't have permission for this action")
+            }
 
             const booking = await ModelDb.BookingModel.findOne({
                 _id: id,
                 restaurant: restaurantId,
-                isDeleted: false,
-                isCheckin: false,
-                isFinished: false
-            })
-
+                isDeleted: false
+            }).populate('restaurant')
             if (!booking) throw new Error("Booking not found")
+            booking.depopulate()
 
-            booking.isCheckin = true
+            const status = req.path.split('/')[1]
+            console.log(status)
+            console.log(req.path)
+            if (status === "checkin" && !booking.isCheckin) {
+                booking.isCheckin = true
+            }
+            else if (status === "finish" && booking.isCheckin && !booking.isFinished) {
+                booking.isFinished = true
+            }
+            else if (status === "cancel" && !booking.isCheckin && !booking.isFinished) {
+                booking.isCanceled = true
+            } else throw new Error("Invalid status")
 
             await booking.save()
 
-            const message = "Checkin booking success"
+            const message = `Update bookign status successfully (${status})`
             dataResponse(res, 200, message, bookingResponse(booking))
-        } catch (error) {
-            returnError(res, 403, error)
-        }
-    },
-    bookingFinishById: async (req, res) => {
-        try {
-            const { id, restaurantId } = req.params
-            const user = req.user
 
-            const employee = await ModelDb.EmployeeModel.findOne({
-                restaurant: restaurantId,
-                isDeleted: false,
-                _id: user.userId
-            }).populate('restaurant')
-
-            if (!employee) throw new Error("You don't have permission for this action")
-            if (employee.restaurant.isDeleted) throw new Error("Restaurant not found")
-
-            const booking = await ModelDb.BookingModel.findOne({
-                _id: id,
-                restaurant: restaurantId,
-                isDeleted: false,
-                isCheckin: true,
-                isFinished: false
-            })
-
-            if (!booking) throw new Error("Booking not found")
-
-            booking.isFinished = true
-
-            await booking.save()
-
-            const message = "Checkin booking success"
-            dataResponse(res, 200, message, bookingResponse(booking))
-        } catch (error) {
-            returnError(res, 403, error)
-        }
-    },
-    cancelBookingById: async (req, res) => {
-        try {
-            const { id } = req.params
-            const findBooking = await ModelDb.BookingModel.findOne({
-                _id: id,
-                isCheckin: false,
-                isFinished: false,
-                isCanceled: false,
-                isDeleted: false
-            }).populate('restaurant')
-            if (!findBooking) throw new Error("Booking not found")
-            const user = req.user
-            if (findBooking.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
-            findBooking.depopulate()
-            findBooking.isCanceled = true
-            await findBooking.save()
-
-            const message = "Delete booking success"
-            dataResponse(res, 200, message)
-        } catch (error) {
-            returnError(res, 403, error)
-        }
-    },
-    deleteBookingById: async (req, res) => {
-        try {
-            const { id } = req.params
-            const findBooking = await ModelDb.BookingModel.findOne({
-                _id: id,
-                isCheckin: false,
-                isFinished: false,
-                isDeleted: false
-            }).populate('restaurant')
-            if (!findBooking) throw new Error("Booking not found")
-            const user = req.user
-            if (findBooking.restaurant.manager.toString() !== user.userId) throw new Error("You don't have permission for this action")
-            findBooking.depopulate()
-            findBooking.isDeleted = true
-            await findBooking.save()
-
-            const message = "Delete booking success"
-            dataResponse(res, 200, message)
         } catch (error) {
             returnError(res, 403, error)
         }

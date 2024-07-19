@@ -6,12 +6,19 @@ import bookingController from '../../controllers/booking.controller.js'
 
 const bookingRoute = express.Router()
 
-bookingRoute.post('/user', tokenMiddleware.verifyAccessToken, authorization.user, validateData.booking.userBooking,
-    bookingController.userBooking
+bookingRoute.post('/', tokenMiddleware.verifyAccessToken, validateData.booking.createBooking,
+    bookingController.createBooking
 )
+bookingRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.booking.getBooking, bookingController.getBookings)
 
-bookingRoute.post('/employee', tokenMiddleware.verifyAccessToken, authorization.employee, validateData.booking.employeeBooking, bookingController.employeeBooking)
+bookingRoute.get('/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.getBookings)
 
-bookingRoute.get('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, bookingController.getBookingListByRestaurantId)
+bookingRoute.put('/info/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, validateData.booking.updateBookingInfo, bookingController.updateBookingInfo)
+
+bookingRoute.put('/checkin/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.updateBookingStatus)
+
+bookingRoute.put('/finish/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.updateBookingStatus)
+
+bookingRoute.put('/cancel/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.updateBookingStatus)
 
 export default bookingRoute
