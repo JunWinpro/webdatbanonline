@@ -13,12 +13,12 @@ bookingRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.employeeO
 
 bookingRoute.get('/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.getBookings)
 
-bookingRoute.put('/info/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, validateData.booking.updateBookingInfo, bookingController.updateBookingInfo)
+bookingRoute.put('/info/:id', tokenMiddleware.verifyAccessToken, authorization.employee, validateData.objectId, validateData.booking.updateBookingInfo, bookingController.updateBookingInfo)
 
-bookingRoute.put('/checkin/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.updateBookingStatus)
+bookingRoute.put('/checkin/:id', tokenMiddleware.verifyAccessToken, authorization.employee, validateData.objectId, bookingController.updateBookingStatus)
 
-bookingRoute.put('/finish/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.updateBookingStatus)
+bookingRoute.put('/finish/:id', tokenMiddleware.verifyAccessToken, authorization.employee, validateData.objectId, bookingController.updateBookingStatus)
 
-bookingRoute.put('/cancel/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.updateBookingStatus)
+bookingRoute.put('/cancel/:id', tokenMiddleware.verifyAccessToken, authorization.employee, validateData.objectId, bookingController.updateBookingStatus)
 
 export default bookingRoute

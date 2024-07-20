@@ -444,7 +444,7 @@ const restaurantController = {
                 $set: {
                     isOpening: true
                 }
-            })
+            }, { new: true })
             if (!restaurant) throw new Error("Restaurant not found")
             dataResponse(res, 200, "Restaurant is opening now", restaurantResponse(restaurant))
         }
@@ -467,7 +467,7 @@ const restaurantController = {
                 $set: {
                     isOpening: false
                 }
-            })
+            }, { new: true })
             if (!restaurant) throw new Error("Restaurant not found")
             dataResponse(res, 200, "Restaurant is closing now", restaurantResponse(restaurant))
         }

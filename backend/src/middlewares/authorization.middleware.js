@@ -1,10 +1,10 @@
 import returnError from "../errors/error.js"
 
 const role = {
-    user: process.env.user,
-    employee: process.env.employee,
-    admin: process.env.admin,
-    manager: process.env.manager
+    user: process.env.USER,
+    employee: process.env.EMPLOYEE,
+    admin: process.env.ADMIN,
+    manager: process.env.MANAGER
 }
 
 const authorization = {
@@ -33,8 +33,8 @@ const authorization = {
     userOrEmployee: (req, res, next) => {
         try {
             const user = req.user
-            if (user.role !== role.user || user.role !== role.employee) throw new Error("You don't have permission for this action")
-            next()
+            if (user.role === role.user || user.role === role.employee) next()
+            else throw new Error("You don't have permission for this action")
         } catch (error) {
             returnError(res, 403, error)
         }

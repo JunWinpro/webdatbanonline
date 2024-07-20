@@ -19,6 +19,7 @@ const autoCancelBooking = async () => {
                 isCanceled: true
             }
         })
+        console.log("cancel");
     }
     catch (err) {
         returnError(res, 403, err)
