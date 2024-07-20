@@ -21,7 +21,7 @@ cloudinary.config({
 })
 
 connectDb()
-setInterval(autoDeleteBooking, 60 * 1000)
+setInterval(autoDeleteBooking, 15 * 60 * 1000)
 app.use(rootRouter)
 
 app.use((err, _, res, next) => {

@@ -1,54 +1,86 @@
 import returnError from "../errors/error.js"
 import ModelDb from "../models/model.js"
+import dataResponse from '../dataResponse/data.response.js'
+import billResponse from "../dataResponse/bill.js"
 const billController = {
     createBill: async (req, res) => {
         try {
-            const { restaurantId, bookingId, checkedBy } = req.body
-
+            const { bookingId, restaurantId, paymentMethod } = req.body
+            const user = req.user
             const employee = await ModelDb.EmployeeModel.findOne({
                 restaurant: restaurantId,
-                isDeleted: false,
-                _id: checkedBy
-            }).lean()
+                _id: user.userId,
+                isDeleted: false
+            })
+            if (!employee) throw new Error("You don't have permission for this action")
 
-            if (!employee) throw new Error("Employee not found")
-
-            const booking = await ModelDb.BookingModel.findOne({
+            const booking = await ModelDb.BookingModel.findOneAndUpdate({
                 _id: bookingId,
                 restaurant: restaurantId,
-                isDeleted: false,
                 isCheckin: true,
-                isFinished: true
-            }).populate('menu.menuItem')
-
-            if (!booking) throw new Error("This booking does not exist")
-
-            if (booking.menu.menuItem.length === 0) throw new Error("Menu is empty")
-            if (booking.table.length === 0) throw new Error("Table is empty")
+                isFinished: true,
+                isCanceled: false,
+                isDeleted: false
+            }).populate('info.menu.menuItem').lean()
+            if (!booking) throw new Error("No booking found")
+            const billExist = await ModelDb.BillModel.findOne({
+                checkinTime: booking.checkinTime
+            })
+            if (billExist) throw new Error("Bill has been paid")
 
             let totalPrice = 0
-            for (let i = 0; i < booking.menu.menuItem.length; i++) {
-                const menuItem = booking.menu.menuItem[i]
-                totalPrice += menuItem.price * booking.menu.quantity[i]
-            }
+            booking.info.forEach(infoItem => {
+                infoItem.menu.forEach(item => {
+                    let total = 0
+                    total += item.menuItem.price * item.quantity * (1 - item.menuItem.discount / 100)
+                    item.total = total
+                    totalPrice += total
+                })
+            })
+            const info = booking.info.map(item => {
+                return {
+                    menu: item.menu.map(item => ({
+                        // menuItem: item.menuItem._id,
+                        menuItem: {
+                            code: item.menuItem.code.prefix + item.menuItem.code.suffix,
+                            name: item.menuItem.name,
+                            type: item.menuItem.type,
+                            unit: item.menuItem.unit,
+                            price: item.menuItem.price,
+                            discount: item.menuItem.discount,
+                        },
+                        quantity: item.quantity,
+                        note: item.note,
+                        total: item.total
+                    })),
+                    tableNumber: item.tableNumber
+                }
+            })
+            console.log(info);
 
-            const bill = await ModelDb.BookingModel.create({
-                ...req.body,
-                restaurant: restaurantId,
-                booking: bookingId,
+            const bill = await ModelDb.BillModel.create({
+                paymentMethod,
                 payer: {
-                    firstName: booking.firstName || null,
-                    lastName: booking.lastName || null,
-                    phone: booking.phone || null
+                    firstName: booking.firstName,
+                    lastName: booking.lastName,
+                    phone: booking.phone
                 },
-                table: booking.table,
+                info,
                 totalPrice,
+                restaurant: restaurantId,
+                checkinTime: booking.checkinTime
             })
 
+            const message = "Bill created"
+            dataResponse(res, 200, message, billResponse(bill))
 
         } catch (error) {
+            console.log(error.message);
             returnError(res, 403, error)
         }
+    },
+    getBills: async (req, res) => {
+
     }
 }
 

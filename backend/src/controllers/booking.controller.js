@@ -253,9 +253,8 @@ const bookingController = {
                 if (currentDate.hour < checkinTimeBooking.hour) throw new Error("The current hour is not avalaible for this booking")
                 if (currentDate.minutes < checkinTimeBooking.minutes) throw new Error("The current minute is not avalaible for this booking")
                 if (currentDate.second < checkinTimeBooking.second) throw new Error("The current second is not avalaible for this booking")
-                console.log(req.path)
+
                 const status = req.path.split('/')[1]
-                console.log(status)
 
                 if (status === "checkin" && !booking.isCheckin) {
                     booking.isCheckin = true
