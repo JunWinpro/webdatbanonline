@@ -49,6 +49,7 @@ const bookingController = {
                 'info.tableNumber': { $in: tableList },
                 isDeleted: false,
                 isCheckin: false,
+                isFinished: false,
                 isCanceled: false
             }
 
@@ -129,7 +130,7 @@ const bookingController = {
                 filterModel[key] = req.query[key]
             }
             const sortModel = {
-                createdAt: -1
+                checkinTime: -1
             }
 
             const bookings = await pageSplit(ModelDb.BookingModel, filterModel, page, pageSize, sortModel, populated)
@@ -183,6 +184,7 @@ const bookingController = {
             const { id } = req.params
 
             const user = req.user
+            console.log(user.userId);
             const employee = await ModelDb.EmployeeModel.findOne({
                 restaurant: restaurantId,
                 isDeleted: false,
@@ -196,16 +198,21 @@ const bookingController = {
             }).populate('restaurant').lean()
             if (!restaurantInfo.restaurant.isActive || restaurantInfo.restaurant.isDeleted) throw new Error("No booking found")
 
-            const booking = await ModelDb.BookingModel.findOneAndUpdate({
-                _id: id,
-                restaurant: restaurantId,
-                isDeleted: false
-            }, {
-                $set: {
-                    ...req.body,
-                    restaurant: restaurantId
-                }
-            })
+            const booking = await ModelDb.BookingModel.findOneAndUpdate(
+                {
+                    _id: id,
+                    restaurant: restaurantId,
+                    isFinished: false,
+                    isDeleted: false
+                },
+                {
+                    $set: {
+                        ...req.body,
+                        restaurant: restaurantId,
+                    }
+                },
+                { new: true }
+            )
 
             if (!booking) throw new Error("Booking not found")
 
@@ -222,22 +229,12 @@ const bookingController = {
             const { restaurantId } = req.body
             const user = req.user
 
-            if (user.role === 'employee') {
-                const employee = await ModelDb.EmployeeModel.findOne({
-                    restaurant: restaurantId,
-                    isDeleted: false,
-                    _id: user.userId
-                }).lean()
-                if (!employee) throw new Error("You don't have permission for this action")
-            }
-            if (user.role === "manager") {
-                const restaurant = await ModelDb.RestaurantModel.findOne({
-                    manager: user.userId,
-                    _id: restaurantId,
-                    isDeleted: false
-                }).lean()
-                if (!restaurant) throw new Error("You don't have permission for this action")
-            }
+            const employee = await ModelDb.EmployeeModel.findOne({
+                restaurant: restaurantId,
+                isDeleted: false,
+                _id: user.userId
+            }).lean()
+            if (!employee) throw new Error("You don't have permission for this action")
 
             const booking = await ModelDb.BookingModel.findOne({
                 _id: id,
@@ -247,24 +244,35 @@ const bookingController = {
             if (!booking) throw new Error("Booking not found")
             booking.depopulate()
 
-            const status = req.path.split('/')[1]
-            console.log(status)
-            console.log(req.path)
-            if (status === "checkin" && !booking.isCheckin) {
-                booking.isCheckin = true
+            const currentDate = date(new Date())
+            const checkinTimeBooking = date(booking.checkinTime)
+
+            if (!booking.isCanceled) {
+                if (currentDate.month !== checkinTimeBooking.month) throw new Error("The current month is not avalaible for this booking")
+                if (currentDate.dateTime !== checkinTimeBooking.dateTime) throw new Error("The current date is not avalaible for this booking")
+                if (currentDate.hour < checkinTimeBooking.hour) throw new Error("The current hour is not avalaible for this booking")
+                if (currentDate.minutes < checkinTimeBooking.minutes) throw new Error("The current minute is not avalaible for this booking")
+                if (currentDate.second < checkinTimeBooking.second) throw new Error("The current second is not avalaible for this booking")
+                console.log(req.path)
+                const status = req.path.split('/')[1]
+                console.log(status)
+
+                if (status === "checkin" && !booking.isCheckin) {
+                    booking.isCheckin = true
+                }
+                else if (status === "finish" && booking.isCheckin && !booking.isFinished) {
+                    booking.isFinished = true
+                }
+                else if (status === "cancel" && !booking.isCheckin && !booking.isFinished) {
+                    booking.isCanceled = true
+                } else throw new Error("Invalid status")
+
+                await booking.save()
+
+                const message = `Update bookign status successfully (${status})`
+                dataResponse(res, 200, message, bookingResponse(booking))
             }
-            else if (status === "finish" && booking.isCheckin && !booking.isFinished) {
-                booking.isFinished = true
-            }
-            else if (status === "cancel" && !booking.isCheckin && !booking.isFinished) {
-                booking.isCanceled = true
-            } else throw new Error("Invalid status")
-
-            await booking.save()
-
-            const message = `Update bookign status successfully (${status})`
-            dataResponse(res, 200, message, bookingResponse(booking))
-
+            else throw new Error("Invalid status or booking is already cancelled")
         } catch (error) {
             returnError(res, 403, error)
         }

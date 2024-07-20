@@ -4,7 +4,8 @@ const date = (checkinTime) => {
     const hour = date.getHours()
     const day = date.getDay()
     const second = date.getSeconds()
-
-    return { minutes, hour, day, second }
+    const dateTime = date.getDate()
+    const month = date.getMonth()
+    return { minutes, hour, day, second, dateTime, month }
 }
 export default date

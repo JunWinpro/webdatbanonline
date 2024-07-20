@@ -78,7 +78,6 @@ const bookingValidate = {
         phone: bookingSchema.phone,
         info: bookingSchema.info,
         restaurantId: bookingSchema.restaurantId.required(),
-        checkinTime: bookingSchema.checkinTime
     }),
 }
 
