@@ -8,10 +8,12 @@ import bookingRoute from "./routes/booking.route.js";
 import billRoute from "./routes/bill.route.js";
 import restaurantRoute from "./routes/restaurant.route.js";
 import reviewRoute from "./routes/review.route.js";
+import dataResponse from "../dataResponse/data.response.js";
 
 const rootRouter = express.Router();
 rootRouter.get('/', (_, res) => {
-    res.send('Taste Tripper 2024')
+    const message = 'Taste Tripper 2024 Services'
+    dataResponse(res, 200, message)
 })
 rootRouter.use('/renew-access-token', renewAccessToken)
 rootRouter.use('/users', userRoute);
