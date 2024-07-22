@@ -13,49 +13,77 @@ import { ProductPage } from "./pages/ProductPage";
 import { UserPage } from "./pages/UserPage";
 import { ForgetPassPage } from "./pages/ForgetPassPage";
 import { UserProvider } from "./context/UserContext";
+import { useDispatch, useSelector } from "react-redux";
+import authService from "./services/auth";
+import { login } from "./store/slice/auth";
 
 function App() {
-  const [showFixedNavBar, setShowFixedNavBar] = useState(false);
-
-  const navItems = [
-    { label: "Home", link: "/" },
-    { label: "Contact", link: "/contact" },
-    {
-      label: "Food & Drink",
-      items: [
-        { label: "Restaurant", link: "/restaurant" },
-        { label: "Hotpot", link: "/hotpot" },
-        { label: "Cafe", link: "/cafe" },
-        { label: "Bar", link: "/bar" },
-        { label: "Grilled food", link: "/grilled-food" },
-      ],
-    },
-    {
-      label: "Sales",
-      link: "/sales",
-    },
-  ];
-
+  const dispatch = useDispatch();
+  const { isLogin, userInfo, accessToken } = useSelector((state) => state.auth);
+  const email = "user@gmail.com";
+  const password = "12345678";
+  const [error, setError] = useState();
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.pageYOffset > 0) {
-        setShowFixedNavBar(true);
-      } else {
-        setShowFixedNavBar(false);
+    const fetchLogin = async () => {
+      if (!isLogin) {
+        if (localStorage.getItem("refreshToken")) {
+          const { accessToken, userInfo } = await authService.renewAccessToken(
+            localStorage.getItem("refreshToken")
+          );
+          dispatch(login({ accessToken, userInfo }));
+        }
       }
     };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    fetchLogin();
   }, []);
+  const login = async () => {
+    const data = await authService.login({ email, password });
+    console.log(data);
+    return data;
+  };
+  login();
+  // const [showFixedNavBar, setShowFixedNavBar] = useState(false);
+
+  // const navItems = [
+  //   { label: "Home", link: "/" },
+  //   { label: "Contact", link: "/contact" },
+  //   {
+  //     label: "Food & Drink",
+  //     items: [
+  //       { label: " staurant", link: "/restaurant" },
+  //       { label: "Hotpot", link: "/hotpot" },
+  //       { label: "Cafe", link: "/cafe" },
+  //       { label: "Bar", link: "/bar" },
+  //       { label: "Grilled food", link: "/grilled-food" },
+  //     ],
+  //   },
+  //   {
+  //     label: "Sales",
+  //     link: "/sales",
+  //   },
+  // ];
+
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (window.pageYOffset > 0) {
+  //       setShowFixedNavBar(true);
+  //     } else {
+  //       setShowFixedNavBar(false);
+  //     }
+  //   };
+
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
 
   return (
-    <UserProvider>
-      <Navbar navItems={navItems} />
+    // <UserProvider>
+    <>
+      {/* <Navbar navItems={navItems} />
       {showFixedNavBar && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <FixedNavBar navItems={navItems} />
-        </div>  
+        </div>
       )}
       <SearchBanner />
       <div className="App">
@@ -68,8 +96,9 @@ function App() {
           <Route path="/forget-password" element={<ForgetPassPage />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
-      </div>
-    </UserProvider>
+      </div> */}
+    </>
+    // </UserProvider>
   );
 }
 

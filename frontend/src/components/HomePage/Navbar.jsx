@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserContext } from "../../context/UserContext";
-import axiosInstance from '../../utils/axiosInstance';
+import axiosInstance from "../../utils/axiosInstance";
 
 import {
   NavigationMenu,
@@ -37,7 +37,9 @@ const Navbar = ({ navItems }) => {
   const handleAvatarChange = async () => {
     if (newAvatarUrl) {
       try {
-        const response = await axiosInstance.put(`/users/${user._id}`, { avatar: newAvatarUrl });
+        const response = await axiosInstance.put(`/users/${user._id}`, {
+          avatar: newAvatarUrl,
+        });
         if (response.data.success) {
           await updateUser({ ...user, avatar: newAvatarUrl });
           setIsChangingAvatar(false);
@@ -51,7 +53,8 @@ const Navbar = ({ navItems }) => {
     }
   };
 
-  const defaultAvatarUrl = "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png";
+  const defaultAvatarUrl =
+    "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png";
 
   return (
     <div className="bg-white flex justify-between items-center px-4">
@@ -89,7 +92,9 @@ const Navbar = ({ navItems }) => {
           <>
             <Avatar>
               <AvatarImage src={user.avatar || defaultAvatarUrl} />
-              <AvatarFallback>{user.firstName.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback>
+                {user.firstName.charAt(0).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
 
             <DropdownMenu>
@@ -121,7 +126,9 @@ const Navbar = ({ navItems }) => {
                   className="mr-2 p-1 border rounded"
                 />
                 <Button onClick={handleAvatarChange}>Update Avatar</Button>
-                {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+                {error && (
+                  <div className="text-red-500 text-sm mt-2">{error}</div>
+                )}
               </div>
             )}
           </>

@@ -47,16 +47,9 @@ const tokenMiddleware = {
 
     verifyRefreshToken: (req, res, next) => {
         try {
-            const authToken = req.headers['authorization']
-
-            if (!authToken) throw new Error("Invalid token")
-
-            const refreshToken = authToken.split(" ")[1]
-
+            const { refreshToken } = req.body
             const data = jwtToken.verifyToken(refreshToken, "RT")
-
             req.user = data
-
             next()
         }
         catch (err) {

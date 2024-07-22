@@ -8,7 +8,7 @@ const userResponse = (data) => {
         delete responseData.resetPasswordExpireIn
         delete responseData.veryficationToken
     }
-    return responseData
+    return { userInfo: responseData }
 }
 
 export default userResponse

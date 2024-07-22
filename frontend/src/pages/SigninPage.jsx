@@ -10,7 +10,6 @@ export const SigninPage = () => {
   const navigate = useNavigate();
   const { user, login } = useContext(UserContext);
 
-
   if (user) {
     return <Navigate to="/" />;
   }
@@ -31,10 +30,8 @@ export const SigninPage = () => {
       );
 
       if (response.data.success) {
-
         localStorage.setItem("accessToken", response.data.data.accessToken);
         localStorage.setItem("refreshToken", response.data.data.refreshToken);
-
 
         login(response.data.data);
         navigate("/");
@@ -42,10 +39,10 @@ export const SigninPage = () => {
         setError("Login failed. Please try again.");
       }
     } catch (error) {
-      console.error('Error details:', error);
+      console.error("Error details:", error);
       if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
       }
       setError(
         error.response?.data?.message || "An error occurred. Please try again."
