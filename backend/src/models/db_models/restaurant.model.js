@@ -49,6 +49,10 @@ const restaurant = new mongoose.Schema(
             min: 1,
             max: 5
         },
+        totalRating: {
+            type: Number,
+            default: 0
+        },
         isOpening: {
             type: Boolean,
             default: false
