@@ -1,7 +1,8 @@
 const restaurantInfoResponse = (data, user) => {
     let responseData = null
     if (data) {
-        responseData = data.toObject()
+        if (typeof (data) !== 'object') responseData = data.toObject()
+        else responseData = data
         delete responseData.isDeleted
         if (user?.userId !== responseData.restaurant.manager || !user) {
             delete responseData.restaurant.manager

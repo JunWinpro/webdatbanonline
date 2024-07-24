@@ -16,11 +16,16 @@ const reviewSchema = new mongoose.Schema(
             type: String,
             default: null
         },
-        reviewImageUrls: [{
+        reviewImages: [{
             type: String,
             default: null
         }],
-        rate: {
+        restaurant: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: collection.RESTAURANTS
+        },
+        rating: {
             type: Number,
             min: 1,
             max: 5,

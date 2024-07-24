@@ -40,7 +40,6 @@ const billController = {
             const info = booking.info.map(item => {
                 return {
                     menu: item.menu.map(item => ({
-                        // menuItem: item.menuItem._id,
                         menuItem: {
                             code: item.menuItem.code.prefix + item.menuItem.code.suffix,
                             name: item.menuItem.name,
@@ -56,7 +55,6 @@ const billController = {
                     tableNumber: item.tableNumber
                 }
             })
-            console.log(info);
 
             const bill = await ModelDb.BillModel.create({
                 paymentMethod,
