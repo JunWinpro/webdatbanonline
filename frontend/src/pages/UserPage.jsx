@@ -9,14 +9,14 @@ export const UserPage = () => {
   const dispatch = useDispatch();
   const { userInfo, accessToken } = useSelector((state) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState({});
+  const [editedData, setEditedData] = useState({ ...userInfo, password: '' });
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!userInfo) {
       navigate("/signin");
     } else {
-      setEditedData(userInfo);
+      setEditedData({ ...userInfo, password: '' });
     }
   }, [userInfo, navigate]);
 
@@ -26,7 +26,7 @@ export const UserPage = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditedData(userInfo);
+    setEditedData({ ...userInfo, password: '' });
   };
 
   const handleChange = (e) => {
@@ -36,14 +36,14 @@ export const UserPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const changedData = {};
+    const changedData = { password: editedData.password };
     for (const key in editedData) {
-      if (editedData[key] !== userInfo[key]) {
+      if (editedData[key] !== userInfo[key] && key !== 'password') {
         changedData[key] = editedData[key];
       }
     }
 
-    if (Object.keys(changedData).length === 0) {
+    if (Object.keys(changedData).length === 1 && changedData.hasOwnProperty('password') && !changedData.password) {
       setIsEditing(false);
       return;
     }
@@ -62,6 +62,7 @@ export const UserPage = () => {
         dispatch(updateUser(changedData));
         setIsEditing(false);
         setError("");
+        setEditedData(prev => ({ ...prev, password: '' }));
       } else {
         setError("Failed to update profile. Please try again.");
       }
@@ -99,23 +100,21 @@ export const UserPage = () => {
     );
   }
 
-  function renderField(label, field) {
+  function renderField(label, field, type = "text") {
     return (
-      <div
-        className={`bg-${
-          field === "email" ? "gray-50" : "white"
-        } px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6`}
-      >
+      <div className={`bg-${field === "email" ? "gray-50" : "white"} px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6`}>
         <dt className="text-sm font-medium text-gray-500">{label}</dt>
         <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {isEditing && field !== "email" ? (
             <input
-              type="text"
+              type={type}
               name={field}
               value={editedData[field] || ""}
               onChange={handleChange}
               className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
             />
+          ) : field === "password" ? (
+            "********"
           ) : (
             editedData[field] || "N/A"
           )}
@@ -158,6 +157,7 @@ export const UserPage = () => {
               {renderField("Email address", "email")}
               {renderField("Phone number", "phone")}
               {renderField("Gender", "gender")}
+              {renderField("Password", "password", "password")}
 
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">Role</dt>

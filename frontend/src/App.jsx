@@ -14,10 +14,12 @@ import { ForgetPassPage } from "./pages/ForgetPassPage";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "./store/slice/auth";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   const dispatch = useDispatch();
-  const { isLogin, userInfo, accessToken } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const { isLogin } = useSelector((state) => state.auth);
   const [showFixedNavBar, setShowFixedNavBar] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,18 +29,32 @@ function App() {
         try {
           const response = await axios.post(
             `${import.meta.env.VITE_BACKEND_URL}/users/refresh-token`,
-            { refreshToken: localStorage.getItem("refreshToken") }
+            { refreshToken: localStorage.getItem("refreshToken") },
+            { timeout: parseInt(import.meta.env.VITE_REQUEST_TIMEOUT) }
           );
           const { accessToken, userInfo } = response.data;
           dispatch(login({ accessToken, userInfo }));
         } catch (error) {
           console.error("Error refreshing token:", error);
-          setError("Failed to refresh authentication. Please log in again.");
+          setError("Session expired. Please log in again.");
+          dispatch(logout());
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("accessToken");
+          navigate("/signin");
         }
       }
     };
     refreshToken();
-  }, [dispatch, isLogin]);
+  }, [dispatch, isLogin, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,7 +93,12 @@ function App() {
         </div>
       )}
       <SearchBanner />
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
       <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
