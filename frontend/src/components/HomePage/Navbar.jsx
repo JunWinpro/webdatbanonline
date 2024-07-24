@@ -1,8 +1,9 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserContext } from "../../context/UserContext";
-import axiosInstance from "../../utils/axiosInstance";
+import axios from "axios";
+import { updateUser, logout } from "../../store/slice/auth";
 
 import {
   NavigationMenu,
@@ -24,24 +25,29 @@ import {
 
 const Navbar = ({ navItems }) => {
   const navigate = useNavigate();
-  const { user, logout, updateUser } = useContext(UserContext);
+  const dispatch = useDispatch();
+  const { userInfo: user, accessToken } = useSelector((state) => state.auth);
   const [isChangingAvatar, setIsChangingAvatar] = useState(false);
   const [newAvatarUrl, setNewAvatarUrl] = useState("");
   const [error, setError] = useState("");
 
   const handleSignOut = () => {
-    logout();
+    dispatch(logout());
     navigate("/");
   };
 
   const handleAvatarChange = async () => {
     if (newAvatarUrl) {
       try {
-        const response = await axiosInstance.put(`/users/${user._id}`, {
-          avatar: newAvatarUrl,
-        });
+        const response = await axios.put(
+          `${import.meta.env.VITE_BACKEND_URL}/users/${user._id}`,
+          { avatar: newAvatarUrl },
+          {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          }
+        );
         if (response.data.success) {
-          await updateUser({ ...user, avatar: newAvatarUrl });
+          dispatch(updateUser({ avatar: newAvatarUrl }));
           setIsChangingAvatar(false);
           setNewAvatarUrl("");
           setError("");

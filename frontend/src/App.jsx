@@ -4,7 +4,6 @@ import { HomePage } from "./pages/HomePage.jsx";
 import { SigninPage } from "./pages/SigninPage";
 import { SignupPage } from "./pages/SignupPage";
 import { ErrorPage } from "./pages/ErrorPage.jsx";
-
 import FixedNavBar from "./components/HomePage/FixedNavBar.jsx";
 import Navbar from "./components/HomePage/Navbar";
 import React, { useState, useEffect } from "react";
@@ -12,80 +11,73 @@ import SearchBanner from "./components/HomePage/SearchBanner";
 import { ProductPage } from "./pages/ProductPage";
 import { UserPage } from "./pages/UserPage";
 import { ForgetPassPage } from "./pages/ForgetPassPage";
-import { UserProvider } from "./context/UserContext";
 import { useDispatch, useSelector } from "react-redux";
-import authService from "./services/auth";
 import { login } from "./store/slice/auth";
+import axios from "axios";
 
 function App() {
   const dispatch = useDispatch();
   const { isLogin, userInfo, accessToken } = useSelector((state) => state.auth);
-  const email = "user@gmail.com";
-  const password = "12345678";
-  const [error, setError] = useState();
+  const [showFixedNavBar, setShowFixedNavBar] = useState(false);
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    const fetchLogin = async () => {
-      if (!isLogin) {
-        if (localStorage.getItem("refreshToken")) {
-          const { accessToken, userInfo } = await authService.renewAccessToken(
-            localStorage.getItem("refreshToken")
+    const refreshToken = async () => {
+      if (!isLogin && localStorage.getItem("refreshToken")) {
+        try {
+          const response = await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/users/refresh-token`,
+            { refreshToken: localStorage.getItem("refreshToken") }
           );
+          const { accessToken, userInfo } = response.data;
           dispatch(login({ accessToken, userInfo }));
+        } catch (error) {
+          console.error("Error refreshing token:", error);
+          setError("Failed to refresh authentication. Please log in again.");
         }
       }
     };
-    fetchLogin();
+    refreshToken();
+  }, [dispatch, isLogin]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowFixedNavBar(window.pageYOffset > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  const login = async () => {
-    const data = await authService.login({ email, password });
-    console.log(data);
-    return data;
-  };
-  login();
-  // const [showFixedNavBar, setShowFixedNavBar] = useState(false);
 
-  // const navItems = [
-  //   { label: "Home", link: "/" },
-  //   { label: "Contact", link: "/contact" },
-  //   {
-  //     label: "Food & Drink",
-  //     items: [
-  //       { label: " staurant", link: "/restaurant" },
-  //       { label: "Hotpot", link: "/hotpot" },
-  //       { label: "Cafe", link: "/cafe" },
-  //       { label: "Bar", link: "/bar" },
-  //       { label: "Grilled food", link: "/grilled-food" },
-  //     ],
-  //   },
-  //   {
-  //     label: "Sales",
-  //     link: "/sales",
-  //   },
-  // ];
-
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     if (window.pageYOffset > 0) {
-  //       setShowFixedNavBar(true);
-  //     } else {
-  //       setShowFixedNavBar(false);
-  //     }
-  //   };
-
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
+  const navItems = [
+    { label: "Home", link: "/" },
+    { label: "Contact", link: "/contact" },
+    {
+      label: "Food & Drink",
+      items: [
+        { label: "Restaurant", link: "/restaurant" },
+        { label: "Hotpot", link: "/hotpot" },
+        { label: "Cafe", link: "/cafe" },
+        { label: "Bar", link: "/bar" },
+        { label: "Grilled food", link: "/grilled-food" },
+      ],
+    },
+    {
+      label: "Sales",
+      link: "/sales",
+    },
+  ];
 
   return (
-    // <UserProvider>
     <>
-      {/* <Navbar navItems={navItems} />
+      <Navbar navItems={navItems} />
       {showFixedNavBar && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <FixedNavBar navItems={navItems} />
         </div>
       )}
       <SearchBanner />
+      {error && <div className="error-message">{error}</div>}
       <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -96,9 +88,8 @@ function App() {
           <Route path="/forget-password" element={<ForgetPassPage />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
-      </div> */}
+      </div>
     </>
-    // </UserProvider>
   );
 }
 

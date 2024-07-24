@@ -1,16 +1,18 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import axios from "axios";
-import { UserContext } from "../context/UserContext";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/slice/auth";
 
 export const SigninPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { user, login } = useContext(UserContext);
+  const dispatch = useDispatch();
+  const { isLogin } = useSelector((state) => state.auth);
 
-  if (user) {
+  if (isLogin) {
     return <Navigate to="/" />;
   }
 
@@ -25,7 +27,7 @@ export const SigninPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/users/login",
+        `${import.meta.env.VITE_BACKEND_URL}/users/login`,
         formData
       );
 
@@ -33,7 +35,7 @@ export const SigninPage = () => {
         localStorage.setItem("accessToken", response.data.data.accessToken);
         localStorage.setItem("refreshToken", response.data.data.refreshToken);
 
-        login(response.data.data);
+        dispatch(login(response.data.data));
         navigate("/");
       } else {
         setError("Login failed. Please try again.");
@@ -51,6 +53,7 @@ export const SigninPage = () => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

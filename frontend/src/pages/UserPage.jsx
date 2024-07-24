@@ -1,14 +1,24 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserContext } from "../context/UserContext";
-import axiosInstance from "../utils/axiosInstance";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
+import { updateUser, logout } from "../store/slice/auth";
 
 export const UserPage = () => {
   const navigate = useNavigate();
-  const { user, updateUser, logout } = useContext(UserContext);
+  const dispatch = useDispatch();
+  const { userInfo, accessToken } = useSelector((state) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState(user || {});
+  const [editedData, setEditedData] = useState({});
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigate("/signin");
+    } else {
+      setEditedData(userInfo);
+    }
+  }, [userInfo, navigate]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -16,19 +26,19 @@ export const UserPage = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditedData(user || {});
+    setEditedData(userInfo);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditedData({ ...editedData, [name]: value });
+    setEditedData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const changedData = {};
     for (const key in editedData) {
-      if (editedData[key] !== user[key]) {
+      if (editedData[key] !== userInfo[key]) {
         changedData[key] = editedData[key];
       }
     }
@@ -39,12 +49,17 @@ export const UserPage = () => {
     }
 
     try {
-      const response = await axiosInstance.put(
-        `/users/${user._id}`,
-        changedData
+      console.log("Sending update request with data:", changedData);
+      const response = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/users/${userInfo._id}`,
+        changedData,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
       );
+      console.log("Update response:", response.data);
       if (response.data.success) {
-        await updateUser(changedData);
+        dispatch(updateUser(changedData));
         setIsEditing(false);
         setError("");
       } else {
@@ -52,8 +67,11 @@ export const UserPage = () => {
       }
     } catch (error) {
       console.error("Error updating profile:", error);
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+      }
       if (error.response && error.response.status === 401) {
-        logout();
+        dispatch(logout());
         navigate("/signin");
       } else {
         setError("An error occurred while updating the profile.");
@@ -64,7 +82,7 @@ export const UserPage = () => {
   const defaultAvatarUrl =
     "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png";
 
-  if (!user) {
+  if (!userInfo) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md">
@@ -77,6 +95,31 @@ export const UserPage = () => {
             Sign In
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  function renderField(label, field) {
+    return (
+      <div
+        className={`bg-${
+          field === "email" ? "gray-50" : "white"
+        } px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6`}
+      >
+        <dt className="text-sm font-medium text-gray-500">{label}</dt>
+        <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {isEditing && field !== "email" ? (
+            <input
+              type="text"
+              name={field}
+              value={editedData[field] || ""}
+              onChange={handleChange}
+              className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+            />
+          ) : (
+            editedData[field] || "N/A"
+          )}
+        </dd>
       </div>
     );
   }
@@ -104,7 +147,7 @@ export const UserPage = () => {
                 <dt className="text-sm font-medium text-gray-500">Avatar</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 ">
                   <img
-                    src={user.avatar || defaultAvatarUrl}
+                    src={editedData.avatar || defaultAvatarUrl}
                     alt="User Avatar"
                     className="ml-10 w-40 h-40 rounded-full"
                   />
@@ -119,8 +162,8 @@ export const UserPage = () => {
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">Role</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {user.role
-                    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                  {editedData.role
+                    ? editedData.role.charAt(0).toUpperCase() + editedData.role.slice(1)
                     : "N/A"}
                 </dd>
               </div>
@@ -130,8 +173,8 @@ export const UserPage = () => {
                   Account created
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {user.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString()
+                  {editedData.createdAt
+                    ? new Date(editedData.createdAt).toLocaleDateString()
                     : "N/A"}
                 </dd>
               </div>
@@ -164,29 +207,4 @@ export const UserPage = () => {
       </div>
     </div>
   );
-
-  function renderField(label, field) {
-    return (
-      <div
-        className={`bg-${
-          field === "email" ? "gray-50" : "white"
-        } px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6`}
-      >
-        <dt className="text-sm font-medium text-gray-500">{label}</dt>
-        <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-          {isEditing && field !== "email" ? (
-            <input
-              type="text"
-              name={field}
-              value={editedData[field] || ""}
-              onChange={handleChange}
-              className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
-            />
-          ) : (
-            user[field] || "N/A"
-          )}
-        </dd>
-      </div>
-    );
-  }
 };
