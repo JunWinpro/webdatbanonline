@@ -22,7 +22,6 @@ function App() {
   const { isLogin } = useSelector((state) => state.auth);
   const [showFixedNavBar, setShowFixedNavBar] = useState(false);
   const [error, setError] = useState("");
-
   useEffect(() => {
     const refreshToken = async () => {
       if (!isLogin && localStorage.getItem("refreshToken")) {

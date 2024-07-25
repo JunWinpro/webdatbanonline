@@ -54,7 +54,6 @@ export const SigninPage = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -113,7 +112,7 @@ export const SigninPage = () => {
             <div className="flex items-center justify-between">
               <div className="text-sm">
                 <Link
-                  to="/forget-password"
+                  to="/reset-password"
                   className="font-medium text-red-600 hover:text-red-500"
                 >
                   Forgot your password?
