@@ -13,7 +13,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuContent,
 } from "@/components/ui/navigation-menu";
-import { Button } from "../ui/button.jsx";
+import { Button, buttonVariants } from "../ui/button.jsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,26 +72,33 @@ const Navbar = ({ navItems }) => {
                 <NavigationMenuTrigger>{item.label}</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   {item.items.map((subItem, subIndex) => (
-                    <NavigationMenuLink key={subIndex}>
-                      <Button>
-                        <Link to={subItem.link}>{subItem.label}</Link>
-                      </Button>
+                    <NavigationMenuLink key={subIndex} asChild>
+                      <Link 
+                        to={subItem.link}
+                        className={buttonVariants({ variant: "default" })}
+                      >
+                        {subItem.label}
+                      </Link>
                     </NavigationMenuLink>
                   ))}
                 </NavigationMenuContent>
               </NavigationMenuItem>
             ) : (
               <NavigationMenuItem key={index}>
-                <NavigationMenuLink>
-                  <Button>
-                    <Link to={item.link}>{item.label}</Link>
-                  </Button>
+                <NavigationMenuLink asChild>
+                  <Link 
+                    to={item.link}
+                    className={buttonVariants({ variant: "default" })}
+                  >
+                    {item.label}
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             )
           )}
         </NavigationMenuList>
       </NavigationMenu>
+
 
       <div className="flex items-center text-black">
         {user ? (

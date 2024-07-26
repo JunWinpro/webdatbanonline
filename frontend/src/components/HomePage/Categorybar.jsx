@@ -16,7 +16,7 @@ const Categorybar = () => {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/restaurants");
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/restaurants`);
         if (response.data.success) {
           setRestaurants(response.data.data.data);
         }

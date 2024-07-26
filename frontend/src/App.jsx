@@ -12,9 +12,10 @@ import { ProductPage } from "./pages/ProductPage";
 import { UserPage } from "./pages/UserPage";
 import { ForgetPassPage } from "./pages/ForgetPassPage";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "./store/slice/auth";
-import axios from "axios";
+import { login, logout } from "./store/slice/auth";
+
 import { useNavigate } from "react-router-dom";
+import axiosInstance from './utils/axiosInstance';
 
 function App() {
   const dispatch = useDispatch();
@@ -26,11 +27,9 @@ function App() {
     const refreshToken = async () => {
       if (!isLogin && localStorage.getItem("refreshToken")) {
         try {
-          const response = await axios.post(
-            `${import.meta.env.VITE_BACKEND_URL}/users/refresh-token`,
-            { refreshToken: localStorage.getItem("refreshToken") },
-            { timeout: parseInt(import.meta.env.VITE_REQUEST_TIMEOUT) }
-          );
+          const response = await axiosInstance.post("/renew-access-token", {
+            refreshToken: localStorage.getItem("refreshToken")
+          });
           const { accessToken, userInfo } = response.data;
           dispatch(login({ accessToken, userInfo }));
         } catch (error) {
@@ -44,7 +43,7 @@ function App() {
       }
     };
     refreshToken();
-  }, [dispatch, isLogin, navigate]);
+  }, []);
 
   useEffect(() => {
     if (error) {

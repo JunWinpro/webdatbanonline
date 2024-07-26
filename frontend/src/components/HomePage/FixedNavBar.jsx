@@ -1,7 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuLink,
@@ -23,32 +21,35 @@ const FixedNavBar = ({ navItems, username }) => {
                 <NavigationMenuTrigger>{item.label}</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   {item.items.map((subItem, subIndex) => (
-                    <NavigationMenuLink key={subIndex}>
-                      <Button
+                    <NavigationMenuLink key={subIndex} asChild>
+                      <Link 
+                        to={subItem.link}
                         className={buttonVariants({
+                          variant: "default",
                           className: "bg-white text-black",
                         })}
                       >
-                        <Link to={subItem.link}>{subItem.label}</Link>
-                      </Button>
+                        {subItem.label}
+                      </Link>
                     </NavigationMenuLink>
                   ))}
                 </NavigationMenuContent>
               </NavigationMenuItem>
             ) : (
               <NavigationMenuItem key={index}>
-                <NavigationMenuLink>
-                  <Button>
-                    <Link to={item.link}>{item.label}</Link>
-                  </Button>
+                <NavigationMenuLink asChild>
+                  <Link 
+                    to={item.link}
+                    className={buttonVariants({ variant: "default" })}
+                  >
+                    {item.label}
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             )
           )}
         </NavigationMenuList>
       </NavigationMenu>
-      
-
     </div>
   );
 };
