@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "antd";
 import Meta from "antd/es/card/Meta";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import {
   Carousel,
   CarouselContent,
@@ -36,30 +37,32 @@ const Categorybar = () => {
         <CarouselContent className="w-full flex-nowrap">
           {restaurants.map((restaurant) => (
             <CarouselItem key={restaurant._id} className="ml-10 md:basis-1/8 lg:basis-1/8">
-              <Card
-                hoverable
-                style={{ width: 200 }}
-                cover={
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      alt={restaurant.name}
-                      src={restaurant.avatar || "https://via.placeholder.com/200"}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                    />
-                  </div>
-                }
-              >
-                <Meta
-                  title={restaurant.name}
-                  description={
-                    <span style={{ color: "red" }}>
-                      {restaurant.minPrice && restaurant.maxPrice
-                        ? `${restaurant.minPrice}$ - ${restaurant.maxPrice}$`
-                        : "Price not available"}
-                    </span>
+              <Link to={`/product/${restaurant._id}`}>
+                <Card
+                  hoverable
+                  style={{ width: 200 }}
+                  cover={
+                    <div className="h-48 overflow-hidden">
+                      <img
+                        alt={restaurant.name}
+                        src={restaurant.avatar || "https://via.placeholder.com/200"}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                      />
+                    </div>
                   }
-                />
-              </Card>
+                >
+                  <Meta
+                    title={restaurant.name}
+                    description={
+                      <span style={{ color: "red" }}>
+                        {restaurant.minPrice && restaurant.maxPrice
+                          ? `${restaurant.minPrice}$ - ${restaurant.maxPrice}$`
+                          : "Price not available"}
+                      </span>
+                    }
+                  />
+                </Card>
+              </Link>
             </CarouselItem>
           ))}
         </CarouselContent>

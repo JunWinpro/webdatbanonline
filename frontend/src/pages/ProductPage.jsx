@@ -1,14 +1,34 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 import BookingBanner from "@/components/ProductPage/BookingBanner";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export const ProductPage = () => {
+  const { id } = useParams();
+  const [restaurant, setRestaurant] = useState(null);
   const [isFloating, setIsFloating] = useState(false);
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
   const [arrivingDate, setArrivingDate] = useState(new Date());
   const [arrivingTime, setArrivingTime] = useState("12:00");
+
+  useEffect(() => {
+    const fetchRestaurant = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/restaurants/${id}`);
+        if (response.data) {
+          setRestaurant(response.data);
+          console.log("Restaurant data:", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching restaurant:", error);
+      }
+    };
+
+    fetchRestaurant();
+  }, [id]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -93,96 +113,43 @@ export const ProductPage = () => {
             <div className=" w-11/12 rounded-lg">
               <div className="bg-white w-full rounded-lg p-6">
                 <h1 className="text-3xl font-semibold mb-2">
-                  Liberty Level 9 – Phạm Ngũ Lão
+                  {restaurant?.name || "Loading..."}
                 </h1>
                 <p className="text-lg mb-2">
-                  Lầu 9, Số 265 Phạm Ngũ Lão, P. Phạm Ngũ Lão, Q. 1
+                  {restaurant?.address ? `${restaurant.address.streetAddress}, ${restaurant.address.district}, ${restaurant.address.city}` : "Loading..."}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Loại hình:</span> Buffet, gọi
-                  món Việt, Hải Sản
+                  <span className="font-semibold">Category:</span> {restaurant?.category?.join(", ") || "Loading..."}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Khoảng giá:</span> 200.000 -
-                  500.000 đ/người
+                  <span className="font-semibold">Price Range:</span> {restaurant?.minPrice && restaurant?.maxPrice ? `${restaurant.minPrice} - ${restaurant.maxPrice} đ/person` : "Loading..."}
                 </p>
-                <p className="text-green-600">
-                  <span className="font-semibold">Đang mở cửa:</span> 11:00 -
-                  14:00
+                <p className={restaurant?.isOpening ? "text-green-600" : "text-red-600"}>
+                  <span className="font-semibold">Status:</span> {restaurant?.isOpening ? "Open" : "Closed"}
                 </p>
               </div>
 
-
-
-              <div
-                className="bg-white w-full rounded-lg mt-10 p-6"
-
-              >
-                <h2 className="text-2xl font-bold mb-4">Thông tin chi tiết</h2>
+              <div className="bg-white w-full rounded-lg mt-10 p-6">
+                <h2 className="text-2xl font-bold mb-4">Additional Information</h2>
 
                 <section className="mb-4">
-                  <h3 className="text-xl font-semibold mb-2">Phù hợp:</h3>
-                  <p>
-                    Văn phòng, gia đình, tụ họp, gặp mặt liên hoan bạn bè, khách
-                    du lịch,...
-                  </p>
+                  <h3 className="text-xl font-semibold mb-2">Rating:</h3>
+                  <p>{restaurant?.rating || "No ratings yet"}</p>
                 </section>
 
                 <section className="mb-4">
-                  <h3 className="text-xl font-semibold mb-2">Món đặc sắc:</h3>
-                  <ul className="list-disc pl-5">
-                    <li>
-                      Hải sản nướng: Tôm nướng, Sò nướng, Cá hồi tẩm nướng muối
-                      ớt,...
-                    </li>
-                    <li>Lagu/cà ri bò gà, Gà/heo/bò quay, rô ti,...</li>
-                    <li>
-                      Món thuần Việt: Món cuốn các loại, lẩu, các loại bánh bèo,
-                      nậm, lọc,...
-                    </li>
-                  </ul>
+                  <h3 className="text-xl font-semibold mb-2">Total Rating:</h3>
+                  <p>{restaurant?.totalRating}</p>
                 </section>
 
                 <section className="mb-4">
-                  <h3 className="text-xl font-semibold mb-2">Không gian:</h3>
-                  <ul className="list-disc pl-5">
-                    <li>
-                      Rộng, thoáng mát, kiến trúc hiện đại và ấm cúng. View toàn
-                      thành phố
-                    </li>
-                    <li>
-                      Lầu 9 sức chứa 170 khách. Phục vụ Buffet trưa T5-CN (11h -
-                      13h30), phục vụ Gọi món thời gian còn lại.
-                    </li>
-                    <li>
-                      Phòng riêng tại lầu 2: 01 phòng (10 - 30 khách/phòng),
-                      chuyên phục vụ Gọi món.
-                    </li>
-                  </ul>
+                  <h3 className="text-xl font-semibold mb-2">Bookings Last Week:</h3>
+                  <p>{restaurant?.numberOfTablesBookedInLastWeek}</p>
                 </section>
 
                 <section className="mb-4">
-                  <h3 className="text-xl font-semibold mb-2">Để ô tô:</h3>
-                  <p>
-                    <strong>Tại Khách sạn:</strong> Phí gửi: 8000đ/chiếc
-                  </p>
-                  <p>
-                    <strong>Số 2 Phạm Ngũ Lão:</strong> Phí gửi phụ thuộc đơn vị
-                    trông giữ xe
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-xl font-semibold mb-2">
-                    Điểm đặc trưng:
-                  </h3>
-                  <ul className="list-disc pl-5">
-                    <li>Đội ngũ đầu bếp giàu kinh nghiệm</li>
-                    <li>
-                      Nguyên liệu tại đây đều được tuyển chọn kỹ lưỡng từ các
-                      nhà cung cấp có giấy xác nhận an toàn vệ sinh thực phẩm.
-                    </li>
-                  </ul>
+                  <h3 className="text-xl font-semibold mb-2">Verification Status:</h3>
+                  <p>{restaurant?.isVerified ? "Verified" : "Not Verified"}</p>
                 </section>
               </div>
             </div>

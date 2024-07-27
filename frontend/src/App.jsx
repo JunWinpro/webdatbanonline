@@ -17,6 +17,7 @@ import { login, logout } from "./store/slice/auth";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from './utils/axiosInstance';
 import authService from "./services/auth";
+import { ResetPassPage } from "./pages/ResetPassPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -99,11 +100,12 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/product" element={<ProductPage />} />
+          <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/signin" element={<SigninPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/profile" element={<UserPage />} />
           <Route path="/forget-password" element={<ForgetPassPage />} />
+          <Route path="/reset-password/:token" element={<ResetPassPage />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </div>
