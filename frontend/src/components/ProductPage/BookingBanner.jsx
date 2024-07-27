@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "antd";
 
-const BookingBanner = () => {
+const BookingBanner = ({ images = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [drawerCurrentIndex, setDrawerCurrentIndex] = useState(0);
   const [clickedIndex, setClickedIndex] = useState(null);
@@ -16,7 +16,8 @@ const BookingBanner = () => {
   const [isDrawerTransitioning, setIsDrawerTransitioning] = useState(false);
   const [prevIndex, setPrevIndex] = useState(0);
   const [drawerPrevIndex, setDrawerPrevIndex] = useState(0);
-  const imageUrls = [
+
+  const defaultImages = [
     "https://anhdepfree.com/wp-content/uploads/2020/03/anh-2560x1440-chat-luong-cao-1920x1080.jpg",
     "https://anhdepfree.com/wp-content/uploads/2020/03/anh-2560x1440-dep-nhat-1920x1080.jpg",
     "https://anhdepfree.com/wp-content/uploads/2020/03/anh-2560x1440-dep-1920x1080.jpg",
@@ -25,6 +26,9 @@ const BookingBanner = () => {
     "https://anhdepfree.com/wp-content/uploads/2020/03/anh-nen-2560x1440-cho-may-tinh-1920x1080.jpg",
     "https://m.yodycdn.com/blog/hinh-nen-thien-nhien-4k-yody-vn-1-jpeg.jpg",
   ];
+
+  const imageUrls = images.length > 0 ? images : defaultImages;
+
 
   const handleTransitionEnd = () => {
     setIsTransitioning(false);

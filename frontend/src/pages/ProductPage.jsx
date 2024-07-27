@@ -7,7 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 export const ProductPage = () => {
   const { id } = useParams();
-  const [restaurant, setRestaurant] = useState(null);
+  const [productData, setProductData] = useState(null);
   const [isFloating, setIsFloating] = useState(false);
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
@@ -15,19 +15,19 @@ export const ProductPage = () => {
   const [arrivingTime, setArrivingTime] = useState("12:00");
 
   useEffect(() => {
-    const fetchRestaurant = async () => {
+    const fetchProductData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/restaurants/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/restaurants/restaurant/${id}`);
         if (response.data) {
-          setRestaurant(response.data);
-          console.log("Restaurant data:", response.data);
+          setProductData(response.data.data);
+
         }
       } catch (error) {
-        console.error("Error fetching restaurant:", error);
+        console.error("Error fetching product data:", error);
       }
     };
 
-    fetchRestaurant();
+    fetchProductData();
   }, [id]);
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export const ProductPage = () => {
     <>
       <div className="bg-slate-100">
         <div className="w-full flex justify-center">
-          <BookingBanner />
+        <BookingBanner images={productData?.restaurant?.images || []} />
         </div>
 
         <div className="flex justify-center w-full">
@@ -113,19 +113,23 @@ export const ProductPage = () => {
             <div className=" w-11/12 rounded-lg">
               <div className="bg-white w-full rounded-lg p-6">
                 <h1 className="text-3xl font-semibold mb-2">
-                  {restaurant?.name || "Loading..."}
+                  {productData?.restaurant?.name || "Loading..."}
                 </h1>
                 <p className="text-lg mb-2">
-                  {restaurant?.address ? `${restaurant.address.streetAddress}, ${restaurant.address.district}, ${restaurant.address.city}` : "Loading..."}
+                  {productData?.restaurant?.address ? 
+                    `${productData.restaurant.address.streetAddress}, ${productData.restaurant.address.district}, ${productData.restaurant.address.city}` 
+                    : "Loading..."}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Category:</span> {restaurant?.category?.join(", ") || "Loading..."}
+                  <span className="font-semibold">Category:</span> {productData?.restaurant?.category?.join(", ") || "Loading..."}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Price Range:</span> {restaurant?.minPrice && restaurant?.maxPrice ? `${restaurant.minPrice} - ${restaurant.maxPrice} đ/person` : "Loading..."}
+                  <span className="font-semibold">Price Range:</span> {productData?.restaurant?.minPrice && productData?.restaurant?.maxPrice ? 
+                    `${productData.restaurant.minPrice} - ${productData.restaurant.maxPrice} đ/person` 
+                    : "Loading..."}
                 </p>
-                <p className={restaurant?.isOpening ? "text-green-600" : "text-red-600"}>
-                  <span className="font-semibold">Status:</span> {restaurant?.isOpening ? "Open" : "Closed"}
+                <p className={productData?.restaurant?.isOpening ? "text-green-600" : "text-red-600"}>
+                  <span className="font-semibold">Status:</span> {productData?.restaurant?.isOpening ? "Open" : "Closed"}
                 </p>
               </div>
 
@@ -134,22 +138,52 @@ export const ProductPage = () => {
 
                 <section className="mb-4">
                   <h3 className="text-xl font-semibold mb-2">Rating:</h3>
-                  <p>{restaurant?.rating || "No ratings yet"}</p>
+                  <p>{productData?.restaurant?.rating || "No ratings yet"}</p>
                 </section>
 
                 <section className="mb-4">
                   <h3 className="text-xl font-semibold mb-2">Total Rating:</h3>
-                  <p>{restaurant?.totalRating}</p>
+                  <p>{productData?.restaurant?.totalRating}</p>
                 </section>
 
                 <section className="mb-4">
                   <h3 className="text-xl font-semibold mb-2">Bookings Last Week:</h3>
-                  <p>{restaurant?.numberOfTablesBookedInLastWeek}</p>
+                  <p>{productData?.restaurant?.numberOfTablesBookedInLastWeek}</p>
                 </section>
 
                 <section className="mb-4">
                   <h3 className="text-xl font-semibold mb-2">Verification Status:</h3>
-                  <p>{restaurant?.isVerified ? "Verified" : "Not Verified"}</p>
+                  <p>{productData?.restaurant?.isVerified ? "Verified" : "Not Verified"}</p>
+                </section>
+
+                <section className="mb-4">
+                  <h3 className="text-xl font-semibold mb-2">Maxim:</h3>
+                  <p>{productData?.maxim}</p>
+                </section>
+
+                <section className="mb-4">
+                  <h3 className="text-xl font-semibold mb-2">Description:</h3>
+                  {productData?.description?.map((desc, index) => (
+                    <div key={index}>
+                      <h4 className="font-semibold">{desc.title}</h4>
+                      <p>{desc.content}</p>
+                    </div>
+                  ))}
+                </section>
+
+                <section className="mb-4">
+                  <h3 className="text-xl font-semibold mb-2">Schedule:</h3>
+                  {productData?.schedule?.map((day, index) => (
+                    <p key={index}>
+                      {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][day.dayOfWeek]}:
+                      {day.isWorkingDay ? ` ${day.openTime}:00 - ${day.closeTime}:00` : ' Closed'}
+                    </p>
+                  ))}
+                </section>
+
+                <section className="mb-4">
+                  <h3 className="text-xl font-semibold mb-2">Total Tables:</h3>
+                  <p>{productData?.totalTable}</p>
                 </section>
               </div>
             </div>
