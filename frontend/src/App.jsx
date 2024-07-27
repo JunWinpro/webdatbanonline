@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from './utils/axiosInstance';
 import authService from "./services/auth";
 import { ResetPassPage } from "./pages/ResetPassPage";
+import { AdminDashboard } from "./pages/AdminDashBoard";
 
 function App() {
   const dispatch = useDispatch();
@@ -104,6 +105,7 @@ function App() {
           <Route path="/signin" element={<SigninPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/profile" element={<UserPage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/forget-password" element={<ForgetPassPage />} />
           <Route path="/reset-password/:token" element={<ResetPassPage />} />
           <Route path="*" element={<ErrorPage />} />

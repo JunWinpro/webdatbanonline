@@ -12,6 +12,7 @@ export const UserPage = () => {
   const [editedData, setEditedData] = useState({ ...userInfo, password: "" });
   const [error, setError] = useState("");
   const [currentLink, setCurrentLink] = useState("profile");
+  const [avatarFile, setAvatarFile] = useState(null);
 
   useEffect(() => {
     if (!userInfo) {
@@ -28,11 +29,49 @@ export const UserPage = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setEditedData({ ...userInfo, password: "" });
+    setAvatarFile(null);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditedData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setAvatarFile(e.target.files[0]);
+    }
+  };
+
+  const uploadAvatar = async () => {
+    if (!avatarFile) return;
+
+    const formData = new FormData();
+    formData.append('file', avatarFile);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/users/upload/avatar/${userInfo._id}`,
+        formData,
+        {
+          headers: { 
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'multipart/form-data'
+          },
+        }
+      );
+
+      if (response.data.success) {
+        dispatch(updateUser({ avatar: response.data.avatarUrl }));
+        setEditedData(prev => ({ ...prev, avatar: response.data.avatarUrl }));
+        setAvatarFile(null);
+      } else {
+        setError("Failed to upload avatar. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      setError("An error occurred while uploading the avatar.");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -68,6 +107,10 @@ export const UserPage = () => {
         setIsEditing(false);
         setError("");
         setEditedData((prev) => ({ ...prev, password: "" }));
+
+        if (avatarFile) {
+          await uploadAvatar();
+        }
       } else {
         setError("Failed to update profile. Please try again.");
       }
@@ -165,12 +208,39 @@ export const UserPage = () => {
               <dl>
                 <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 ">
                   <dt className="text-sm font-medium text-gray-500">Avatar</dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 ">
-                    <img
-                      src={editedData.avatar || defaultAvatarUrl}
-                      alt="User Avatar"
-                      className="ml-10 w-40 h-40 rounded-full"
-                    />
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 relative">
+                    <div className="ml-10 w-40 h-40 rounded-full overflow-hidden relative group">
+                      <img
+                        src={editedData.avatar || defaultAvatarUrl}
+                        alt="User Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                      {isEditing && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <label htmlFor="avatar-upload" className="cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                          </label>
+                          <input
+                            id="avatar-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarChange}
+                            className="hidden"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    {avatarFile && (
+                      <button
+                        type="button"
+                        onClick={uploadAvatar}
+                        className="mt-2 bg-red-600 text-white px-3 py-1 rounded-md text-sm"
+                      >
+                        Upload New Avatar
+                      </button>
+                    )}
                   </dd>
                 </div>
                 {renderField("First name", "firstName")}
