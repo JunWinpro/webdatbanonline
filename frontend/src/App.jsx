@@ -15,10 +15,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { login, logout } from "./store/slice/auth";
 
 import { useNavigate } from "react-router-dom";
-import axiosInstance from './utils/axiosInstance';
+import axiosInstance from "./utils/axiosInstance";
 import authService from "./services/auth";
 import { ResetPassPage } from "./pages/ResetPassPage";
 import { AdminDashboard } from "./pages/AdminDashBoard";
+import { EmployeeSigninPage } from "./pages/EmployeeSigninPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const dispatch = useDispatch();
@@ -30,8 +32,10 @@ function App() {
     const refreshToken = async () => {
       if (!isLogin && localStorage.getItem("refreshToken")) {
         try {
-          const { accessToken, userInfo }  = await authService.renewAccessToken(localStorage.getItem("refreshToken"))
-          console.log(userInfo)
+          const { accessToken, userInfo } = await authService.renewAccessToken(
+            localStorage.getItem("refreshToken")
+          );
+          console.log(userInfo);
           dispatch(login({ accessToken, userInfo }));
         } catch (error) {
           console.error("Error refreshing token:", error);
@@ -93,7 +97,10 @@ function App() {
       )}
       <SearchBanner />
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
         </div>
@@ -103,9 +110,12 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/signin" element={<SigninPage />} />
+          <Route path="/employee/signin" element={<EmployeeSigninPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/profile" element={<UserPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route element={<ProtectedRoute allowedRoles={["manager"]} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
           <Route path="/forget-password" element={<ForgetPassPage />} />
           <Route path="/reset-password/:token" element={<ResetPassPage />} />
           <Route path="*" element={<ErrorPage />} />

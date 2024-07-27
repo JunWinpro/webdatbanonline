@@ -24,18 +24,21 @@ export const SigninPage = () => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-
+  
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/users/login`,
         formData
       );
-
+  
       if (response.data.success) {
         localStorage.setItem("accessToken", response.data.data.accessToken);
         localStorage.setItem("refreshToken", response.data.data.refreshToken);
-
-        dispatch(login(response.data.data));
+  
+        dispatch(login({
+          userInfo: response.data.data.userInfo,
+          role: response.data.data.userInfo.role, 
+        }));
         navigate("/");
       } else {
         setError("Login failed. Please try again.");

@@ -2,18 +2,23 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 export const AdminDashboard = () => {
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [activeTab, setActiveTab] = useState("restaurants");
 
   const renderContent = () => {
-    switch (activeTab) {
-      case "restaurants":
-        return <RestaurantManagement />;
-      case "staff":
-        return <StaffManagement />;
-      case "bookings":
-        return <BookingList />;
-      default:
-        return <RestaurantManagement />;
+    if (activeTab === "restaurants") {
+      return <RestaurantManagement onSelectRestaurant={setSelectedRestaurant} />;
+    } else if (selectedRestaurant) {
+      switch (activeTab) {
+        case "staff":
+          return <StaffManagement restaurantId={selectedRestaurant._id} />;
+        case "bookings":
+          return <BookingList restaurantId={selectedRestaurant._id} />;
+        default:
+          return null;
+      }
+    } else {
+      return <p>Please select a restaurant first.</p>;
     }
   };
 
@@ -25,27 +30,53 @@ export const AdminDashboard = () => {
           <h1 className="text-xl font-semibold">Admin Dashboard</h1>
         </div>
         <nav className="mt-4">
-          {["restaurants", "staff", "bookings"].map((tab) => (
-            <button
-              key={tab}
-              className={`block w-full text-left py-2 px-4 hover:bg-gray-200 ${
-                activeTab === tab ? "bg-gray-200" : ""
-              }`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+          <button
+            className={`block w-full text-left py-2 px-4 hover:bg-gray-200 ${
+              activeTab === "restaurants" ? "bg-gray-200" : ""
+            }`}
+            onClick={() => {
+              setActiveTab("restaurants");
+              setSelectedRestaurant(null);
+            }}
+          >
+            Restaurants
+          </button>
+          {selectedRestaurant && (
+            <>
+              <button
+                className={`block w-full text-left py-2 px-4 hover:bg-gray-200 ${
+                  activeTab === "staff" ? "bg-gray-200" : ""
+                }`}
+                onClick={() => setActiveTab("staff")}
+              >
+                Staff
+              </button>
+              <button
+                className={`block w-full text-left py-2 px-4 hover:bg-gray-200 ${
+                  activeTab === "bookings" ? "bg-gray-200" : ""
+                }`}
+                onClick={() => setActiveTab("bookings")}
+              >
+                Bookings
+              </button>
+            </>
+          )}
         </nav>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-10 overflow-y-auto">{renderContent()}</div>
+      <div className="flex-1 p-10 overflow-y-auto">
+        {selectedRestaurant && (
+          <h2 className="text-2xl font-semibold mb-4">
+            {selectedRestaurant.name}
+          </h2>
+        )}
+        {renderContent()}
+      </div>
     </div>
   );
 };
-
-const RestaurantManagement = () => {
+const RestaurantManagement = ({ onSelectRestaurant }) => {
   const [restaurants, setRestaurants] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -74,171 +105,6 @@ const RestaurantManagement = () => {
     } catch (error) {
       console.error("Error fetching restaurants:", error);
       setRestaurants([]);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editingId) {
-        await axios.put(
-          `${import.meta.env.VITE_BACKEND_URL}/restaurants/${editingId}`,
-          formData
-        );
-      } else {
-        await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/restaurants`,
-          formData
-        );
-      }
-      fetchRestaurants();
-      setFormData({
-        name: "",
-        address: "",
-        category: "",
-        minPrice: "",
-        maxPrice: "",
-      });
-      setEditingId(null);
-    } catch (error) {
-      console.error("Error saving restaurant:", error);
-    }
-  };
-
-  const handleEdit = (restaurant) => {
-    setFormData(restaurant);
-    setEditingId(restaurant._id);
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/restaurants/${id}`
-      );
-      fetchRestaurants();
-    } catch (error) {
-      console.error("Error deleting restaurant:", error);
-    }
-  };
-
-  return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Restaurant Management</h2>
-
-      <form onSubmit={handleSubmit} className="mb-8">
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          placeholder="Restaurant Name"
-          className="mr-2 p-2 border rounded"
-        />
-        <input
-          type="text"
-          name="address"
-          value={formData.address}
-          onChange={handleInputChange}
-          placeholder="Address"
-          className="mr-2 p-2 border rounded"
-        />
-        <input
-          type="text"
-          name="category"
-          value={formData.category}
-          onChange={handleInputChange}
-          placeholder="Category"
-          className="mr-2 p-2 border rounded"
-        />
-        <input
-          type="number"
-          name="minPrice"
-          value={formData.minPrice}
-          onChange={handleInputChange}
-          placeholder="Min Price"
-          className="mr-2 p-2 border rounded"
-        />
-        <input
-          type="number"
-          name="maxPrice"
-          value={formData.maxPrice}
-          onChange={handleInputChange}
-          placeholder="Max Price"
-          className="mr-2 p-2 border rounded"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          {editingId ? "Update" : "Add"} Restaurant
-        </button>
-      </form>
-
-      <table className="w-full">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Category</th>
-            <th>Price Range</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-  {restaurants.map((restaurant) => (
-    <tr key={restaurant._id}>
-      <td>{restaurant.name}</td>
-      <td>{`${restaurant.address.streetAddress}, ${restaurant.address.district}, ${restaurant.address.city}`}</td>
-      <td>{restaurant.category.join(", ")}</td>
-      <td>{`${restaurant.minPrice || 'N/A'} - ${restaurant.maxPrice || 'N/A'}`}</td>
-      <td>
-        <button
-          onClick={() => handleEdit(restaurant)}
-          className="text-blue-500 mr-2"
-        >
-          Edit
-        </button>
-        <button
-          onClick={() => handleDelete(restaurant._id)}
-          className="text-red-500"
-        >
-          Delete
-        </button>
-      </td>
-    </tr>
-  ))}
-</tbody>
-      </table>
-    </div>
-  );
-};
-
-const StaffManagement = () => {
-  const [staff, setStaff] = useState([]);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "",
-  });
-  const [editingId, setEditingId] = useState(null);
-
-  useEffect(() => {
-    fetchStaff();
-  }, []);
-
-  const fetchStaff = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/staff`
-      );
-      setStaff(response.data);
-    } catch (error) {
-      console.error("Error fetching staff:", error);
     }
   };
 
@@ -280,6 +146,7 @@ const StaffManagement = () => {
       console.error("Error saving restaurant:", error);
     }
   };
+
   const handleEdit = (restaurant) => {
     setFormData({
       name: restaurant.name,
@@ -293,16 +160,140 @@ const StaffManagement = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/staff/${id}`);
-      fetchStaff();
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/restaurants/${id}`
+      );
+      fetchRestaurants();
     } catch (error) {
-      console.error("Error deleting staff:", error);
+      console.error("Error deleting restaurant:", error);
     }
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Staff Account Management</h2>
+      <h2 className="text-2xl font-semibold mb-4">Restaurant Management</h2>
+
+      <form onSubmit={handleSubmit} className="mb-8">
+        {/* Form fields */}
+        {/* ... */}
+      </form>
+
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Category</th>
+            <th>Price Range</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {restaurants.map((restaurant) => (
+            <tr key={restaurant._id}>
+              <td>
+                <button
+                  onClick={() => onSelectRestaurant(restaurant)}
+                  className="text-blue-500 hover:underline"
+                >
+                  {restaurant.name}
+                </button>
+              </td>
+              <td>{`${restaurant.address.streetAddress}, ${restaurant.address.district}, ${restaurant.address.city}`}</td>
+              <td>{restaurant.category.join(", ")}</td>
+              <td>{`${restaurant.minPrice || 'N/A'} - ${restaurant.maxPrice || 'N/A'}`}</td>
+              <td>
+                <button
+                  onClick={() => handleEdit(restaurant)}
+                  className="text-blue-500 mr-2"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(restaurant._id)}
+                  className="text-red-500"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+const StaffManagement = ({ restaurantId }) => {
+  const [staff, setStaff] = useState([]);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+  });
+  const [editingId, setEditingId] = useState(null);
+
+  useEffect(() => {
+    fetchStaff();
+  }, []);
+
+  const fetchStaff = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/restaurants/${restaurantId}/staff`
+      );
+      setStaff(response.data);
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingId) {
+        await axios.put(
+          `${import.meta.env.VITE_BACKEND_URL}/restaurants/${restaurantId}/staff/${editingId}`,
+          formData
+        );
+      } else {
+        await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/restaurants/${restaurantId}/staff`,
+          formData
+        );
+      }
+      fetchStaff();
+      setFormData({ firstName: "", lastName: "", email: "", role: "" });
+      setEditingId(null);
+    } catch (error) {
+      console.error("Error saving staff member:", error);
+    }
+  };
+
+  const handleEdit = (staffMember) => {
+    setFormData(staffMember);
+    setEditingId(staffMember._id);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/restaurants/${restaurantId}/staff/${id}`
+      );
+      fetchStaff();
+    } catch (error) {
+      console.error("Error deleting staff member:", error);
+    }
+  };
+
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-4">Staff Management</h2>
 
       <form onSubmit={handleSubmit} className="mb-8">
         <input
@@ -336,8 +327,9 @@ const StaffManagement = () => {
           className="mr-2 p-2 border rounded"
         >
           <option value="">Select Role</option>
-          <option value="admin">Admin</option>
-          <option value="staff">Staff</option>
+          <option value="manager">Manager</option>
+          <option value="waiter">Waiter</option>
+          <option value="chef">Chef</option>
         </select>
         <button
           type="submit"
@@ -384,21 +376,37 @@ const StaffManagement = () => {
   );
 };
 
-const BookingList = () => {
+
+const BookingList = ({ restaurantId }) => {
   const [bookings, setBookings] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [restaurantId, currentPage]);
 
   const fetchBookings = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/bookings`
+        `${import.meta.env.VITE_BACKEND_URL}/restaurants/${restaurantId}/bookings?page=${currentPage}`
       );
-      setBookings(response.data);
+      setBookings(response.data.bookings);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching bookings:", error);
+    }
+  };
+
+  const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/restaurants/${restaurantId}/bookings/${bookingId}`,
+        { status: newStatus }
+      );
+      fetchBookings();
+    } catch (error) {
+      console.error("Error updating booking status:", error);
     }
   };
 
@@ -408,25 +416,50 @@ const BookingList = () => {
       <table className="w-full">
         <thead>
           <tr>
-            <th>Restaurant</th>
+            <th>Customer</th>
             <th>Date</th>
             <th>Time</th>
             <th>Guests</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {bookings.map((booking) => (
             <tr key={booking._id}>
-              <td>{booking.restaurantName}</td>
+              <td>{booking.customerName}</td>
               <td>{new Date(booking.date).toLocaleDateString()}</td>
               <td>{booking.time}</td>
               <td>{booking.guests}</td>
               <td>{booking.status}</td>
+              <td>
+                <select
+                  value={booking.status}
+                  onChange={(e) => handleStatusChange(booking._id, e.target.value)}
+                  className="p-2 border rounded"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <div className="mt-4 flex justify-center">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => setCurrentPage(page)}
+            className={`mx-1 px-3 py-1 border rounded ${
+              currentPage === page ? "bg-blue-500 text-white" : ""
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

@@ -26,11 +26,11 @@ import {
 const Navbar = ({ navItems }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const {isLogin,userInfo} = useSelector(state=>state.auth)
+  const { isLogin, userInfo } = useSelector((state) => state.auth);
   const [isChangingAvatar, setIsChangingAvatar] = useState(false);
   const [newAvatarUrl, setNewAvatarUrl] = useState("");
   const [error, setError] = useState("");
-  console.log(userInfo,isLogin)
+  console.log(userInfo, isLogin);
   const handleSignOut = () => {
     dispatch(logout());
     navigate("/");
@@ -43,7 +43,7 @@ const Navbar = ({ navItems }) => {
           `${import.meta.env.VITE_BACKEND_URL}/userInfos/${userInfo._id}`,
           { avatar: newAvatarUrl },
           {
-            headers: { Authorization: `Bearer ${accessToken}` }
+            headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
         if (response.data.success) {
@@ -73,7 +73,7 @@ const Navbar = ({ navItems }) => {
                 <NavigationMenuContent>
                   {item.items.map((subItem, subIndex) => (
                     <NavigationMenuLink key={subIndex} asChild>
-                      <Link 
+                      <Link
                         to={subItem.link}
                         className={buttonVariants({ variant: "default" })}
                       >
@@ -86,7 +86,7 @@ const Navbar = ({ navItems }) => {
             ) : (
               <NavigationMenuItem key={index}>
                 <NavigationMenuLink asChild>
-                  <Link 
+                  <Link
                     to={item.link}
                     className={buttonVariants({ variant: "default" })}
                   >
@@ -99,20 +99,28 @@ const Navbar = ({ navItems }) => {
         </NavigationMenuList>
       </NavigationMenu>
 
-
       <div className="flex items-center text-black">
         {isLogin ? (
           <>
             <Avatar>
-              <AvatarImage src={userInfo.avatar || defaultAvatarUrl} />
-              <AvatarFallback>
-                {userInfo.firstName.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              {userInfo && userInfo.avatar ? (
+                <AvatarImage src={userInfo.avatar} />
+              ) : (
+                <AvatarFallback>
+                  {userInfo && userInfo.firstName
+                    ? userInfo.firstName.charAt(0).toUpperCase()
+                    : "?"}
+                </AvatarFallback>
+              )}
             </Avatar>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <span className="ml-2 cursor-pointer">{`${userInfo.firstName} ${userInfo.lastName}`}</span>
+                <span className="ml-2 cursor-pointer">
+                  {userInfo
+                    ? `${userInfo.firstName || ""} ${userInfo.lastName || ""}`
+                    : "User"}
+                </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>userInfo</DropdownMenuLabel>

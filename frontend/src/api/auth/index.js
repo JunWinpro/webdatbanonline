@@ -1,4 +1,5 @@
 import axiosInstance from "../axios"
+
 const authAPI = {
     login: async (payload) => {
         try {
@@ -19,4 +20,5 @@ const authAPI = {
         }
     }
 }
+
 export default authAPI
