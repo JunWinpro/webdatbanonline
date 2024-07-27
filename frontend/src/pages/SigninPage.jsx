@@ -112,7 +112,7 @@ export const SigninPage = () => {
             <div className="flex items-center justify-between">
               <div className="text-sm">
                 <Link
-                  to="/reset-password"
+                  to="/forget-password"
                   className="font-medium text-red-600 hover:text-red-500"
                 >
                   Forgot your password?

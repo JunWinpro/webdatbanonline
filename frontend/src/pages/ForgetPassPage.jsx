@@ -25,7 +25,10 @@ export const ForgetPassPage = () => {
 
     setIsSending(true);
     try {
-      const response = await axios.post('http://localhost:8000/users/forget-password', { email });
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/users/forget-password`,
+        {email}
+      );
       setMessage(response.data.message);
       setIsError(!response.data.success);
       if (response.data.success) {

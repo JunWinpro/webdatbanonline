@@ -26,11 +26,11 @@ import {
 const Navbar = ({ navItems }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { userInfo: user, accessToken } = useSelector((state) => state.auth);
+  const {isLogin,userInfo} = useSelector(state=>state.auth)
   const [isChangingAvatar, setIsChangingAvatar] = useState(false);
   const [newAvatarUrl, setNewAvatarUrl] = useState("");
   const [error, setError] = useState("");
-
+  console.log(userInfo,isLogin)
   const handleSignOut = () => {
     dispatch(logout());
     navigate("/");
@@ -40,7 +40,7 @@ const Navbar = ({ navItems }) => {
     if (newAvatarUrl) {
       try {
         const response = await axios.put(
-          `${import.meta.env.VITE_BACKEND_URL}/users/${user._id}`,
+          `${import.meta.env.VITE_BACKEND_URL}/userInfos/${userInfo._id}`,
           { avatar: newAvatarUrl },
           {
             headers: { Authorization: `Bearer ${accessToken}` }
@@ -101,21 +101,21 @@ const Navbar = ({ navItems }) => {
 
 
       <div className="flex items-center text-black">
-        {user ? (
+        {isLogin ? (
           <>
             <Avatar>
-              <AvatarImage src={user.avatar || defaultAvatarUrl} />
+              <AvatarImage src={userInfo.avatar || defaultAvatarUrl} />
               <AvatarFallback>
-                {user.firstName.charAt(0).toUpperCase()}
+                {userInfo.firstName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <span className="ml-2 cursor-pointer">{`${user.firstName} ${user.lastName}`}</span>
+                <span className="ml-2 cursor-pointer">{`${userInfo.firstName} ${userInfo.lastName}`}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>User</DropdownMenuLabel>
+                <DropdownMenuLabel>userInfo</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => navigate("/profile")}>
                   Profile

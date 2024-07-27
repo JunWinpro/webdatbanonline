@@ -16,6 +16,7 @@ import { login, logout } from "./store/slice/auth";
 
 import { useNavigate } from "react-router-dom";
 import axiosInstance from './utils/axiosInstance';
+import authService from "./services/auth";
 
 function App() {
   const dispatch = useDispatch();
@@ -27,10 +28,8 @@ function App() {
     const refreshToken = async () => {
       if (!isLogin && localStorage.getItem("refreshToken")) {
         try {
-          const response = await axiosInstance.post("/renew-access-token", {
-            refreshToken: localStorage.getItem("refreshToken")
-          });
-          const { accessToken, userInfo } = response.data;
+          const { accessToken, userInfo }  = await authService.renewAccessToken(localStorage.getItem("refreshToken"))
+          console.log(userInfo)
           dispatch(login({ accessToken, userInfo }));
         } catch (error) {
           console.error("Error refreshing token:", error);
