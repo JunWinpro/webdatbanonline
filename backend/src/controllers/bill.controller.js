@@ -79,7 +79,6 @@ const billController = {
             dataResponse(res, 200, message, billResponse(bill))
 
         } catch (error) {
-            console.log(error.message);
             returnError(res, 403, error)
         }
     },

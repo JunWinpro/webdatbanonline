@@ -26,7 +26,6 @@ const authorization = {
         }
         catch (err) {
 
-            console.log("Authorization err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -47,7 +46,6 @@ const authorization = {
         }
         catch (err) {
 
-            console.log("Authorization err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -60,7 +58,6 @@ const authorization = {
         }
         catch (err) {
 
-            console.log("Authorization err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -72,7 +69,6 @@ const authorization = {
             next()
         }
         catch (err) {
-            console.log("Authorization err: ", err)
             returnError(res, 403, err)
         }
     },

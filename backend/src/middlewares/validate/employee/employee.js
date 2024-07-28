@@ -5,13 +5,11 @@ const employeeValidateData = {
     register: (req, res, next) => {
         try {
             const { error, value } = employeeValidate.register.validate(req.body)
-            console.log(error?.details[0].type)
             if (error) throw new Error(error.details[0].message)
             req.body = value
             next()
         }
         catch (err) {
-            console.log("Validate register err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -31,7 +29,6 @@ const employeeValidateData = {
             next()
         }
         catch (err) {
-            console.log("Validate login err: ", err)
             returnError(res, 403, err)
         }
 
@@ -45,7 +42,6 @@ const employeeValidateData = {
             next()
         }
         catch (err) {
-            console.log("Validate update user err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -58,7 +54,6 @@ const employeeValidateData = {
             next()
         }
         catch (err) {
-            console.log("Validate update user err: ", err)
             returnError(res, 403, err)
         }
     }

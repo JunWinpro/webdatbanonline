@@ -61,7 +61,6 @@ const employeeController = {
             dataResponse(res, 200, message, employeeResponse(newEployee))
         }
         catch (err) {
-            console.log("employee register err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -100,7 +99,6 @@ const employeeController = {
             dataResponse(res, 200, message, { accessToken, refreshToken, ...employeeResponse(employee) })
         }
         catch (err) {
-            console.log("user login err: ", err)
             returnError(res, 401, err)
         }
     },
@@ -134,7 +132,6 @@ const employeeController = {
         }
 
         catch (err) {
-            console.log("get all users err: ", err)
 
             returnError(res, 403, err)
         }
@@ -156,7 +153,6 @@ const employeeController = {
             dataResponse(res, 200, message, employeeResponse(employee))
         }
         catch (err) {
-            console.log("get user by id err")
             returnError(res, 403, err)
         }
     },
@@ -183,7 +179,6 @@ const employeeController = {
             const message = "Update password success"
             dataResponse(res, 200, message, employeeResponse(employee))
         } catch (error) {
-            console.log("update user by id err: ", error)
             returnError(res, 403, error)
         }
     },
@@ -229,7 +224,6 @@ const employeeController = {
             dataResponse(res, 200, message)
         }
         catch (err) {
-            console.log("update user by id err: ", err)
             returnError(res, 403, err)
         }
     }
