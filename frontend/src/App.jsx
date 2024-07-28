@@ -24,7 +24,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { AdminDashboard } from "./pages/AdminDashBoard";
 import { ManagerDashboard } from "./pages/ManagerDashBoard";
 
-
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -35,12 +34,16 @@ function App() {
     const refreshToken = async () => {
       if (!isLogin && localStorage.getItem("refreshToken")) {
         try {
-          const { accessToken, userInfo, role } = await authService.renewAccessToken(
-            localStorage.getItem("refreshToken")
-          );
-          
+          const { accessToken, userInfo, role } =
+            await authService.renewAccessToken(
+              localStorage.getItem("refreshToken")
+            );
 
-          console.log("Token refresh successful:", { accessToken, userInfo, role });
+          console.log("Token refresh successful:", {
+            accessToken,
+            userInfo,
+            role,
+          });
           dispatch(login({ accessToken, userInfo, role }));
         } catch (error) {
           console.error("Error refreshing token:", error);
@@ -119,7 +122,11 @@ function App() {
           <Route path="/profile" element={<UserPage />} />
 
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/manager" element={<ManagerDashboard />} />
+
+          {/* <Route element={<ProtectedRoute allowedRoles={["manager"]} />}> */}
+            <Route path="/manager" element={<ManagerDashboard />} />
+          {/* </Route> */}
+
           <Route path="/forget-password" element={<ForgetPassPage />} />
           <Route path="/reset-password/:token" element={<ResetPassPage />} />
           <Route path="*" element={<ErrorPage />} />
