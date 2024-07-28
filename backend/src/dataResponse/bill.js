@@ -6,7 +6,6 @@ const billResponse = (data) => {
         } else {
             responseData = data;
         }
-        console.log(data);
     }
     return responseData
 }

@@ -44,7 +44,6 @@ const restaurantController = {
             })
         }
         catch (err) {
-            console.log("create restaurant err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -132,7 +131,6 @@ const restaurantController = {
             dataResponse(res, 200, message, data)
         }
         catch (err) {
-            console.log('get restaurant error: ', err.message)
             returnError(res, 403, err)
         }
     },
@@ -224,7 +222,6 @@ const restaurantController = {
                 dataResponse(res, 200, message, data)
             }
             catch (err) {
-                console.log('get restaurant error: ', err.message)
                 returnError(res, 403, err)
             }
         }
@@ -269,7 +266,6 @@ const restaurantController = {
             dataResponse(res, 200, message, restaurantResponse(restaurant))
 
         } catch (err) {
-            console.log("update restaurant err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -593,8 +589,6 @@ const restaurantController = {
             dataResponse(res, 200, message)
 
         } catch (err) {
-
-            console.log("delete restaurant err: ", err)
             returnError(res, 403, err)
         }
     }

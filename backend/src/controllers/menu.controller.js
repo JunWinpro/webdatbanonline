@@ -55,7 +55,6 @@ const menuController = {
             dataResponse(res, 200, message, menuResponse(menu))
 
         } catch (err) {
-            console.log('create menu error: ', err.message)
             returnError(res, 403, err)
         }
     },
@@ -85,7 +84,6 @@ const menuController = {
             dataResponse(res, 200, message, data)
 
         } catch (err) {
-            console.log('get menus err: ', err.message)
             returnError(res, 403, err)
         }
     },
@@ -101,7 +99,6 @@ const menuController = {
             dataResponse(res, 200, message, menuResponse(menu.depopulate('restaurant')))
 
         } catch (error) {
-            console.log('get menu error: ', error.message)
             returnError(res, 403, error)
         }
     },
@@ -196,7 +193,6 @@ const menuController = {
             dataResponse(res, 200, message, menuResponse(menu))
 
         } catch (err) {
-            console.log('update menu error: ', err.message)
             returnError(res, 403, duplicateErr(err))
         }
     },
@@ -221,7 +217,6 @@ const menuController = {
             dataResponse(res, 200, message)
 
         } catch (error) {
-            console.log('delete menu error: ', error.message)
             returnError(res, 403, error)
         }
     }
