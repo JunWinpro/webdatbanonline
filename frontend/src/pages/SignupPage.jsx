@@ -29,13 +29,13 @@ export const SignupPage = ({ onSignup }) => {
     setError("");
     try {
       const response = await axios.post(
-        "http://localhost:8000/users/register",
+        `${import.meta.env.VITE_BACKEND_URL}/users/register`,
         formData
       );
 
+
       if (response.data.success) {
-        onSignup(response.data.data);
-        alert(response.data.message);
+        console.log(response.data.message);
         navigate("/");
       } else {
         setError(

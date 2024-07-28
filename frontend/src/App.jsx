@@ -20,9 +20,11 @@ import authService from "./services/auth";
 import { ResetPassPage } from "./pages/ResetPassPage";
 
 import { EmployeeSigninPage } from "./pages/EmployeeSigninPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+
 import { AdminDashboard } from "./pages/AdminDashBoard";
 import { ManagerDashboard } from "./pages/ManagerDashBoard";
+import { VerifyPage } from "./pages/VerifyPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const dispatch = useDispatch();
@@ -123,10 +125,10 @@ function App() {
 
           <Route path="/admin" element={<AdminDashboard />} />
 
-          {/* <Route element={<ProtectedRoute allowedRoles={["manager"]} />}> */}
+          <Route element={<ProtectedRoute allowedRoles={["manager"]} />}>
             <Route path="/manager" element={<ManagerDashboard />} />
-          {/* </Route> */}
-
+          </Route>
+          <Route path="/verify-user/:token" element={<VerifyPage />} />
           <Route path="/forget-password" element={<ForgetPassPage />} />
           <Route path="/reset-password/:token" element={<ResetPassPage />} />
           <Route path="*" element={<ErrorPage />} />
