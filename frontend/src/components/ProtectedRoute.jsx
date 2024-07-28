@@ -1,48 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
 
 const ProtectedRoute = ({ allowedRoles }) => {
-  const { isLogin, accessToken } = useSelector((state) => state.auth);
-  const [userRole, setUserRole] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLogin, userInfo } = useSelector((state) => state.auth);
   const location = useLocation();
 
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (isLogin && accessToken) {
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_BACKEND_URL}/userInfos/me`,
-            {
-              headers: { Authorization: `Bearer ${accessToken}` },
-            }
-          );
-          setUserRole(response.data.role);
-        } catch (error) {
-          console.error('Error fetching user info:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    };
+  console.log('ProtectedRoute: Current path', location.pathname);
+  console.log('ProtectedRoute: Is Login', isLogin);
+  console.log('ProtectedRoute: User Role', userInfo?.role);
+  console.log('ProtectedRoute: Allowed Roles', allowedRoles);
 
-    fetchUserInfo();
-  }, [isLogin, accessToken]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isLogin || !userRole) {
+  if (!isLogin || !userInfo) {
     console.log('ProtectedRoute: User not logged in or no user info, redirecting to signin');
     return <Navigate to="/signin" replace state={{ from: location }} />;
   }
 
-  if (!allowedRoles.includes(userRole)) {
+  if (!allowedRoles.includes(userInfo.role)) {
     console.log('ProtectedRoute: User does not have required role, redirecting to home');
     return <Navigate to="/" replace />;
   }
