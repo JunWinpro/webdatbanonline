@@ -252,14 +252,16 @@ const restaurantController = {
                 isDeleted: false,
             }).lean()
             if (!restaurant) throw new Error("Restaurant not found")
-            const findBooking = await ModelDb.BookingModel.findOne({
+            const findBooking = await ModelDb.BookingModel.find({
                 restaurant: id,
                 isCheckin: false,
                 isFinished: false,
                 isCanceled: false,
                 isDeleted: false
             }).lean()
-            const info = findBooking.info
+            console.log(findBooking);
+            let info = []
+            if (findBooking.length > 0) info = findBooking.info
             const tablesBooked = info.map(item => item.tableNumber)
             dataResponse(res, 200, "Get booked tables success", tablesBooked)
         } catch (error) {
