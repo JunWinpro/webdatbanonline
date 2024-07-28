@@ -41,6 +41,7 @@ const billSchema = new mongoose.Schema(
     {
         restaurant: {
             type: mongoose.Schema.Types.ObjectId,
+            ref: collection.RESTAURANTS,
             required: true
         },
         paymentMethod: {

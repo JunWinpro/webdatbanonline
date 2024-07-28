@@ -241,6 +241,7 @@ const bookingController = {
                 isDeleted: false
             }).populate('restaurant')
             if (!booking) throw new Error("Booking not found")
+            if (!booking.restaurant.isActive || booking.restaurant.isDeleted) throw new Error("No booking found")
             booking.depopulate()
 
             const currentDate = date(new Date())

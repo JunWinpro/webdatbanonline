@@ -1,3 +1,4 @@
+import billValidateData from './bill/bill.js';
 import bookingValidateData from './booking/booking.js';
 import employeeValidateData from './employee/employee.js';
 import menuValidateData from './menu/menu.js';
@@ -12,7 +13,8 @@ const validateData = {
     restaurant: restaurantValidateData,
     menu: menuValidateData,
     booking: bookingValidateData,
-    review: reviewValidateData
+    review: reviewValidateData,
+    bill: billValidateData
 }
 
 export default validateData
