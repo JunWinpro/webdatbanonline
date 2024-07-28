@@ -105,7 +105,7 @@ export const ProductPage = () => {
     <>
       <div className="bg-slate-100">
         <div className="w-full flex justify-center">
-        <BookingBanner images={productData?.restaurant?.images || []} />
+        <BookingBanner images={productData?.restaurantImages || []} />
         </div>
 
         <div className="flex justify-center w-full">

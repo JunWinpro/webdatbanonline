@@ -18,9 +18,12 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "./utils/axiosInstance";
 import authService from "./services/auth";
 import { ResetPassPage } from "./pages/ResetPassPage";
-import { AdminDashboard } from "./pages/AdminDashBoard";
+
 import { EmployeeSigninPage } from "./pages/EmployeeSigninPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { AdminDashboard } from "./pages/AdminDashBoard";
+import { ManagerDashboard } from "./pages/ManagerDashBoard";
+
 
 function App() {
   const dispatch = useDispatch();
@@ -32,14 +35,15 @@ function App() {
     const refreshToken = async () => {
       if (!isLogin && localStorage.getItem("refreshToken")) {
         try {
-          const { accessToken, userInfo } = await authService.renewAccessToken(
+          const { accessToken, userInfo, role } = await authService.renewAccessToken(
             localStorage.getItem("refreshToken")
           );
-          console.log(userInfo);
-          dispatch(login({ accessToken, userInfo }));
+          
+
+          console.log("Token refresh successful:", { accessToken, userInfo, role });
+          dispatch(login({ accessToken, userInfo, role }));
         } catch (error) {
           console.error("Error refreshing token:", error);
-          setError("Session expired. Please log in again.");
           dispatch(logout());
           localStorage.removeItem("refreshToken");
           localStorage.removeItem("accessToken");
@@ -113,9 +117,9 @@ function App() {
           <Route path="/employee/signin" element={<EmployeeSigninPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/profile" element={<UserPage />} />
-          <Route element={<ProtectedRoute allowedRoles={["manager"]} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-          </Route>
+
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/manager" element={<ManagerDashboard />} />
           <Route path="/forget-password" element={<ForgetPassPage />} />
           <Route path="/reset-password/:token" element={<ResetPassPage />} />
           <Route path="*" element={<ErrorPage />} />

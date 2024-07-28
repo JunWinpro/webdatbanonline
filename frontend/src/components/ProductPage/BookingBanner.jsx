@@ -26,7 +26,7 @@ const BookingBanner = ({ images = [] }) => {
     "https://anhdepfree.com/wp-content/uploads/2020/03/anh-nen-2560x1440-cho-may-tinh-1920x1080.jpg",
     "https://m.yodycdn.com/blog/hinh-nen-thien-nhien-4k-yody-vn-1-jpeg.jpg",
   ];
-
+console.log(images);
   const imageUrls = images.length > 0 ? images : defaultImages;
 
 

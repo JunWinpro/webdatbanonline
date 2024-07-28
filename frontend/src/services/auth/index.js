@@ -5,7 +5,8 @@ const authService = {
         try {
             const data = await authAPI.login(payload)
             if (data.data) {
-                const { accessToken, refreshToken, userInfo, role } = data.data;
+                const { accessToken, refreshToken, userInfo} = data.data;
+                const role = userInfo.role
                 localStorage.setItem("accessToken", accessToken);
                 localStorage.setItem("refreshToken", refreshToken);
                 return { userInfo, role };
@@ -17,7 +18,8 @@ const authService = {
     renewAccessToken: async (payload) => {
         try {
             const data = await authAPI.renewAccessToken(payload)
-            const { accessToken, userInfo, role } = data.data
+            const { accessToken, userInfo } = data.data
+            const role = userInfo.role
             localStorage.setItem("accessToken", accessToken);
             return { accessToken, userInfo, role }
         } catch (error) {

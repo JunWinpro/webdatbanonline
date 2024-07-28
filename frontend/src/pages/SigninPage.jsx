@@ -35,10 +35,13 @@ export const SigninPage = () => {
         localStorage.setItem("accessToken", response.data.data.accessToken);
         localStorage.setItem("refreshToken", response.data.data.refreshToken);
   
-        dispatch(login({
+        const loginData = {
           userInfo: response.data.data.userInfo,
-          role: response.data.data.userInfo.role, 
-        }));
+          role: response.data.data.userInfo.role,
+          accessToken: response.data.data.accessToken
+        };
+        console.log("Dispatching login with:", loginData);
+        dispatch(login(loginData));
         navigate("/");
       } else {
         setError("Login failed. Please try again.");

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-
-export const AdminDashboard = () => {
+export const ManagerDashboard = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [activeTab, setActiveTab] = useState("restaurants");
+  useEffect(() => {
+    console.log("AdminDashboard: Component mounted");
+  }, []);
 
   const renderContent = () => {
     if (activeTab === "restaurants") {
@@ -14,9 +16,7 @@ export const AdminDashboard = () => {
     } else if (selectedRestaurant) {
       switch (activeTab) {
         case "employees":
-          return (
-            <EmployeesManagement restaurantId={selectedRestaurant._id} />
-          );
+          return <EmployeesManagement restaurantId={selectedRestaurant._id} />;
         case "bookings":
           return <BookingList restaurantId={selectedRestaurant._id} />;
         default:
