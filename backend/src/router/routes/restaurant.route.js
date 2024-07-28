@@ -23,9 +23,9 @@ restaurantRoute.get('/', validateData.restaurant.getRestaurants, restaurantContr
 restaurantRoute.get('/restaurant/:id', validateData.objectId, restaurantController.getRestaurantById)
 restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.restaurant.getRestaurants, restaurantController.getOwnedRestaurants)
 
-restaurantRoute.put('/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantById, restaurantController.updateRestaurantById)
+restaurantRoute.put('/restaurant/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantById, restaurantController.updateRestaurantById)
 
-restaurantRoute.put('/info/validateData.objectId,', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantInfoById, restaurantController.updateRestaurantInfoById)
+restaurantRoute.put('/info/:id,', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantInfoById, restaurantController.updateRestaurantInfoById)
 
 restaurantRoute.put('/approve/:id', tokenMiddleware.verifyAccessToken, authorization.admin, validateData.objectId, restaurantController.approveRestaurantById)
 
