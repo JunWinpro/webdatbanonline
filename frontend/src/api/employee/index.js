@@ -1,10 +1,11 @@
 import axiosInstance from "../axios"
 
-const basePath = "/employees"
+const basePath = "employees"
 const employeeAPI = {
     getEmployees: async (query) => {
         try {
             const { data } = await axiosInstance.get(`${basePath}/?${query}`)
+
             return data
         } catch (error) {
             throw error
@@ -20,7 +21,7 @@ const employeeAPI = {
     },
     createEmployee: async (payload) => {
         try {
-            const { data } = await axiosInstance.post(`${basePath}`, payload)
+            const { data } = await axiosInstance.post(`${basePath}/register`, payload)
             return data
         } catch (error) {
             throw error
@@ -51,5 +52,5 @@ const employeeAPI = {
         }
       },
     }
-    
+
 export default employeeAPI

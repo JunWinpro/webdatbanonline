@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import employeeService from "@/services/employee";
 
 export const ManagerDashboard = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
@@ -234,10 +235,13 @@ const RestaurantManagement = ({ onSelectRestaurant }) => {
 const EmployeesManagement = ({ restaurantId }) => {
   const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({
+    username:"",
+    phone:"",
+    password:"",
     firstName: "",
     lastName: "",
-    email: "",
-    role: "",
+    gender:"",
+    restaurantId: restaurantId
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -247,14 +251,9 @@ const EmployeesManagement = ({ restaurantId }) => {
 
   const fetchEmployees = async () => {
     try {
-      const accessToken = localStorage.getItem("accessToken");
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/employees`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-
-      console.log(response.data.data);
-      setEmployees(response.data.data);
+        const {data, message, success} = await employeeService.getEmployees()
+        setEmployees(data.data);
+        return data;
     } catch (error) {
       console.error("Error fetching employees:", error);
     }
@@ -275,15 +274,13 @@ const EmployeesManagement = ({ restaurantId }) => {
           formData
         );
       } else {
-        await axios.post(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/restaurants/${restaurantId}/employees`,
-          formData
-        );
+        const data = await employeeService.createEmployee(formData);
+        
+        return data;
+        console.log(data);
       }
       fetchEmployees();
-      setFormData({ firstName: "", lastName: "", email: "", role: "" });
+      setFormData({ username: "", phone:"",password:"",firstName: "", lastName: "", email: "",gender: "",});
       setEditingId(null);
     } catch (error) {
       console.error("Error saving employees member:", error);
@@ -297,12 +294,9 @@ const EmployeesManagement = ({ restaurantId }) => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/restaurants/${restaurantId}/employees/${id}`
-      );
-      fetchEmployees();
+      const data = await employeeService.deleteEmployee(id) 
+
+      console.log(data.success)
     } catch (error) {
       console.error("Error deleting employees member:", error);
     }
@@ -313,6 +307,30 @@ const EmployeesManagement = ({ restaurantId }) => {
       <h2 className="text-2xl font-semibold mb-4">Employees Management</h2>
 
       <form onSubmit={handleSubmit} className="mb-8">
+      <input
+          type="text"
+          name="username"
+          value={formData.username}
+          onChange={handleInputChange}
+          placeholder="Username"
+          className="mr-2 p-2 border rounded"
+        />
+        <input
+          type="text"
+          name="phone"
+          value={formData.phone}
+          onChange={handleInputChange}
+          placeholder="phone"
+          className="mr-2 p-2 border rounded"
+        />
+        <input
+          type="text"
+          name="password"
+          value={formData.password}
+          onChange={handleInputChange}
+          placeholder="password"
+          className="mr-2 p-2 border rounded"
+        />
         <input
           type="text"
           name="firstName"
@@ -329,24 +347,16 @@ const EmployeesManagement = ({ restaurantId }) => {
           placeholder="Last Name"
           className="mr-2 p-2 border rounded"
         />
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          placeholder="Email"
-          className="mr-2 p-2 border rounded"
-        />
+
         <select
-          name="role"
-          value={formData.role}
+          name="gender"
+          value={formData.gender}
           onChange={handleInputChange}
           className="mr-2 p-2 border rounded"
         >
-          <option value="">Select Role</option>
-          <option value="manager">Manager</option>
-          <option value="waiter">Waiter</option>
-          <option value="chef">Chef</option>
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
         </select>
         <button
           type="submit"
@@ -359,9 +369,9 @@ const EmployeesManagement = ({ restaurantId }) => {
       <table className="w-full text-center">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
+            <th>Full Name</th>
+            <th>First Name</th>
+            <th>Last Name</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -369,8 +379,8 @@ const EmployeesManagement = ({ restaurantId }) => {
           {employees.map((employeesMember) => (
             <tr key={employeesMember._id}>
               <td>{`${employeesMember.firstName} ${employeesMember.lastName}`}</td>
-              <td>{employeesMember.email}</td>
-              <td>{employeesMember.role}</td>
+              <td>{employeesMember.firstName}</td>
+              <td>{employeesMember.lastName}</td>
               <td>
                 <button
                   onClick={() => handleEdit(employeesMember)}

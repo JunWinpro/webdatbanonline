@@ -4,7 +4,7 @@ const employeeService = {
     getEmployees: async (query) => {
         try {
             const data = await employeeAPI.getEmployees(query)
-            return data.employees
+            return data
         } catch (error) {
             throw error.response?.data?.message || error.message
         }
@@ -36,7 +36,7 @@ const employeeService = {
     deleteEmployee: async (_id) => {
         try {
             const data = await employeeAPI.deleteEmployee(_id)
-            return data.success
+            return data.datas
         } catch (error) {
             throw error.response?.data?.message || error.message
         }
