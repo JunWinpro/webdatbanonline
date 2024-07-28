@@ -752,6 +752,28 @@
 					"response": []
 				},
 				{
+					"name": "Get Booked Table",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/booked-table/6688f5a0d82a5ec4b8150437",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"booked-table",
+								"6688f5a0d82a5ec4b8150437"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get Owned",
 					"request": {
 						"auth": {
@@ -1092,12 +1114,13 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8000/menus/668ca4cbfc93e275f9ff850a",
-							"protocol": "http",
+							"raw": "https://tastetripperservice.onrender.com/menus/668ca4cbfc93e275f9ff850a",
+							"protocol": "https",
 							"host": [
-								"localhost"
+								"tastetripperservice",
+								"onrender",
+								"com"
 							],
-							"port": "8000",
 							"path": [
 								"menus",
 								"668ca4cbfc93e275f9ff850a"
@@ -1112,12 +1135,13 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8000/menus",
-							"protocol": "http",
+							"raw": "https://tastetripperservice.onrender.com/menus",
+							"protocol": "https",
 							"host": [
-								"localhost"
+								"tastetripperservice",
+								"onrender",
+								"com"
 							],
-							"port": "8000",
 							"path": [
 								"menus"
 							]
@@ -1156,12 +1180,13 @@
 							]
 						},
 						"url": {
-							"raw": "http://localhost:8000/menus/upload/image/668ca4cbfc93e275f9ff850a",
-							"protocol": "http",
+							"raw": "https://tastetripperservice.onrender.com/menus/upload/image/668ca4cbfc93e275f9ff850a",
+							"protocol": "https",
 							"host": [
-								"localhost"
+								"tastetripperservice",
+								"onrender",
+								"com"
 							],
-							"port": "8000",
 							"path": [
 								"menus",
 								"upload",
@@ -1178,12 +1203,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8000/menus/restaurant/",
-							"protocol": "http",
+							"raw": "https://tastetripperservice.onrender.com/menus/restaurant/",
+							"protocol": "https",
 							"host": [
-								"localhost"
+								"tastetripperservice",
+								"onrender",
+								"com"
 							],
-							"port": "8000",
 							"path": [
 								"menus",
 								"restaurant",
@@ -1197,7 +1223,20 @@
 					"name": "Get Menu By Id",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/menus/668ca4cbfc93e275f9ff850a",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"menus",
+								"668ca4cbfc93e275f9ff850a"
+							]
+						}
 					},
 					"response": []
 				}
