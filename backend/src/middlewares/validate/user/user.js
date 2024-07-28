@@ -10,7 +10,6 @@ const userValidateData = {
             next()
         }
         catch (err) {
-            console.log("Validate register err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -22,7 +21,6 @@ const userValidateData = {
             next()
         }
         catch (err) {
-            console.log("Validate login err: ", err)
             returnError(res, 403, err)
         }
 
@@ -40,7 +38,6 @@ const userValidateData = {
             next()
         }
         catch (err) {
-            console.log("Validate update user err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -52,7 +49,6 @@ const userValidateData = {
             next()
         }
         catch (err) {
-            console.log("change role user err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -65,7 +61,6 @@ const userValidateData = {
             next()
         }
         catch (err) {
-            console.log("change role user err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -77,7 +72,6 @@ const userValidateData = {
             next()
         }
         catch (err) {
-            console.log("change role user err: ", err)
             returnError(res, 403, err)
         }
     },
@@ -89,7 +83,6 @@ const userValidateData = {
             next()
         }
         catch (err) {
-            console.log("change role user err: ", err)
             returnError(res, 403, err)
         }
     }

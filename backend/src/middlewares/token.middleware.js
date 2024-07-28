@@ -6,19 +6,16 @@ const tokenMiddleware = {
         try {
 
             const authToken = req.headers['authorization']
-            console.log(req.headers);
             if (!authToken) throw new Error("Invalid token")
 
             const accessToken = authToken.split(" ")[1]
 
             const data = jwtToken.verifyToken(accessToken, "AT")
-            console.log(1);
             req.user = data
             next()
         }
         catch (err) {
 
-            console.log("verify access token err: ", err)
 
             let type = '';
             let getMessage = '';
@@ -53,8 +50,6 @@ const tokenMiddleware = {
             next()
         }
         catch (err) {
-            console.log("verify refresh token err: ", err)
-
             let type = '';
             let getMessage = '';
 

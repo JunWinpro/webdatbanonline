@@ -52,7 +52,6 @@ const userController = {
             dataResponse(res, 201, message, userResponse(newUser))
         }
         catch (err) {
-            console.log("user register err: ", err.message)
             returnError(res, 403, err)
         }
     },
@@ -72,7 +71,6 @@ const userController = {
 
             dataResponse(res, 200, message)
         } catch (err) {
-            console.log("verify user err: ", err.message)
             returnError(res, 403, err)
         }
     },
@@ -121,14 +119,12 @@ const userController = {
             dataResponse(res, 200, message, { accessToken, refreshToken, ...userResponse(user) })
         }
         catch (err) {
-            console.log("user login err: ", err.message)
             returnError(res, 401, err)
         }
     },
     getUsers: async (req, res) => {
         try {
             const { page, pageSize, email, name, sortBy } = req.query
-            console.log(req.query);
             const filterModel = {}
             if (name) {
                 filterModel.name = {
@@ -161,8 +157,6 @@ const userController = {
         }
 
         catch (err) {
-            console.log("get all users err: ", err.message)
-
             returnError(res, 403, err)
         }
     },
@@ -183,7 +177,6 @@ const userController = {
             dataResponse(res, 200, message, userResponse(user))
         }
         catch (err) {
-            console.log("get user by id err: ", err.message)
             returnError(res, 403, err)
         }
     },
@@ -212,7 +205,6 @@ const userController = {
             dataResponse(res, 201, message)
         }
         catch (err) {
-            console.log("forgot password err: ", err.message)
             returnError(res, 403, err)
         }
     },
@@ -241,7 +233,6 @@ const userController = {
             dataResponse(res, 200, message)
         }
         catch (err) {
-            console.log("reset password err: ", err.message)
             returnError(res, 403, err)
         }
     },
@@ -265,7 +256,6 @@ const userController = {
             dataResponse(res, 200, message, userResponse(currentUser))
         }
         catch (err) {
-            console.log("update user by id err: ", err.message)
             returnError(res, 403, err)
         }
     },
@@ -304,7 +294,6 @@ const userController = {
             dataResponse(res, 200, message, userResponse(currentUser))
         }
         catch (err) {
-            console.log("update user by id err: ", err.message)
 
             returnError(res, 403, duplicateErr(err))
         }
@@ -373,7 +362,6 @@ const userController = {
             dataResponse(res, 200, message, null)
         }
         catch (err) {
-            console.log("update user by id err: ", err.message)
             returnError(res, 403, err)
         }
     },
@@ -401,7 +389,6 @@ const userController = {
             dataResponse(res, 200, message, null)
 
         } catch (err) {
-            console.log("recover account err: ", err.message)
             returnError(res, 403, err)
         }
     }

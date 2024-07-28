@@ -20,8 +20,6 @@ const renewAccessTokenController = async (req, res) => {
         })
     }
     catch (err) {
-        console.log('authentication controller err: ', err)
-
         returnError(res, 403, err)
     }
 }

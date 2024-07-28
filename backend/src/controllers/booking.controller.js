@@ -184,7 +184,6 @@ const bookingController = {
             const { id } = req.params
 
             const user = req.user
-            console.log(user.userId);
             const employee = await ModelDb.EmployeeModel.findOne({
                 restaurant: restaurantId,
                 isDeleted: false,
