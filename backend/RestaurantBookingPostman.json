@@ -1,0 +1,1520 @@
+{
+	"info": {
+		"_postman_id": "a15dd94b-7bcb-472a-867c-a8bea13d5945",
+		"name": "RESTAURANT BOOKING",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29981267"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"user@gmail.com\",\r\n    \"phone\": \"1234512341\",\r\n    \"password\": \"12345678\",\r\n    \"firstName\": \"Bake\",\r\n    \"lastName\": \"Holmes\",\r\n    \"gender\": \"male\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/register",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"user@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/login",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Renew Access Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhlMTVhZmQ5OWUyMjdlOTMyNmIyY2EiLCJlbWFpbCI6InVzZXJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3MjE4MzM5MzMsImV4cCI6MTcyMjQzODczM30.a19DBV2Zyh6XMcjeIPw7GNc4Q0XpIBnRfM4DdasfKDU\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/renew-access-token",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"renew-access-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4MDZiODYyOWY5MDI3OWIzM2QyMzciLCJlbWFpbCI6ImJha2VmZXJvY2lvdXNAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIwMjQ4ODE1LCJleHAiOjE3MjAyNTI0MTV9.y1cu_fCWYLZT3y45oYRxZszKO54bg3fKSxBFbyLdkR8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/D:/Download/lonely-samurai-autumn-tree-monochrome-thumb.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/upload/avatar/668806b8629f90279b33d237",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"upload",
+								"avatar",
+								"668806b8629f90279b33d237"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Password forget",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"bakeferocious@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/forget-password",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"forget-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Password reset",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newPassword\":\"overbake\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/reset-password/080f2993-48a8-4384-b4bf-81387cb13972",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"reset-password",
+								"080f2993-48a8-4384-b4bf-81387cb13972"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify User",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newPassword\":\"123456789\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/verify-user/a19d5836-1d51-4007-936a-37fa0fc4dbb4",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"verify-user",
+								"a19d5836-1d51-4007-936a-37fa0fc4dbb4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4MDZiODYyOWY5MDI3OWIzM2QyMzciLCJlbWFpbCI6ImJha2VmZXJvY2lvdXNAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIwMjQ4ODE1LCJleHAiOjE3MjAyNTI0MTV9.y1cu_fCWYLZT3y45oYRxZszKO54bg3fKSxBFbyLdkR8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\":\"manager\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/change-role/6688e9af2e9f471b1031eda9",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"change-role",
+								"6688e9af2e9f471b1031eda9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4MDZiODYyOWY5MDI3OWIzM2QyMzciLCJlbWFpbCI6ImJha2VmZXJvY2lvdXNAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIwMjUwNTM5LCJleHAiOjE3MjAyNTQxMzl9.F9Dzvgr7QZQc4NGwktHmqm_ZUdigMC7AtlcvxdNWbcs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\":\"overbake\"\r\n    \r\n  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/668806b8629f90279b33d237",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"668806b8629f90279b33d237"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMjUwNDUzLCJleHAiOjE3MjAyNTQwNTN9.VeTZP4m9heEBHaub8CHrVF2YX370yjXDTS16I1Wc_98",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjVjMTIxMTIyNTU3Y2ZiODljMGRlY2EiLCJwaG9uZSI6MTIzNDU2NywiaWF0IjoxNzE3MzEzMjg4fQ.83QiztYUvOb9687bQbi1mHRKD7Rg6a6XEku9BUygdec",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/users/665c843e068e050d71f0d67f",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"users",
+								"665c843e068e050d71f0d67f"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "\"accessToken\": eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjVjODQzZTA2OGUwNTBkNzFmMGQ2N2YiLCJlbWFpbCI6InRlc3RlcjEyM0BnbWFpbC5jb20iLCJyb2xlIjoibWFuYWdlciIsImlzRGVsZXRlZCI6ZmFsc2UsImlhdCI6MTcxNzcyOTkwNH0.JYFO1RARePXFEOpm_9wDyCQKy69xlYNlYU-RNlnffbw"
+		},
+		{
+			"name": "Restaurant",
+			"item": [
+				{
+					"name": "Create Restaurant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4MGRlOGYxYjdkNzQ2ZTYyMTc0NTEiLCJlbWFpbCI6Imp1bmRlcHRyYWluaGF0QGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIyMTUxNDMyLCJleHAiOjE3MjIyMzc4MzJ9.QUQMHvBntbZfZT-EGTtXrU5N3pfoIrzH7JaoGi7bC18",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Restaurant 1\",\r\n    \"address\": {\r\n        \"streetAddress\": \"123 Wandong Street\",\r\n        \"district\": \"Mola\",\r\n        \"city\": \"Mexico\"\r\n    },\r\n    \"category\": [\"buffet\",\"grill\"],\r\n    \"totalTable\": 50,\r\n    \"description\": [\r\n        {\r\n            \"title\": \"Buffet Grill Restaurant\",\r\n            \"content\": \"Best restaurant in this city\"\r\n        },\r\n        {\r\n            \"title\": \"Many type of foods\",\r\n            \"content\": \"We have fresh foods and a lot of types\"\r\n        }\r\n    ],\r\n    \"schedule\": [\r\n    {\r\n        \"dayOfWeek\": 0, //Sunday\r\n        \"isWorkingDay\": false,\r\n        \"openTime\": 23,\r\n        \"closeTime\": 23.99\r\n    },\r\n    {\r\n        \"dayOfWeek\": 1, //Monday\r\n        \"isWorkingDay\": true,\r\n        \"openTime\": 8,\r\n        \"closeTime\": 21\r\n    },\r\n    {\r\n        \"dayOfWeek\": 2, //Tuesday\r\n        \"isWorkingDay\": true,\r\n        \"openTime\": 8,\r\n        \"closeTime\": 21\r\n    },\r\n    {\r\n        \"dayOfWeek\": 3, //Wednesday\r\n        \"isWorkingDay\": true,\r\n        \"openTime\": 8,\r\n        \"closeTime\": 21\r\n    },\r\n    {\r\n        \"dayOfWeek\": 4, //Thursday\r\n        \"isWorkingDay\": true,\r\n        \"openTime\": 8,\r\n        \"closeTime\": 21\r\n    }\r\n    ,\r\n    {\r\n        \"dayOfWeek\": 5, //Friday\r\n        \"isWorkingDay\": true,\r\n        \"openTime\": 8,\r\n        \"closeTime\": 21\r\n    }\r\n    ,\r\n    {\r\n        \"dayOfWeek\": 6, //Saturday\r\n        \"isWorkingDay\": false,\r\n        \"openTime\": 23,\r\n        \"closeTime\": 23.99\r\n    }\r\n\r\n]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Food/Menu/Restaurant Images",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMzQ0Nzc1LCJleHAiOjE3MjAzNDgzNzV9.CsnESQlKl8Kihw9v88mBDBbMBUEg9Xs3l1f7TqVDPUs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"description": "Array to upload images to db",
+									"type": "file",
+									"src": [
+										"/D:/Download/images/5-52405_clip-art-for-free-download-background-png-transparent.png",
+										"/D:/Download/images/abstract-smoke-wallpaper-background-desktop_53876-133380.avif"
+									],
+									"disabled": true
+								},
+								{
+									"key": "foodImages[0]",
+									"value": "https://res.cloudinary.com/dyrhuykvm/image/upload/v1720345977/Restaurant/6688f5a0d82a5ec4b8150437/foodImages/1720345975189-5-52405_clip-art-for-free-download-background-png-transparent.jpg",
+									"description": "Array to delete images from db",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/upload/food-images/6688f5a0d82a5ec4b8150437",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"upload",
+								"food-images",
+								"6688f5a0d82a5ec4b8150437"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Avatar",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMzQ0Nzc1LCJleHAiOjE3MjAzNDgzNzV9.CsnESQlKl8Kihw9v88mBDBbMBUEg9Xs3l1f7TqVDPUs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/D:/Download/images/5-52405_clip-art-for-free-download-background-png-transparent.png",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/upload/avatar/6688f5a0d82a5ec4b8150437",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"upload",
+								"avatar",
+								"6688f5a0d82a5ec4b8150437"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Restaurant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMzM4MjAyLCJleHAiOjE3MjAzNDE4MDJ9.RYWOhXmTGwVkr4fWvFzXpt7Wy69kjqqPx0LLxHn8ku8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"\",\r\n    \"address\": \"\",\r\n    \"category\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/restaurant/6688f5a0d82a5ec4b8150437",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"restaurant",
+								"6688f5a0d82a5ec4b8150437"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMzM4MjAyLCJleHAiOjE3MjAzNDE4MDJ9.RYWOhXmTGwVkr4fWvFzXpt7Wy69kjqqPx0LLxHn8ku8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"maxim\":\"\",\r\n    \"description\": \"\",\r\n    \"schedule\": \"\",\r\n    \"totalTable\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/info/6688f5a0d82a5ec4b8150437",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"info",
+								"6688f5a0d82a5ec4b8150437"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Open/Close",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMzM4MjAyLCJleHAiOjE3MjAzNDE4MDJ9.RYWOhXmTGwVkr4fWvFzXpt7Wy69kjqqPx0LLxHn8ku8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/close/6688f5a0d82a5ec4b8150437",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"close",
+								"6688f5a0d82a5ec4b8150437"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Active/Deactive",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMzM4MjAyLCJleHAiOjE3MjAzNDE4MDJ9.RYWOhXmTGwVkr4fWvFzXpt7Wy69kjqqPx0LLxHn8ku8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/active/6688f5a0d82a5ec4b8150437",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"active",
+								"6688f5a0d82a5ec4b8150437"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Restaurant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4MDZiODYyOWY5MDI3OWIzM2QyMzciLCJlbWFpbCI6ImJha2VmZXJvY2lvdXNAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIwMzM5MDM0LCJleHAiOjE3MjAzNDI2MzR9.HSQO4RicbLpjJAHzD5lbzMgkjIR-DgkRxOeeQRb0chc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/approve/667c0a3ab3d76a193df70129",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"approve",
+								"667c0a3ab3d76a193df70129"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Restaurants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Restaurant By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/6688f5a0d82a5ec4b8150437",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"6688f5a0d82a5ec4b8150437"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Owned",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMzM4MjAyLCJleHAiOjE3MjAzNDE4MDJ9.RYWOhXmTGwVkr4fWvFzXpt7Wy69kjqqPx0LLxHn8ku8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/owned",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"owned"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Restaurant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njc2N2YwZGU0NjJiYzcwN2RiZjU2NDYiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXNAZ21haWwuY29tIiwicm9sZSI6Im1hbmFnZXIiLCJpYXQiOjE3MTk0MDA1ODEsImV4cCI6MTcxOTQwNDE4MX0.eE3_zgGMPw9rsJWyNUMMsiY8JFAcmAKIUAYFOKK7Bbg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/restaurants/667bd98480cf5407b4cc9665",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"restaurants",
+								"667bd98480cf5407b4cc9665"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employee",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\":\"Abcd\",\r\n    \"lastName\":\"BCD\",\r\n    \"gender\":\"male\",\r\n    \"username\":\"employee1\",\r\n    \"phone\":\"1563256987\",\r\n    \"password\":\"12345678\",\r\n    \"restaurantId\": \"6688f5a0d82a5ec4b8150437\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/employees/register",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"employees",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    //  \"username\":\"employee1\",\r\n     \"phone\":\"0325698741\",\r\n    \"password\":\"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/employees/login",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"employees",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwNDg5NTg2LCJleHAiOjE3MjA0OTMxODZ9.xXI4NZbjzvG1_IQMDJF_8XcVAu-XBH4vJX5pULoILk4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"Home\",\r\n    \"lastName\": \"Lander\",\r\n    \"gender\": \"other\",\r\n    \"phone\": \"0325698741\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/employees/info/668bc47caee82fc05f4b47c1",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"employees",
+								"info",
+								"668bc47caee82fc05f4b47c1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhiYzQ3Y2FlZTgyZmMwNWY0YjQ3YzEiLCJ1c2VybmFtZSI6ImVtcGxveWVlMSIsInJvbGUiOiJlbXBsb3llZSIsImlhdCI6MTcyMDQ4OTEwMiwiZXhwIjoxNzIwNDkyNzAyfQ.y9kuc6eDx_r6UyDdoerilbOrnOzRcy6OHiPGN82wgIQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\":12345678\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/employees/password/668bc47caee82fc05f4b47c1",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"employees",
+								"password",
+								"668bc47caee82fc05f4b47c1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Employees",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4MGRlOGYxYjdkNzQ2ZTYyMTc0NTEiLCJlbWFpbCI6Imp1bmRlcHRyYWluaGF0QGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIyMTUxNDMyLCJleHAiOjE3MjIyMzc4MzJ9.QUQMHvBntbZfZT-EGTtXrU5N3pfoIrzH7JaoGi7bC18",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/employees",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4MGRlOGYxYjdkNzQ2ZTYyMTc0NTEiLCJlbWFpbCI6Imp1bmRlcHRyYWluaGF0QGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIyMTUxNDMyLCJleHAiOjE3MjIyMzc4MzJ9.QUQMHvBntbZfZT-EGTtXrU5N3pfoIrzH7JaoGi7bC18",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/employees/66a5e58ba350640561dade87",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"employees",
+								"66a5e58ba350640561dade87"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4MGRlOGYxYjdkNzQ2ZTYyMTc0NTEiLCJlbWFpbCI6Imp1bmRlcHRyYWluaGF0QGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIyMTUxNDMyLCJleHAiOjE3MjIyMzc4MzJ9.QUQMHvBntbZfZT-EGTtXrU5N3pfoIrzH7JaoGi7bC18",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/employees/66a5e58ba350640561dade87",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"employees",
+								"66a5e58ba350640561dade87"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Menu",
+			"item": [
+				{
+					"name": "Update menu",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwNDkzNzQ1LCJleHAiOjE3MjA0OTczNDV9.0tqHtvHKgUyxtASC-rpQhuGJrJ6THW_qtyvcHVfn6y8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"price\": 40,\r\n    \"discount\": 6,\r\n    \"restaurantId\":\"6688f5a0d82a5ec4b8150437\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/menus/668ca4cbfc93e275f9ff850a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"menus",
+								"668ca4cbfc93e275f9ff850a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Menu",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/menus",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"menus"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Menu Image",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Njg4ZTlhZjJlOWY0NzFiMTAzMWVkYTkiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwNDkzNzQ1LCJleHAiOjE3MjA0OTczNDV9.0tqHtvHKgUyxtASC-rpQhuGJrJ6THW_qtyvcHVfn6y8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "restaurantId",
+									"value": "6688f5a0d82a5ec4b8150437",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/D:/Download/images/5-52405_clip-art-for-free-download-background-png-transparent.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/menus/upload/image/668ca4cbfc93e275f9ff850a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"menus",
+								"upload",
+								"image",
+								"668ca4cbfc93e275f9ff850a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Menu With Restaurant Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/menus/restaurant/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"menus",
+								"restaurant",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Menu By Id",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking",
+			"item": [
+				{
+					"name": "Get Booking By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjdiYjNkNGMyNTVjNjMwY2M4N2YzODQiLCJlbWFpbCI6ImJha2VmZXJvY2lvdXMyQGdtYWlsLmNvbSIsInJvbGUiOiJtYW5hZ2VyIiwiaWF0IjoxNzIwMDc0NjY0LCJleHAiOjE3MjAwNzgyNjR9.sj1DdcIQgfYF8l0N04g2Q657nqE_h-j6MRJ6rT0w1oQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/bookings/667c0a3ab3d76a193df70123",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"bookings",
+								"667c0a3ab3d76a193df70123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Bookings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhiYzQ3Y2FlZTgyZmMwNWY0YjQ3YzEiLCJ1c2VybmFtZSI6ImVtcGxveWVlMSIsInJvbGUiOiJlbXBsb3llZSIsImlhdCI6MTcyMTM3NjE1NywiZXhwIjoxNzIxMzc5NzU3fQ.7vIvkHeJN5QTgS4zAHW-3VSjDPIi55Hq2TIanLU3JGg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/bookings",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Booking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhiYzQ3Y2FlZTgyZmMwNWY0YjQ3YzEiLCJ1c2VybmFtZSI6ImVtcGxveWVlMSIsInJvbGUiOiJlbXBsb3llZSIsImlhdCI6MTcyMTM3NjE1NywiZXhwIjoxNzIxMzc5NzU3fQ.7vIvkHeJN5QTgS4zAHW-3VSjDPIi55Hq2TIanLU3JGg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"restaurantId\": \"6688f5a0d82a5ec4b8150437\",\r\n    \"firstName\": \"Alex\",\r\n    \"lastName\": \"Pelope\",\r\n    \"phone\": \"1536987452\",\r\n    \"info\": [\r\n        {\r\n            \"tableNumber\": 7,\r\n            \"menu\":[{\r\n                \"menuItem\":\"668ca4cbfc93e275f9ff850a\",\r\n                \"quantity\":123,\r\n                \"note\":\"any\"\r\n            }]\r\n        },\r\n        {\r\n            \"menu\":[],\r\n            \"tableNumber\":6\r\n        }\r\n    ],\r\n    \"notes\": \"1 table for 4 people\",\r\n    \"checkinTime\": 1721391300000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/bookings",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Info Booking By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhiYzQ3Y2FlZTgyZmMwNWY0YjQ3YzEiLCJ1c2VybmFtZSI6ImVtcGxveWVlMSIsInJvbGUiOiJlbXBsb3llZSIsImlhdCI6MTcyMTQ0MjcxMSwiZXhwIjoxNzIxNDQ2MzExfQ.tOyS2tolRJ3w8-29IS5W8RkfMcw_GYiENNkouFCvgJE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\":\"Alex\",\r\n    \"lastName\": \"Bill\",\r\n    \"phone\": \"1523698547\",\r\n    \"restaurantId\":\"6688f5a0d82a5ec4b8150437\",\r\n    \"info\":[\r\n        {\r\n            \"menu\":[\r\n                {\r\n                    \"menuItem\":\"\",\r\n                    \"quantity\":\"\",\r\n                    \"note\":\"\"\r\n                },\r\n                {\r\n                    \"menuItem\":\"\",\r\n                    \"quantity\":\"\",\r\n                    \"note\":\"\"\r\n                }\r\n            ],\r\n            \"tableNumber\":1\r\n        },\r\n         {\r\n            \"menu\":[\r\n                {\r\n                    \"menuItem\":\"\",\r\n                    \"quantity\":\"\",\r\n                    \"note\":\"\"\r\n                },\r\n                {\r\n                    \"menuItem\":\"\",\r\n                    \"quantity\":\"\",\r\n                    \"note\":\"\"\r\n                }\r\n            ],\r\n            \"tableNumber\":2\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/bookings/info/669a2838e93d38db289e6118",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"bookings",
+								"info",
+								"669a2838e93d38db289e6118"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Checkin Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhiYzQ3Y2FlZTgyZmMwNWY0YjQ3YzEiLCJ1c2VybmFtZSI6ImVtcGxveWVlMSIsInJvbGUiOiJlbXBsb3llZSIsImlhdCI6MTcyMTQ1MzA0MSwiZXhwIjoxNzIxNDU2NjQxfQ.YBQOWRQHS4Xc6zeGeBAjGYS1NPbKCn2fK7KSVtG3zvs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"restaurantId\": \"6688f5a0d82a5ec4b8150437\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/bookings/checkin/669a2838e93d38db289e6118",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"bookings",
+								"checkin",
+								"669a2838e93d38db289e6118"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Finish Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhiYzQ3Y2FlZTgyZmMwNWY0YjQ3YzEiLCJ1c2VybmFtZSI6ImVtcGxveWVlMSIsInJvbGUiOiJlbXBsb3llZSIsImlhdCI6MTcyMTQ1MzA0MSwiZXhwIjoxNzIxNDU2NjQxfQ.YBQOWRQHS4Xc6zeGeBAjGYS1NPbKCn2fK7KSVtG3zvs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"restaurantId\": \"6688f5a0d82a5ec4b8150437\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/bookings/finish/669a2838e93d38db289e6118",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"bookings",
+								"finish",
+								"669a2838e93d38db289e6118"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cancel Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhiYzQ3Y2FlZTgyZmMwNWY0YjQ3YzEiLCJ1c2VybmFtZSI6ImVtcGxveWVlMSIsInJvbGUiOiJlbXBsb3llZSIsImlhdCI6MTcyMTQ1MzA0MSwiZXhwIjoxNzIxNDU2NjQxfQ.YBQOWRQHS4Xc6zeGeBAjGYS1NPbKCn2fK7KSVtG3zvs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"restaurantId\": \"6688f5a0d82a5ec4b8150437\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/bookings/cancel/669a2838e93d38db289e6118",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"bookings",
+								"cancel",
+								"669a2838e93d38db289e6118"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bill",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhiYzQ3Y2FlZTgyZmMwNWY0YjQ3YzEiLCJ1c2VybmFtZSI6ImVtcGxveWVlMSIsInJvbGUiOiJlbXBsb3llZSIsImlhdCI6MTcyMjE2NTUzMCwiZXhwIjoxNzIyMjUxOTMwfQ.2c95H_SOAnq0R4thH5wtIfawwYHyHzYoLaxus8CPDKc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"bookingId\":\"669a2838e93d38db289e6118\",\r\n    \"restaurantId\":\"6688f5a0d82a5ec4b8150437\",\r\n    \"paymentMethod\": \"cash\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://tastetripperservice.onrender.com/bills",
+							"protocol": "https",
+							"host": [
+								"tastetripperservice",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"bills"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
