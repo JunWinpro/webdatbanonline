@@ -120,7 +120,7 @@ const restaurantController = {
             }
 
             const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
-
+            if (restaurants.data.length === 0) throw new Error("No restaurant found")
             const data = {
                 data: restaurants.data.map(restaurant => restaurantResponse(restaurant)),
                 totalPages: restaurants.totalPages,

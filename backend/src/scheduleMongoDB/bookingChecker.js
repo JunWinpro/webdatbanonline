@@ -1,4 +1,3 @@
-import returnError from "../errors/error.js"
 import ModelDb from "../models/model.js"
 
 const autoCancelBooking = async () => {
@@ -19,10 +18,9 @@ const autoCancelBooking = async () => {
                 isCanceled: true
             }
         })
-        console.log("cancel");
     }
     catch (err) {
-        returnError(res, 403, err)
+        console.log(`Error booking checker`);
     }
 }
 export default autoCancelBooking

@@ -6,13 +6,13 @@ const tokenMiddleware = {
         try {
 
             const authToken = req.headers['authorization']
-
+            console.log(req.headers);
             if (!authToken) throw new Error("Invalid token")
 
             const accessToken = authToken.split(" ")[1]
 
             const data = jwtToken.verifyToken(accessToken, "AT")
-
+            console.log(1);
             req.user = data
             next()
         }
