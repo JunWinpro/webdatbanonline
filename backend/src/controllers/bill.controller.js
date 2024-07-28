@@ -68,7 +68,13 @@ const billController = {
                 restaurant: restaurantId,
                 checkinTime: booking.checkinTime
             })
-
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                _id: restaurantId,
+                isDeleted: false,
+                isActive: true
+            })
+            restaurant.numberOfTablesBookedInLastWeek++
+            await restaurant.save()
             const message = "Bill created"
             dataResponse(res, 200, message, billResponse(bill))
 

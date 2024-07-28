@@ -5,6 +5,7 @@ import employeeResponse from "../dataResponse/employee.js";
 import dataResponse from "../dataResponse/data.response.js";
 import returnError from "../errors/error.js";
 import duplicateErr from "../errors/duplicate.js";
+import pageSplit from "../utils/pageSplit.util.js";
 
 const employeeController = {
     register: async (req, res) => {
@@ -106,20 +107,27 @@ const employeeController = {
 
     getEmployees: async (req, res) => {
         try {
-            const { page, pageSize, filter, search, sortBy, restaurant } = req.query
+            const { page, pageSize, restaurantId } = req.query
             const user = req.user
 
             const filterModel = {}
 
-            const employees = await ModelDb.EmployeeModel.find({
-                isDeleted: false,
-                manager: user.userId
-            })
-            console.log(employees);
+            if (restaurantId) filterModel.restaurant = restaurantId
 
-            if (employees.length === 0) throw new Error("User not found")
+            filterModel.manager = user.userId
+            filterModel.isDeleted = false
 
-            const data = employees.map(employee => employeeResponse(employee));
+            const sortModel = {}
+            const employees = await pageSplit(ModelDb.EmployeeModel, filterModel, page, pageSize, {}, undefined)
+
+            if (employees.data.length === 0) throw new Error("User not found")
+
+            const data = {
+                totalPages: employees.totalPages,
+                totalItems: employees.totalItems,
+                page: employees.page,
+                data: employees.data.map(employee => employeeResponse(employee))
+            }
 
             const message = "Get employees success"
             dataResponse(res, 200, message, data)
@@ -202,7 +210,7 @@ const employeeController = {
         }
 
     },
-    deleteEmployeeById: async (_, res) => {
+    deleteEmployeeById: async (req, res) => {
         try {
             const { id } = req.params
             const user = req.user

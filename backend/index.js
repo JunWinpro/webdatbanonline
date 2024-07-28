@@ -7,6 +7,7 @@ import connectDb from "./src/database/db.js";
 import autoDeleteBooking from "./src/scheduleMongoDB/bookingChecker.js";
 import multer from "multer"
 import returnError from "./src/errors/error.js";
+import resetBookingRestaurant from "./src/scheduleMongoDB/resetRestaurantBooking.js";
 dotenv.config()
 const app = express()
 app.use(cors());
@@ -22,6 +23,7 @@ cloudinary.config({
 
 connectDb()
 setInterval(autoDeleteBooking, 15 * 60 * 1000)
+setInterval(resetBookingRestaurant, 60 * 60 * 1000)
 app.use(rootRouter)
 
 app.use((err, _, res, next) => {

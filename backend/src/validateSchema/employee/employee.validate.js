@@ -44,7 +44,38 @@ const employeeSchema = {
     }).custom((value, helpers) => {
         if (trimString(value).length !== 24) return helpers.message("Restaurant id is invalid")
         return trimString(value)
-    })
+    }),
+    page: joi.string().regex(/^[0-9]+$/).messages({
+        'string.empty': "Page can't be empty",
+        'string.base': "Page must be a string",
+        'string.pattern.base': "Page only contains integer number",
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Page can't be empty")
+
+        if (!Number.isInteger(Number(value)))
+            return helpers.message("Page can't be float")
+
+        if (Number(value) <= 0)
+            return helpers.message("Page can't be negative")
+
+        return Number(value)
+    }),
+
+    pageSize: joi.string().regex(/^[0-9]+$/).messages({
+        'string.empty': "Page size can't be empty",
+        'string.base': "Page size must be a string",
+        'string.pattern.base': "Page size only contains integer number",
+    }).custom((value, helpers) => {
+        if (trimString(value).length === 0) return helpers.message("Page size can't be empty")
+
+        if (!Number.isInteger(Number(value)))
+            return helpers.message("Page size can't be float")
+
+        if (Number(value) <= 0)
+            return helpers.message("Page size can't be negative")
+
+        return Number(value)
+    }),
 }
 
 const employeeValidate = {
@@ -69,6 +100,12 @@ const employeeValidate = {
             'object.missing': "Username/phone is required",
             'object.xor': 'Please use only username or phone',
         }),
+
+    getEmployee: joi.object({
+        restaurantId: employeeSchema.restaurantId,
+        page: employeeSchema.page,
+        pageSize: employeeSchema.pageSize,
+    }),
 
     updatePassword: joi.object({
         password: employeeSchema.password.required(),

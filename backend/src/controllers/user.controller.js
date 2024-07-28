@@ -128,7 +128,7 @@ const userController = {
     getUsers: async (req, res) => {
         try {
             const { page, pageSize, email, name, sortBy } = req.query
-
+            console.log(req.query);
             const filterModel = {}
             if (name) {
                 filterModel.name = {
