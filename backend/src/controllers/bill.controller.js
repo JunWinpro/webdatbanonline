@@ -83,7 +83,19 @@ const billController = {
         }
     },
     getBills: async (req, res) => {
-
+        try {
+            const user = req.user
+            const { id } = req.params
+            const bills = await ModelDb.BillModel.find({
+                restaurant: id
+            }).populate('restaurant')
+            if (bills.length === 0) throw new Error("No bills found")
+            if (bills.restaurant.manager.toString() !== user.userId) throw new Error("No restaurant found")
+            if (bills.restaurant.isDeleted || !bills.restaurant.isActive) throw new Error("No restaurant found")
+            dataResponse(res, 200, "Bills fetched", bills.map(bill => billResponse(bill)))
+        } catch (error) {
+            returnError(res, 403, error)
+        }
     }
 }
 
