@@ -244,7 +244,28 @@ const restaurantController = {
             returnError(res, 403, err)
         }
     },
-
+    getEmptyTable: async (req, res) => {
+        try {
+            const { id } = req.params
+            const restaurant = await ModelDb.RestaurantModel.findOne({
+                _id: id,
+                isDeleted: false,
+            }).lean()
+            if (!restaurant) throw new Error("Restaurant not found")
+            const findBooking = await ModelDb.BookingModel.findOne({
+                restaurant: id,
+                isCheckin: false,
+                isFinished: false,
+                isCanceled: false,
+                isDeleted: false
+            }).lean()
+            const info = findBooking.info
+            const tablesBooked = info.map(item => item.tableNumber)
+            dataResponse(res, 200, "Get booked tables success", tablesBooked)
+        } catch (error) {
+            returnError(res, 403, error)
+        }
+    },
     updateRestaurantById: async (req, res) => {
         try {
             const { id } = req.params
