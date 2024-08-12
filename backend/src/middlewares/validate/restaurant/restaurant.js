@@ -1,6 +1,5 @@
 import returnError from "../../../errors/error.js"
 import restaurantValidate from "../../../validateSchema/restaurant/restaurant.validate.js"
-
 const restaurantValidateData = {
     createRestaurant: (req, res, next) => {
         try {
@@ -14,20 +13,6 @@ const restaurantValidateData = {
             returnError(res, 403, err)
         }
     },
-
-    getRestaurants: (req, res, next) => {
-        try {
-            const { error, value } = restaurantValidate.getRestaurants.validate(req.query)
-            if (error) throw new Error(error.details[0].message)
-
-            req.query = value
-            next()
-        }
-        catch (err) {
-            returnError(res, 403, err)
-        }
-    },
-
     updateRestaurantById: (req, res, next) => {
         try {
             const { error, value } = restaurantValidate.updateRestaurant.validate(req.body)

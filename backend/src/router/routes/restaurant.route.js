@@ -5,6 +5,7 @@ import validateData from '../../middlewares/validate/index.js'
 import restaurantController from '../../controllers/restaurant.controller.js'
 import { memoryUploader } from '../../middlewares/uploader.middleware.js'
 import imageValidate from '../../middlewares/imageValidate.middleware.js'
+import queryMiddleWare from '../../middlewares/query.middleware.js'
 
 const restaurantRoute = express.Router()
 
@@ -19,9 +20,9 @@ restaurantRoute.post('/upload/avatar/:id', tokenMiddleware.verifyAccessToken, au
 
 restaurantRoute.post('/', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.restaurant.createRestaurant, restaurantController.createRestaurant)
 
-restaurantRoute.get('/', validateData.restaurant.getRestaurants, restaurantController.getRestaurants)
+restaurantRoute.get('/', queryMiddleWare.restaurant, restaurantController.getRestaurants)
 restaurantRoute.get('/restaurant/:id', validateData.objectId, restaurantController.getRestaurantById)
-restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.restaurant.getRestaurants, restaurantController.getOwnedRestaurants)
+restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, queryMiddleWare.restaurant, restaurantController.getOwnedRestaurants)
 restaurantRoute.get('/booked-table/:id', validateData.objectId, restaurantController.getEmptyTable)
 
 restaurantRoute.put('/restaurant/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantById, restaurantController.updateRestaurantById)
