@@ -126,100 +126,6 @@ const restaurantInfoSchema = {
     })
 }
 
-const sortType = ['rating', 'price', 'new', 'name']
-const sortValue = ['asc', 'desc']
-const restaurantQuerySchema = {
-    name: joi.string().regex(/^[\p{L}\p{N}\s]+$/u).messages({
-        'string.base': "Name must be a string",
-        'string.empty': "Name is empty",
-        'string.pattern.base': "Name can't contain special character"
-    }).custom((value, helpers) => {
-        if (value.trim().length === 0) {
-            return helpers.message("Name can't be empty")
-        }
-        return convertUnicode(lowerCaseString(trimString(value)))
-    }),
-
-    page: joi.string().regex(/^[0-9]+$/).messages({
-        'string.empty': "Page can't be empty",
-        'string.base': "Page must be a string",
-        'string.pattern.base': "Page only contains integer number",
-    }).custom((value, helpers) => {
-        if (trimString(value).length === 0) return helpers.message("Page can't be empty")
-
-        if (!Number.isInteger(Number(value)))
-            return helpers.message("Page can't be float")
-
-        if (Number(value) <= 0)
-            return helpers.message("Page can't be negative")
-
-        return Number(value)
-    }),
-
-    pageSize: joi.string().regex(/^[0-9]+$/).messages({
-        'string.empty': "Page size can't be empty",
-        'string.base': "Page size must be a string",
-        'string.pattern.base': "Page size only contains integer number",
-    }).custom((value, helpers) => {
-        if (trimString(value).length === 0) return helpers.message("Page size can't be empty")
-
-        if (!Number.isInteger(Number(value)))
-            return helpers.message("Page size can't be float")
-
-        if (Number(value) <= 0)
-            return helpers.message("Page size can't be negative")
-
-        return Number(value)
-    }),
-
-    district: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
-        ...messages.address.district
-    }).custom((value, helpers) => {
-        if (trimString(value).length === 0) return helpers.message("District can't be empty")
-        return convertUnicode(lowerCaseString(trimString(value)))
-    }),
-
-    city: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
-        ...messages.address.city
-    }).custom((value, helpers) => {
-        if (trimString(value).length === 0) return helpers.message("City can't be empty")
-        return convertUnicode(lowerCaseString(trimString(value)))
-    }),
-
-    category: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
-        'any.invalid': 'Category must be a string or an array of strings',
-        'string.empty': "Category can't be empty",
-        'string.pattern.base': "Category can't contain special character"
-    }).custom((value, helpers) => {
-        if (trimString(value).length === 0) return helpers.message("Category can't be empty")
-        return convertUnicode(lowerCaseString(trimString(value)))
-    }),
-
-    sortBy: joi.alternatives().try(
-        joi.string().custom((value, helpers) => {
-
-            if (trimString(value).length === 0) return helpers.message("Sort by can't be empty")
-            const [type, sort] = value.split("_")
-            if (!sortValue.includes(sort)) return helpers.message("Sort value must be asc or desc")
-            if (!sortType.includes(type)) return helpers.message("Sort type must be rating, price, new or name")
-            return convertUnicode(lowerCaseString(trimString(value)))
-        }),
-
-        joi.array().items(joi.string().custom((value, helpers) => {
-
-            if (trimString(value).length === 0) return helpers.message("Sort by can't be empty")
-            const [type, sort] = value.split("_")
-
-            if (!sortValue.includes(sort)) return helpers.message("Sort value must be asc or desc")
-            if (!sortType.includes(type)) return helpers.message("Sort type must be rating, price, new or name")
-            return convertUnicode(lowerCaseString(trimString(value)))
-        }))
-    ).messages({
-        'any.invalid': 'Sort by must be a string or an array of strings',
-        'string.empty': "Sort by can't be empty"
-    })
-}
-
 const restaurantValidate = {
     createRestaurant: joi.object({
         name: restaurantSchema.name.required(),
@@ -229,16 +135,6 @@ const restaurantValidate = {
         maxim: restaurantInfoSchema.maxim,
         description: restaurantInfoSchema.description,
         schedule: restaurantInfoSchema.schedule.required(),
-    }),
-
-    getRestaurants: joi.object({
-        name: restaurantQuerySchema.name,
-        page: restaurantQuerySchema.page,
-        pageSize: restaurantQuerySchema.pageSize,
-        city: restaurantQuerySchema.city,
-        district: restaurantQuerySchema.district,
-        category: restaurantQuerySchema.category,
-        sortBy: restaurantQuerySchema.sortBy
     }),
 
     updateRestaurant: joi.object({

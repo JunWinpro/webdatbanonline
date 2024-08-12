@@ -13,6 +13,10 @@ const restaurant = new mongoose.Schema(
             unique: true,
             required: true
         },
+        cloneName: {
+            type: String,
+            required: true
+        },
         address: {
             streetAddress: {
                 type: String,
