@@ -27,7 +27,7 @@ const restaurantController = {
 
             const newRestaurant = await ModelDb.RestaurantModel.create({
                 ...req.body,
-                cloneName: unidecode(name),
+                decodeName: unidecode(name),
                 manager: user.userId,
             })
 

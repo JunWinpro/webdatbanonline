@@ -6,7 +6,6 @@ import cities from "../jsonDb/cities.json" with {type: "json"}
 const queryMiddleWare = {
     restaurant: (req, res, next) => {
         try {
-
             const filterModel = {}
             const acceptQuery = ['sort', 'name', 'minPrice', 'maxPrice', 'rating', 'category', 'isOpening', 'city', 'district']
             for (let key of Object.keys(req.query)) {
@@ -79,8 +78,7 @@ const queryMiddleWare = {
                 if (Object.values(filterModel.minPrice)[0] >= Object.values(filterModel.maxPrice)[0]) throw new Error("Min price must be less than max price")
             }
             if (filterModel['address.city'] && filterModel['address.district']) {
-                const district = districts.find(item => item.code === filterModel['address.district'] && item.parent_code === filterModel['address.city'])
-                if (!district) throw new Error("District code must be a child of city")
+                if (!districts.find(item => item.code === filterModel['address.district'] && item.parent_code === filterModel['address.city'])) throw new Error("District code must be a child of city")
             }
             req.query = {}
             req.query.filterModel = filterModel

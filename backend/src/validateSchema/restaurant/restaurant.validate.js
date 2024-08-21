@@ -3,10 +3,11 @@ import trimString from "../../utils/trimString.js";
 import lowerCaseString from "../../utils/lowerCaseString.js";
 import convertUnicode from "../../utils/unidecode.js";
 import messages from "./messages.js";
-
+import districts from "../../jsonDb/districts.json" with {type: "json"}
+import cities from "../../jsonDb/cities.json" with {type: "json"}
 
 const restaurantSchema = {
-    name: joi.string().regex(/^[a-zA-Z0-9\s]+$/).messages({
+    name: joi.string().regex(/^[\p{L}\p{N}\s]+$/u).messages({
         ...messages.name
     }).custom((value, helpers) => {
         if (value.trim().length === 0) {
@@ -24,21 +25,15 @@ const restaurantSchema = {
                 return trimString(value)
             }),
 
-        district: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
-            ...messages.address.district
-        }).required()
-            .custom((value, helpers) => {
-                if (trimString(value).length === 0) return helpers.message("District can't be empty")
-                return trimString(value)
-            }),
+        district: joi.string().custom((value, helpers) => {
+            if (!districts.find(item => item.code === value)) return helpers.message("Invalid district code")
+            return value
+        }),
 
-        city: joi.string().regex(/^[a-zA-Z\s]+$/).messages({
-            ...messages.address.city
-        }).required()
-            .custom((value, helpers) => {
-                if (trimString(value).length === 0) return helpers.message("City can't be empty")
-                return trimString(value)
-            })
+        city: joi.string().custom((value, helpers) => {
+            if (!cities.find(item => item.code === value)) return helpers.message("Invalid district code")
+            return value
+        })
 
     }).messages({
         ...messages.address.address
