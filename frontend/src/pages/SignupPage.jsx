@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 export const SignupPage = ({ onSignup }) => {
+  const [showAlert, setShowAlert] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     phone: "",
@@ -14,12 +17,10 @@ export const SignupPage = ({ onSignup }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!termsAccepted) {
@@ -32,11 +33,12 @@ export const SignupPage = ({ onSignup }) => {
         `${import.meta.env.VITE_BACKEND_URL}/users/register`,
         formData
       );
-
-
       if (response.data.success) {
         console.log(response.data.message);
-        navigate("/");
+        setShowAlert(true);
+        setTimeout(() => {
+          navigate("/");
+        }, 5000);
       } else {
         setError(
           response.data.message || "Registration failed. Please try again."
@@ -53,19 +55,16 @@ export const SignupPage = ({ onSignup }) => {
       }
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Join us
         </h2>
-
         <p className="mt-2 text-center text-sm text-gray-600">
           Create your personal account
         </p>
       </div>
-
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -212,18 +211,27 @@ export const SignupPage = ({ onSignup }) => {
                 </span>
               </label>
             </div>
-
             {error && <div className="text-red-500 text-sm">{error}</div>}
-
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="w-full flex justify-center pyw w-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
                 Register
               </button>
             </div>
           </form>
+          {showAlert && (
+            <Alert className="mt-4">
+              <Terminal className="h-4 w-4" />
+
+              <AlertTitle>Registration Successful!</AlertTitle>
+              <AlertDescription>
+                Please check your email to verify your account. You will be
+                redirected to the homepage shortly.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="mt-6">
             <div className="relative">

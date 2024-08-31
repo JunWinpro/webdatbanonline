@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { ContactPage } from "./pages/ContactPage";
 import "./App.css";
 import { HomePage } from "./pages/HomePage.jsx";
 import { SigninPage } from "./pages/SigninPage";
@@ -24,7 +25,10 @@ import { EmployeeSigninPage } from "./pages/EmployeeSigninPage";
 import { AdminDashboard } from "./pages/AdminDashBoard";
 import { ManagerDashboard } from "./pages/ManagerDashBoard";
 import { VerifyPage } from "./pages/VerifyPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/AdminDashboard/ProtectedRoute";
+import AdminUserList from "./pages/AdminUserList";
+import AdminEmployeeList from "./pages/AdminEmployeeList";
+import AdminRestaurantList from "./pages/AdminRestaurantList";
 
 function App() {
   const dispatch = useDispatch();
@@ -32,10 +36,12 @@ function App() {
   const { isLogin } = useSelector((state) => state.auth);
   const [showFixedNavBar, setShowFixedNavBar] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const refreshToken = async () => {
       if (!isLogin && localStorage.getItem("refreshToken")) {
         try {
+          setIsLoading(true);
           const { accessToken, userInfo, role } =
             await authService.renewAccessToken(
               localStorage.getItem("refreshToken")
@@ -53,7 +59,11 @@ function App() {
           localStorage.removeItem("refreshToken");
           localStorage.removeItem("accessToken");
           navigate("/signin");
+        } finally {
+          setIsLoading(false);
         }
+      } else {
+        setIsLoading(false);
       }
     };
     refreshToken();
@@ -122,12 +132,47 @@ function App() {
           <Route path="/employee/signin" element={<EmployeeSigninPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/profile" element={<UserPage />} />
-
-          <Route path="/admin" element={<AdminDashboard />} />
-
-          <Route element={<ProtectedRoute allowedRoles={["manager"]} />}>
-            <Route path="/manager" element={<ManagerDashboard />} />
-          </Route>
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]} isLoading={isLoading}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]} isLoading={isLoading}>
+                <AdminUserList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/restaurants"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]} isLoading={isLoading}>
+                <AdminRestaurantList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/restaurants/:restaurantId/employees"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]} isLoading={isLoading}>
+                <AdminEmployeeList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manager"
+            element={
+              <ProtectedRoute allowedRoles={["manager"]} isLoading={isLoading}>
+                <ManagerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/verify-user/:token" element={<VerifyPage />} />
           <Route path="/forget-password" element={<ForgetPassPage />} />
           <Route path="/reset-password/:token" element={<ResetPassPage />} />
