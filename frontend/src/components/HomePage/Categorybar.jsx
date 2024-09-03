@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Card } from "antd";
 import Meta from "antd/es/card/Meta";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import {
   Carousel,
@@ -11,24 +10,7 @@ import {
   CarouselPrevious,
 } from "../ui/carousel";
 
-const Categorybar = () => {
-  const [restaurants, setRestaurants] = useState([]);
-
-  useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/restaurants`);
-        if (response.data.success) {
-          setRestaurants(response.data.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching restaurants:", error);
-      }
-    };
-
-    fetchRestaurants();
-  }, []);
-
+const Categorybar = ({ restaurants }) => {
   return (
     <>
       <Carousel className="w-5/6 relative my-5">
@@ -38,11 +20,11 @@ const Categorybar = () => {
           {restaurants.map((restaurant) => (
             <CarouselItem key={restaurant._id} className="ml-10 md:basis-1/8 lg:basis-1/8">
               <Link to={`/product/${restaurant._id}`}>
-                <Card
+                <Card 
                   hoverable
                   style={{ width: 200 }}
                   cover={
-                    <div className="h-48 overflow-hidden">
+                    <div className="h-48 overflow-hidden ">
                       <img
                         alt={restaurant.name}
                         src={restaurant.avatar || "https://via.placeholder.com/200"}
@@ -51,12 +33,12 @@ const Categorybar = () => {
                     </div>
                   }
                 >
-                  <Meta
+                  <Meta className="p-0"
                     title={restaurant.name}
                     description={
                       <span style={{ color: "red" }}>
                         {restaurant.minPrice && restaurant.maxPrice
-                          ? `${restaurant.minPrice}$ - ${restaurant.maxPrice}$`
+                          ? `${restaurant.minPrice}K - ${restaurant.maxPrice}K`
                           : "Price not available"}
                       </span>
                     }
