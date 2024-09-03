@@ -123,11 +123,21 @@ const Navbar = ({ navItems }) => {
                 </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>userInfo</DropdownMenuLabel>
+                <DropdownMenuLabel>User Info</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => navigate("/profile")}>
                   Profile
                 </DropdownMenuItem>
+                {userInfo && userInfo.role === "admin" && (
+                  <DropdownMenuItem onSelect={() => navigate("/admin")}>
+                    Admin Dashboard
+                  </DropdownMenuItem>
+                )}
+                {userInfo && userInfo.role === "manager" && (
+                  <DropdownMenuItem onSelect={() => navigate("/manager")}>
+                    Manager Dashboard
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onSelect={() => setIsChangingAvatar(true)}>
                   Change Avatar
                 </DropdownMenuItem>

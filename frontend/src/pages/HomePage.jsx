@@ -5,8 +5,20 @@ import FilterHome from "@/components/HomePage/FilterHome";
 import TitleBar from "@/components/HomePage/TitleBar";
 import axios from "axios";
 
+const capitalizeWords = (str) => {
+  return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+};
+
+const chunkArray = (array, size) => {
+  const chunkedArr = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunkedArr.push(array.slice(i, i + size));
+  }
+  return chunkedArr;
+};
+
 export const HomePage = () => {
-  const [restaurants, setRestaurants] = useState([]);
+  const [restaurantsByCategory, setRestaurantsByCategory] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -15,7 +27,8 @@ export const HomePage = () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/restaurants`);
         if (response.data.success) {
-          setRestaurants(response.data.data.data);
+          const groupedRestaurants = groupRestaurantsByCategory(response.data.data.data);
+          setRestaurantsByCategory(groupedRestaurants);
         }
       } catch (error) {
         console.error("Error fetching restaurants:", error);
@@ -24,32 +37,42 @@ export const HomePage = () => {
         setLoading(false);
       }
     };
-
     fetchRestaurants();
   }, []);
 
-  const chunkArray = (array, size) => {
-    const chunked = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunked.push(array.slice(i, i + size));
-    }
-    return chunked;
+  const groupRestaurantsByCategory = (restaurants) => {
+    return restaurants.reduce((acc, restaurant) => {
+      const categories = restaurant.category || ["Uncategorized"];
+      categories.forEach(category => {
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(restaurant);
+      });
+      return acc;
+    }, {});
   };
-
-  const restaurantChunks = chunkArray(restaurants, 7);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
+  const categories = Object.keys(restaurantsByCategory);
+
   return (
     <>
       <FilterHome />
-      {restaurantChunks.map((chunk, index) => (
-        <React.Fragment key={index}>
-          <TitleBar title={`Featured Restaurants ${index + 1}`} />
-          <Categorybar restaurants={chunk} />
-        </React.Fragment>
-      ))}
+      {categories.map(category => {
+        const restaurantsInCategory = restaurantsByCategory[category];
+        const chunkedRestaurants = chunkArray(restaurantsInCategory, 7);
+        return (
+          <React.Fragment key={category}>
+            <TitleBar title={`${capitalizeWords(category)} Restaurants`} />
+            {chunkedRestaurants.map((chunk, index) => (
+              <Categorybar key={`${category}-${index}`} restaurants={chunk} />
+            ))}
+          </React.Fragment>
+        );
+      })}
       <Banner />
     </>
   );

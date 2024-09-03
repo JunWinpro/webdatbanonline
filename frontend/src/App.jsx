@@ -143,7 +143,7 @@ function App() {
           <Route
             path="/admin/users"
             element={
-              <ProtectedRoute allowedRoles={["admin"]} isLoading={isLoading}>
+              <ProtectedRoute allowedRoles={["admin","manager"]} isLoading={isLoading}>
                 <AdminUserList />
               </ProtectedRoute>
             }
@@ -151,7 +151,7 @@ function App() {
           <Route
             path="/admin/restaurants"
             element={
-              <ProtectedRoute allowedRoles={["admin"]} isLoading={isLoading}>
+              <ProtectedRoute allowedRoles={["admin","manager"]} isLoading={isLoading}>
                 <AdminRestaurantList />
               </ProtectedRoute>
             }
@@ -159,7 +159,7 @@ function App() {
           <Route
             path="/admin/restaurants/:restaurantId/employees"
             element={
-              <ProtectedRoute allowedRoles={["admin"]} isLoading={isLoading}>
+              <ProtectedRoute allowedRoles={["admin","manager"]} isLoading={isLoading}>
                 <AdminEmployeeList />
               </ProtectedRoute>
             }

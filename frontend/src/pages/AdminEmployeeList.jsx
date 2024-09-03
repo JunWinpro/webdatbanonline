@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiEdit, FiTrash2 } from "react-icons/fi";
 
 const AdminEmployeeList = () => {
   const { restaurantId } = useParams();
@@ -9,6 +9,17 @@ const AdminEmployeeList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    phone: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    gender: "",
+    role: "",
+  });
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchEmployees();
@@ -16,8 +27,8 @@ const AdminEmployeeList = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axiosInstance.get(`/restaurants/${restaurantId}/employees`);
-      setEmployees(response.data.data);
+      const response = await axiosInstance.get(`/employees`);
+      setEmployees(response.data.data.data);
       setLoading(false);
     } catch (err) {
       setError("Error fetching employees");
@@ -25,15 +36,59 @@ const AdminEmployeeList = () => {
     }
   };
 
-  const changeRole = async (employeeId, newRole) => {
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await axiosInstance.put(`/restaurants/${restaurantId}/employees/${employeeId}`, {
-        role: newRole,
-      });
+      if (editingId) {
+        await axiosInstance.put(`/employees/${editingId}`, formData);
+      } else {
+        await axiosInstance.post("/employees", { ...formData, restaurantId });
+      }
+      fetchEmployees();
+      resetForm();
+    } catch (err) {
+      setError("Error saving employee");
+    }
+  };
+
+  const handleEdit = (employee) => {
+    setFormData({
+      username: employee.username,
+      phone: employee.phone,
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      email: employee.email,
+      gender: employee.gender,
+      role: employee.role,
+    });
+    setEditingId(employee._id);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axiosInstance.delete(`/employees/${id}`);
       fetchEmployees();
     } catch (err) {
-      setError("Error changing employee role");
+      setError("Error deleting employee");
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      username: "",
+      phone: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      gender: "",
+      role: "",
+    });
+    setEditingId(null);
   };
 
   const filteredEmployees = employees.filter(
@@ -50,6 +105,115 @@ const AdminEmployeeList = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Employee Management</h1>
+      
+      <form onSubmit={handleSubmit} className="mb-8 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div className="mb-4 flex flex-wrap -mx-2">
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              placeholder="Username"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="Phone"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Password"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              placeholder="First Name"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              placeholder="Last Name"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Email"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleInputChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            >
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            >
+              <option value="">Select Role</option>
+              <option value="waiter">Waiter</option>
+              <option value="chef">Chef</option>
+              <option value="manager">Manager</option>
+            </select>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            {editingId ? "Update" : "Add"} Employee
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      </form>
+
       <div className="mb-4">
         <div className="relative">
           <input
@@ -62,6 +226,7 @@ const AdminEmployeeList = () => {
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
       </div>
+
       <div className="bg-white shadow-xl rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -100,16 +265,19 @@ const AdminEmployeeList = () => {
                     {employee.role}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <select
-                    onChange={(e) => changeRole(employee._id, e.target.value)}
-                    className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    onClick={() => handleEdit(employee)}
+                    className="text-indigo-600 hover:text-indigo-900 mr-4"
                   >
-                    <option value="">Change Role</option>
-                    <option value="waiter">Waiter</option>
-                    <option value="chef">Chef</option>
-                    <option value="manager">Manager</option>
-                  </select>
+                    <FiEdit className="inline-block mr-1" /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(employee._id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    <FiTrash2 className="inline-block mr-1" /> Delete
+                  </button>
                 </td>
               </tr>
             ))}
