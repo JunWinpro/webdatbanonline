@@ -66,7 +66,7 @@ export const HomePage = () => {
         const chunkedRestaurants = chunkArray(restaurantsInCategory, 7);
         return (
           <React.Fragment key={category}>
-            <TitleBar title={`${capitalizeWords(category)} Restaurants`} />
+            <TitleBar title={`${capitalizeWords(category)} Restaurants`} description={`bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla `}/>
             {chunkedRestaurants.map((chunk, index) => (
               <Categorybar key={`${category}-${index}`} restaurants={chunk} />
             ))}

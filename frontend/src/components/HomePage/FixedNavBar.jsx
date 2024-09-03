@@ -25,8 +25,8 @@ const FixedNavBar = ({ navItems, username }) => {
                       <Link 
                         to={subItem.link}
                         className={buttonVariants({
-                          variant: "default",
-                          className: "bg-white text-black",
+                          variant: "defaultt",
+                          className: "bg-white",
                         })}
                       >
                         {subItem.label}
@@ -37,8 +37,8 @@ const FixedNavBar = ({ navItems, username }) => {
               </NavigationMenuItem>
             ) : (
               <NavigationMenuItem key={index}>
-                <NavigationMenuLink asChild>
-                  <Link 
+                <NavigationMenuLink asChild >
+                  <Link
                     to={item.link}
                     className={buttonVariants({ variant: "default" })}
                   >

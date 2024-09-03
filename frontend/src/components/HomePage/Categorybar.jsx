@@ -18,13 +18,13 @@ const Categorybar = ({ restaurants }) => {
         <CarouselPrevious className="absolute top-1/2 -left-10 -translate-y-1/2"></CarouselPrevious>
         <CarouselContent className="w-full flex-nowrap">
           {restaurants.map((restaurant) => (
-            <CarouselItem key={restaurant._id} className="ml-10 md:basis-1/8 lg:basis-1/8">
+            <CarouselItem key={restaurant._id} className="ml-10 md:basis-1/8 lg:basis-1/8 py-2">
               <Link to={`/product/${restaurant._id}`}>
                 <Card 
                   hoverable
                   style={{ width: 200 }}
                   cover={
-                    <div className="h-48 overflow-hidden ">
+                    <div className="h-48 overflow-hidden  ">
                       <img
                         alt={restaurant.name}
                         src={restaurant.avatar || "https://via.placeholder.com/200"}

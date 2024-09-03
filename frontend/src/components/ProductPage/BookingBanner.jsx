@@ -16,6 +16,8 @@ const BookingBanner = ({ images = [] }) => {
   const [isDrawerTransitioning, setIsDrawerTransitioning] = useState(false);
   const [prevIndex, setPrevIndex] = useState(0);
   const [drawerPrevIndex, setDrawerPrevIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageUrls, setImageUrls] = useState([]);
 
   const defaultImages = [
     "https://anhdepfree.com/wp-content/uploads/2020/03/anh-2560x1440-chat-luong-cao-1920x1080.jpg",
@@ -26,7 +28,18 @@ const BookingBanner = ({ images = [] }) => {
     "https://anhdepfree.com/wp-content/uploads/2020/03/anh-nen-2560x1440-cho-may-tinh-1920x1080.jpg",
     "https://m.yodycdn.com/blog/hinh-nen-thien-nhien-4k-yody-vn-1-jpeg.jpg",
   ];
-  const imageUrls = images.length > 0 ? images : defaultImages;
+
+  useEffect(() => {
+    const loadImages = async () => {
+      setIsLoading(true);
+      setImageUrls(images.length > 0 ? images : defaultImages);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      setIsLoading(false);
+    };
+
+    loadImages();
+  }, [images]);
 
 
   const handleTransitionEnd = () => {
@@ -50,6 +63,7 @@ const BookingBanner = ({ images = [] }) => {
       setIsDrawerTransitioning(false);
     }, 0);
   };
+
 
   useEffect(() => {
     if (clickedIndex !== null) {
@@ -104,7 +118,13 @@ const BookingBanner = ({ images = [] }) => {
     setDrawerPrevIndex(drawerCurrentIndex);
     setDrawerCurrentIndex(index);
   };
-
+  if (isLoading) {
+    return (
+      <div className="flex w-full max-w-screen-xl bg-slate-100 items-center justify-center h-96">
+        <div className="text-2xl font-bold text-gray-500">Loading...</div>
+      </div>
+    );
+  }
   return (
     <div className="flex w-full max-w-screen-xl bg-slate-100	">
       <div className="carousel relative w-2/3 overflow-hidden">
