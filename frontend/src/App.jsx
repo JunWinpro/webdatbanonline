@@ -37,6 +37,8 @@ function App() {
   const [showFixedNavBar, setShowFixedNavBar] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [foodDrinkCategories, setFoodDrinkCategories] = useState([]);
+
   useEffect(() => {
     const refreshToken = async () => {
       if (!isLogin && localStorage.getItem("refreshToken")) {
@@ -70,6 +72,21 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get('/restaurants');
+        if (response.data.success) {
+          const categories = [...new Set(response.data.data.data.flatMap(restaurant => restaurant.category || []))];
+          setFoodDrinkCategories(categories);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
         setError("");
@@ -87,18 +104,19 @@ function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const capitalizeWords = (str) => {
+    return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+  };
+
   const navItems = [
     { label: "Home", link: "/" },
     { label: "Contact", link: "/contact" },
     {
       label: "Food & Drink",
-      items: [
-        { label: "Restaurant", link: "/restaurant" },
-        { label: "Hotpot", link: "/hotpot" },
-        { label: "Cafe", link: "/cafe" },
-        { label: "Bar", link: "/bar" },
-        { label: "Grilled food", link: "/grilled-food" },
-      ],
+      items: foodDrinkCategories.map(category => ({
+        label: capitalizeWords(category),
+        link: `/${category.toLowerCase().replace(/\s+/g, '-')}`
+      }))
     },
     {
       label: "Sales",
