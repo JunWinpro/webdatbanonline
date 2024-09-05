@@ -2,7 +2,7 @@ import transporter from "../configs/transporter.config.js";
 import dotenv from 'dotenv'
 dotenv.config()
 const sendEmail = async (email, token, info) => {
-    const url = info.path ? `http://${process.env.CLIENT_URL || 'localhost:5173'}/${info.path}/${token}` : null
+    const url = info.path ? `${process.env.CLIENT_URL || 'http://localhost:5173'}/${info.path}/${token}` : null
 
     const text = info.action ? `Click on the following link to ${info.action}: ${url && url}` : info.textOption
 
