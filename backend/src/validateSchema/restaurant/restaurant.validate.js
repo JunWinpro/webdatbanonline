@@ -26,12 +26,14 @@ const restaurantSchema = {
             }),
 
         district: joi.string().custom((value, helpers) => {
-            if (!districts.find(item => item.code === value)) return helpers.message("Invalid district code")
+            const district = districts.find(item => item.code === value)
+            if (!district) return helpers.message("Invalid district code")
             return value
         }),
 
         city: joi.string().custom((value, helpers) => {
-            if (!cities.find(item => item.code === value)) return helpers.message("Invalid district code")
+            const city = cities.find(item => item.code === value)
+            if (!city) return helpers.message("Invalid district code")
             return value
         })
 

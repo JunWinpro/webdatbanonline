@@ -27,7 +27,7 @@ const restaurantController = {
 
             const newRestaurant = await ModelDb.RestaurantModel.create({
                 ...req.body,
-                decodeName: unidecode(name),
+                cloneName: unidecode(name),
                 manager: user.userId,
             })
 
@@ -52,6 +52,7 @@ const restaurantController = {
     getRestaurants: async (req, res) => {
         try {
             const { filterModel, sortModel, page, pageSize } = req.query
+            console.log(filterModel);
             const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
             if (restaurants.data.length === 0) throw new Error("No restaurant found")
             const data = {
