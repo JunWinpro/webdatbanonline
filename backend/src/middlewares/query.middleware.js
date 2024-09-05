@@ -7,7 +7,7 @@ const queryMiddleWare = {
     restaurant: (req, res, next) => {
         try {
             const filterModel = {}
-            const acceptQuery = ['sort', 'name', 'minPrice', 'maxPrice', 'rating', 'category', 'isOpening', 'city', 'district']
+            const acceptQuery = ['sort', 'name', 'minPrice', 'maxPrice', 'rating', 'category', 'isOpening', 'city', 'district', 'page', 'pageSize']
             for (let key of Object.keys(req.query)) {
                 if (!acceptQuery.includes(key)) {
                     throw new Error(`Invalid query parameter: ${key}`)
@@ -91,12 +91,16 @@ const queryMiddleWare = {
             if (filterModel['address.city'] && filterModel['address.district']) {
                 if (filterModel['address.district'].parent_code !== filterModel['address.city'].code) throw new Error('District parent code must match city code')
             }
-            delete filterModel['address.city'].code
-            delete filterModel['address.district'].code
-            delete filterModel['address.district'].parent_code
+            if (filterModel['address.city']) {
+                delete filterModel['address.city'].code
+
+            }
+            if (filterModel['address.district']) {
+                delete filterModel['address.district'].code
+                delete filterModel['address.district'].parent_code
+            }
             req.query = {}
             req.query.filterModel = filterModel
-
             next()
         } catch (error) {
             returnError(res, 403, error)
