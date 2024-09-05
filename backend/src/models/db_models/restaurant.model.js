@@ -13,7 +13,7 @@ const restaurant = new mongoose.Schema(
             unique: true,
             required: true
         },
-        decodeName: {
+        cloneName: {
             type: String,
             required: true
         },
