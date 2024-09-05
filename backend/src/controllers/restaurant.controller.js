@@ -72,80 +72,10 @@ const restaurantController = {
     getOwnedRestaurants: async (req, res) => {
         {
             try {
-                let { name, sortBy, page, pageSize, city, district, category } = req.query
-
-                if (district && !city) throw new Error("Please choose city first")
-
-                const sortModel = {}
-                if (sortBy) {
-                    const sortToObject = (ele) => {
-                        if (ele.type === "rating") {
-                            sortModel.rating = sortModelType(ele.value)
-                        }
-                        if (ele.type === "price") {
-                            sortModel.minPrice = sortModelType(ele.value)
-                        }
-                        if (ele.type === "new") {
-                            sortModel.createdAt = sortModelType(ele.value)
-                        }
-                        if (ele.type === "name") {
-                            sortModel.name = sortModelType(ele.value)
-                        }
-                    }
-                    if (Array.isArray(sortBy)) {
-                        const sortMap = sortBy.map(ele => {
-                            const [type, value] = ele.split("_")
-                            return { type, value }
-                        })
-
-                        sortMap.forEach(ele => {
-                            sortToObject(ele)
-                        })
-                    }
-                    else {
-                        const [type, value] = sortBy.split("_")
-                        sortToObject({ type, value })
-                    }
-                }
-
-                const user = req.user
-
-                const filterModel = {
-                    isDeleted: false,
-                }
-
-                filterModel['manager'] = user.userId
-
-                if (city) {
-                    filterModel['address.city'] = {
-                        $regex: city,
-                        $options: "i"
-                    }
-                }
-
-                if (district) {
-                    filterModel['address.district'] = {
-                        $regex: district,
-                        $options: "i"
-                    }
-                }
-
-                if (name) {
-                    filterModel.name = {
-                        $regex: name,
-                        $options: 'i'
-                    }
-                }
-
-                if (category) {
-                    filterModel.category = {
-                        $regex: category,
-                        $options: 'i'
-                    }
-                }
-
+                const { filterModel, sortModel, page, pageSize } = req.query
+                filterModel.manager = req.user.userId
                 const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
-                if (restaurants.data.length === 0) throw new Error("Restaurant not found")
+                if (restaurants.data.length === 0) throw new Error("No restaurant found")
                 const data = {
                     data: restaurants.data.map(restaurant => restaurantResponse(restaurant)),
                     totalPages: restaurants.totalPages,
