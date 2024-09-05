@@ -42,7 +42,7 @@ const userController = {
                 veryficationToken
             })
             const info = {
-                path: 'direct/verify-user',
+                path: 'verify-user',
                 subject: 'Verify account',
                 action: 'verify your account'
             }
