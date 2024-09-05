@@ -52,7 +52,7 @@ const restaurantController = {
     getRestaurants: async (req, res) => {
         try {
             const { filterModel, sortModel, page, pageSize } = req.query
-            console.log(filterModel);
+            filterModel.isActive = true
             const restaurants = await pageSplit(ModelDb.RestaurantModel, filterModel, page, pageSize, sortModel)
             if (restaurants.data.length === 0) throw new Error("No restaurant found")
             const data = {
