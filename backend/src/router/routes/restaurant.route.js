@@ -22,7 +22,7 @@ restaurantRoute.post('/', tokenMiddleware.verifyAccessToken, authorization.manag
 
 restaurantRoute.get('/', queryMiddleWare.restaurant, restaurantController.getRestaurants)
 restaurantRoute.get('/restaurant/:id', validateData.objectId, restaurantController.getRestaurantById)
-restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, queryMiddleWare.restaurant, restaurantController.getOwnedRestaurants)
+restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, queryMiddleWare.ownedRestaurants, restaurantController.getOwnedRestaurants)
 restaurantRoute.get('/booked-table/:id', validateData.objectId, restaurantController.getEmptyTable)
 
 restaurantRoute.put('/restaurant/:id', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.objectId, validateData.restaurant.updateRestaurantById, restaurantController.updateRestaurantById)
