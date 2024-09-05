@@ -14,6 +14,10 @@ const queryMiddleWare = {
                 if (!acceptQuery.includes(key)) {
                     throw new Error(`Invalid query parameter: ${key}`)
                 }
+                if (key === 'page' || key === 'pageSize') {
+                    if (!Number.isInteger(Number(req.query[key]))) throw new Error("Page or page size must be integer")
+                    req.query[key] = Number(req.query[key])
+                }
                 if (key === 'sort') {
                     const [sortKey, sortValue] = req.query[key].split('_')
                     if (Number(sortValue) !== 1 && Number(sortValue) !== -1) {
@@ -101,7 +105,6 @@ const queryMiddleWare = {
                 delete filterModel['address.district'].code
                 delete filterModel['address.district'].parent_code
             }
-            req.query = {}
             req.query.filterModel = filterModel
             next()
         } catch (error) {
@@ -116,6 +119,10 @@ const queryMiddleWare = {
             for (let key of Object.keys(req.query)) {
                 if (!acceptQuery.includes(key)) {
                     throw new Error(`Invalid query parameter: ${key}`)
+                }
+                if (key === 'page' || key === 'pageSize') {
+                    if (!Number.isInteger(Number(req.query[key]))) throw new Error("Page or page size must be integer")
+                    req.query[key] = Number(req.query[key])
                 }
                 if (key === 'isActive') {
                     if (req.query[key] !== 'true' || req.query[key] == 'false') throw new Error("isActive must be true or false")
@@ -209,7 +216,6 @@ const queryMiddleWare = {
                 delete filterModel['address.district'].code
                 delete filterModel['address.district'].parent_code
             }
-            req.query = {}
             req.query.filterModel = filterModel
             next()
         } catch (error) {
