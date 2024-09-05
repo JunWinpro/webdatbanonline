@@ -42,11 +42,10 @@ const userController = {
                 veryficationToken
             })
             const info = {
-                path: 'verify-user',
+                path: 'direct/verify-user',
                 subject: 'Verify account',
                 action: 'verify your account'
             }
-            console.log(1);
             await sendEmail(email, veryficationToken, info)
 
             const message = "Please check your email for verify account"
