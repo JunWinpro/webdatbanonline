@@ -53,7 +53,7 @@ export const HomePage = () => {
     }, {});
   };
 
-  if (loading) return <div>Loading...</div>;
+
   if (error) return <div>{error}</div>;
 
   const categories = Object.keys(restaurantsByCategory);

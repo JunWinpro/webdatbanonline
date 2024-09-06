@@ -14,14 +14,11 @@ import { UserPage } from "./pages/UserPage";
 import { ForgetPassPage } from "./pages/ForgetPassPage";
 import { useDispatch, useSelector } from "react-redux";
 import { login, logout } from "./store/slice/auth";
-
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "./utils/axiosInstance";
 import authService from "./services/auth";
 import { ResetPassPage } from "./pages/ResetPassPage";
-
 import { EmployeeSigninPage } from "./pages/EmployeeSigninPage";
-
 import { AdminDashboard } from "./pages/AdminDashBoard";
 import { ManagerDashboard } from "./pages/ManagerDashBoard";
 import { VerifyPage } from "./pages/VerifyPage";
@@ -29,7 +26,7 @@ import ProtectedRoute from "./components/AdminDashboard/ProtectedRoute";
 import AdminUserList from "./pages/AdminUserList";
 import AdminEmployeeList from "./pages/AdminEmployeeList";
 import AdminRestaurantList from "./pages/AdminRestaurantList";
-
+import CreateRestaurantPage from "./pages/CreateRestaurantPage";
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -85,7 +82,6 @@ function App() {
     };
     fetchCategories();
   }, []);
-
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -187,6 +183,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["manager"]} isLoading={isLoading}>
                 <ManagerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manager/create-new-restaurant"
+            element={
+              <ProtectedRoute allowedRoles={["manager"]} isLoading={isLoading}>
+                <CreateRestaurantPage />
               </ProtectedRoute>
             }
           />

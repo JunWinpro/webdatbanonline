@@ -28,7 +28,7 @@ export const ContactPage = () => {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
-            Welcome to TasteTipper
+            Welcome to TasteTripper
           </h1>
           <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500">
             Your ultimate destination for hassle-free restaurant reservations
@@ -38,9 +38,9 @@ export const ContactPage = () => {
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <article className="prose prose-lg max-w-none">
-              <h2>Discover the TasteTipper Experience</h2>
+              <h2>Discover the TasteTripper Experience</h2>
               <p>
-                TasteTipper is revolutionizing the way food enthusiasts connect with their favorite dining spots. 
+                TasteTr   ipper is revolutionizing the way food enthusiasts connect with their favorite dining spots. 
                 Our platform ensures a smooth and enjoyable experience from booking to dining, making restaurant 
                 reservations easier than ever before.
               </p>
@@ -48,7 +48,7 @@ export const ContactPage = () => {
               <div className="w-full h-64 my-8 overflow-hidden">
                 <img 
                   src="https://images2.thanhnien.vn/528068263637045248/2024/1/25/e093e9cfc9027d6a142358d24d2ee350-65a11ac2af785880-17061562929701875684912.jpg" 
-                  alt="TasteTipper App Screenshot" 
+                  alt="TasteTripper App Screenshot" 
                   className="w-full h-full object-cover object-center rounded-lg shadow-md"
                 />
               </div>
@@ -63,7 +63,7 @@ export const ContactPage = () => {
 
               <h3>Our Mission</h3>
               <p>
-                At TasteTipper, we're passionate about connecting people with great dining experiences. 
+                At TasteTripper, we're passionate about connecting people with great dining experiences. 
                 We strive to make the reservation process as enjoyable as the meal itself, ensuring that 
                 every user can discover new flavors and create lasting memories.
               </p>
@@ -71,14 +71,14 @@ export const ContactPage = () => {
               <div className="w-full h-64 my-8 overflow-hidden">
                 <img 
                   src="https://png.pngtree.com/background/20230519/original/pngtree-treed-reflections-at-a-sunset-hd-picture-image_2653276.jpg" 
-                  alt="Happy diners using TasteTipper" 
+                  alt="Happy diners using TasteTripper" 
                   className="w-full h-full object-cover object-center rounded-lg shadow-md"
                 />
               </div>
 
               <h3>Join Our Community</h3>
               <p>
-                Become a part of the TasteTipper community and stay updated on the latest features, 
+                Become a part of the TasteTripper community and stay updated on the latest features, 
                 restaurant additions, and exclusive offers. Follow us on our social media channels:
               </p>
               
