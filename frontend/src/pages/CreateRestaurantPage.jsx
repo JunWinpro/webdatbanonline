@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import axiosInstance from '@/api/axios';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const CreateRestaurantPage = () => {
+  const navigate = useNavigate();
+  const { userInfo, accessToken, isLogin } = useSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     name: '',
     address: {
@@ -102,16 +104,42 @@ const CreateRestaurantPage = () => {
     }));
   };
 
+  
+  useEffect(() => {
+    if (!isLogin || !accessToken) {
+      navigate('/signin');
+    }
+  }, [isLogin, accessToken, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${BACKEND_URL}/restaurants`, formData);
+      const response = await axiosInstance.post('/restaurants', formData, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
       console.log('Restaurant created:', response.data);
+      navigate('/admin/restaurants');
     } catch (error) {
+      console.log(formData)
       console.error('Error creating restaurant:', error);
-
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+          case 403:
+            console.log('Unauthorized or Forbidden. Redirecting to login.');
+            navigate('/signin');
+            break;
+          default:
+            console.log('An error occurred while creating the restaurant.');
+        }
+      } else {
+        console.log('Network error or server is not responding.');
+      }
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">

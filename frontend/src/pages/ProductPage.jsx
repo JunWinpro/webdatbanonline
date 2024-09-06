@@ -78,8 +78,11 @@ export const ProductPage = () => {
           },
         }
       );
+      
       setBookingStatus("Booking successful!");
+
     } catch (error) {
+      console.log(bookingData);
       console.error("Error making booking:", error);
       setBookingStatus("Error making booking. Please try again.");
     }
@@ -97,8 +100,8 @@ export const ProductPage = () => {
           showTimeSelect
           dateFormat="MMMM d, yyyy h:mm aa"
           minDate={new Date()}
-          minTime={setHours(setMinutes(new Date(), 0), 8)}
-          maxTime={setHours(setMinutes(new Date(), 30), 20)}
+          minTime={setHours(setMinutes(new Date(), 0), 0)}
+          maxTime={setHours(setMinutes(new Date(), 59), 23)}
           className="p-2 border rounded w-full"
         />
       </div>
