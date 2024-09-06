@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,8 +15,6 @@ export const UserPage = () => {
 
   const [currentView, setCurrentView] = useState("profile");
   const [avatarFile, setAvatarFile] = useState(null);
-
-
 
   useEffect(() => {
     if (!userInfo) {
@@ -41,22 +40,21 @@ export const UserPage = () => {
   };
 
   const handleAvatarChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
+    if (isEditing && e.target.files && e.target.files[0]) {
       setAvatarFile(e.target.files[0]);
+      uploadAvatar(e.target.files[0]);
     }
   };
 
-  const uploadAvatar = async () => {
-    if (!avatarFile) return;
-
+  const uploadAvatar = async (file) => {
+    if (!isEditing || !file) return;
+  
     const formData = new FormData();
-    formData.append("file", avatarFile);
-
+    formData.append("file", file);
+  
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/users/upload/avatar/${
-          userInfo._id
-        }`,
+        `${import.meta.env.VITE_BACKEND_URL}/users/upload/avatar/${userInfo._id}`,
         formData,
         {
           headers: {
@@ -65,7 +63,7 @@ export const UserPage = () => {
           },
         }
       );
-
+  
       if (response.data.success) {
         dispatch(updateUser({ avatar: response.data.avatarUrl }));
         setEditedData((prev) => ({ ...prev, avatar: response.data.avatarUrl }));
@@ -134,7 +132,7 @@ export const UserPage = () => {
   };
 
   const defaultAvatarUrl =
-    "https://gamek.mediacdn.vn/133514250583805952/2023/11/15/screenshot60-170003261338138915475.png";
+    "https://inkythuatso.com/uploads/thumbnails/800/2023/03/9-anh-dai-dien-trang-inkythuatso-03-15-27-03.jpg";
 
   const renderField = (label, field, type = "text") => {
     return (
@@ -160,7 +158,6 @@ export const UserPage = () => {
   };
 
   if (!userInfo) {
-    
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md">
@@ -176,6 +173,49 @@ export const UserPage = () => {
       </div>
     );
   }
+
+  const renderAvatar = () => (
+    <div className={`w-32 h-32 rounded-full overflow-hidden mr-6 relative ${isEditing ? 'group' : ''}`}>
+      <img
+        src={editedData.avatar || defaultAvatarUrl}
+        alt="User Avatar"
+        className="w-full h-full object-cover"
+      />
+      {isEditing && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <label htmlFor="avatar-upload" className="cursor-pointer">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          </label>
+          <input
+            id="avatar-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+          />
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -211,43 +251,7 @@ export const UserPage = () => {
             {currentView === "profile" ? (
               <form onSubmit={handleSubmit}>
                 <div className="flex items-center mb-6">
-                  <div className="w-32 h-32 rounded-full overflow-hidden mr-6 relative group">
-                    <img
-                      src={editedData.avatar || defaultAvatarUrl}
-                      alt="User Avatar"
-                      className="w-full h-full object-cover"
-                    />
-                    {isEditing && (
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <label
-                          htmlFor="avatar-upload"
-                          className="cursor-pointer"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-8 w-8 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                          w
-                            />
-                          </svg>
-                        </label>
-                        <input
-                          id="avatar-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleAvatarChange}
-                          className="hidden"
-                        />
-                      </div>
-                    )}
-                  </div>
+                  {renderAvatar()}
                   <div>
                     <h4 className="text-xl font-semibold">{`${editedData.firstName} ${editedData.lastName}`}</h4>
                     <p className="text-gray-600">
@@ -265,9 +269,11 @@ export const UserPage = () => {
                   {renderField("Email Address", "email")}
                   {renderField("Phone Number", "phone")}
                   {renderField("Gender", "gender")}
-                  
+
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Account Created</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Account Created
+                    </label>
                     <p className="text-gray-900">
                       {editedData.createdAt
                         ? new Date(editedData.createdAt).toLocaleDateString()
@@ -278,11 +284,12 @@ export const UserPage = () => {
 
                 {isEditing && renderField("Password", "password", "password")}
 
-                {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+                {error && (
+                  <div className="text-red-500 text-sm mt-2">{error}</div>
+                )}
 
                 {isEditing && (
                   <div className="mt-6 flex justify-end">
-
                     <button
                       type="button"
                       onClick={handleCancel}
@@ -300,7 +307,6 @@ export const UserPage = () => {
                 )}
               </form>
             ) : (
-
               <form className="space-y-6">
                 <div>
                   <label
@@ -316,7 +322,7 @@ export const UserPage = () => {
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
                   />
                 </div>
-                
+
                 <div>
                   <label
                     htmlFor="newPassword"
@@ -339,7 +345,6 @@ export const UserPage = () => {
                     Retype New Password
                   </label>
                   <input
-                  
                     type="password"
                     name="retypeNewPassword"
                     id="retypeNewPassword"
