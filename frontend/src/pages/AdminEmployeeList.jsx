@@ -10,14 +10,12 @@ const AdminEmployeeList = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    gender: "",
     username: "",
     phone: "",
     password: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    gender: "",
-    role: "",
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -46,7 +44,7 @@ const AdminEmployeeList = () => {
       if (editingId) {
         await axiosInstance.put(`/employees/${editingId}`, formData);
       } else {
-        await axiosInstance.post("/employees", { ...formData, restaurantId });
+        await axiosInstance.post("/employees/register", { ...formData, restaurantId });
       }
       fetchEmployees();
       resetForm();
@@ -57,13 +55,11 @@ const AdminEmployeeList = () => {
 
   const handleEdit = (employee) => {
     setFormData({
-      username: employee.username,
-      phone: employee.phone,
       firstName: employee.firstName,
       lastName: employee.lastName,
-      email: employee.email,
       gender: employee.gender,
-      role: employee.role,
+      username: employee.username,
+      phone: employee.phone,
     });
     setEditingId(employee._id);
   };
@@ -79,14 +75,12 @@ const AdminEmployeeList = () => {
 
   const resetForm = () => {
     setFormData({
+      firstName: "",
+      lastName: "",
+      gender: "",
       username: "",
       phone: "",
       password: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      gender: "",
-      role: "",
     });
     setEditingId(null);
   };
@@ -95,7 +89,7 @@ const AdminEmployeeList = () => {
     (employee) =>
       employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchTerm.toLowerCase())
+      employee.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div></div>;
@@ -108,6 +102,39 @@ const AdminEmployeeList = () => {
       
       <form onSubmit={handleSubmit} className="mb-8 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div className="mb-4 flex flex-wrap -mx-2">
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              placeholder="First Name"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              placeholder="Last Name"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="w-full md:w-1/2 px-2 mb-4">
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleInputChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            >
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
           <div className="w-full md:w-1/2 px-2 mb-4">
             <input
               type="text"
@@ -137,62 +164,6 @@ const AdminEmployeeList = () => {
               placeholder="Password"
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
-          </div>
-          <div className="w-full md:w-1/2 px-2 mb-4">
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleInputChange}
-              placeholder="First Name"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div className="w-full md:w-1/2 px-2 mb-4">
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              placeholder="Last Name"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div className="w-full md:w-1/2 px-2 mb-4">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Email"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div className="w-full md:w-1/2 px-2 mb-4">
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="w-full md:w-1/2 px-2 mb-4">
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            >
-              <option value="">Select Role</option>
-              <option value="waiter">Waiter</option>
-              <option value="chef">Chef</option>
-              <option value="manager">Manager</option>
-            </select>
           </div>
         </div>
         <div className="flex items-center justify-between">

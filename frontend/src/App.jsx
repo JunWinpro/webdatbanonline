@@ -1,5 +1,6 @@
-import { Route, Routes } from "react-router-dom";
-import { ContactPage } from "./pages/ContactPage";
+import React, { useState, useEffect } from "react";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+
 import "./App.css";
 import { HomePage } from "./pages/HomePage.jsx";
 import { SigninPage } from "./pages/SigninPage";
@@ -7,14 +8,13 @@ import { SignupPage } from "./pages/SignupPage";
 import { ErrorPage } from "./pages/ErrorPage.jsx";
 import FixedNavBar from "./components/HomePage/FixedNavBar.jsx";
 import Navbar from "./components/HomePage/Navbar";
-import React, { useState, useEffect } from "react";
 import SearchBanner from "./components/HomePage/SearchBanner";
+import { ContactPage } from "./pages/ContactPage";
 import { ProductPage } from "./pages/ProductPage";
 import { UserPage } from "./pages/UserPage";
 import { ForgetPassPage } from "./pages/ForgetPassPage";
 import { useDispatch, useSelector } from "react-redux";
 import { login, logout } from "./store/slice/auth";
-import { useNavigate } from "react-router-dom";
 import axiosInstance from "./utils/axiosInstance";
 import authService from "./services/auth";
 import { ResetPassPage } from "./pages/ResetPassPage";
@@ -27,9 +27,12 @@ import AdminUserList from "./pages/AdminUserList";
 import AdminEmployeeList from "./pages/AdminEmployeeList";
 import AdminRestaurantList from "./pages/AdminRestaurantList";
 import CreateRestaurantPage from "./pages/CreateRestaurantPage";
+import { SearchProvider } from "./components/HomePage/SearchContent";
+
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isLogin } = useSelector((state) => state.auth);
   const [showFixedNavBar, setShowFixedNavBar] = useState(false);
   const [error, setError] = useState("");
@@ -41,16 +44,10 @@ function App() {
       if (!isLogin && localStorage.getItem("refreshToken")) {
         try {
           setIsLoading(true);
-          const { accessToken, userInfo, role } =
-            await authService.renewAccessToken(
-              localStorage.getItem("refreshToken")
-            );
-
-          console.log("Token refresh successful:", {
-            accessToken,
-            userInfo,
-            role,
-          });
+          const { accessToken, userInfo, role } = await authService.renewAccessToken(
+            localStorage.getItem("refreshToken")
+          );
+          console.log("Token refresh successful:", { accessToken, userInfo, role });
           dispatch(login({ accessToken, userInfo, role }));
         } catch (error) {
           console.error("Error refreshing token:", error);
@@ -82,6 +79,7 @@ function App() {
     };
     fetchCategories();
   }, []);
+
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -120,15 +118,21 @@ function App() {
     },
   ];
 
+  const handleSearch = (searchTerm) => {
+    if (location.pathname !== '/') {
+      navigate('/', { state: { searchTerm } });
+    }
+  };
+
   return (
-    <>
+    <SearchProvider>
       <Navbar navItems={navItems} />
       {showFixedNavBar && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <FixedNavBar navItems={navItems} />
         </div>
       )}
-      <SearchBanner />
+      <SearchBanner onSearch={handleSearch} />
       {error && (
         <div
           className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
@@ -201,7 +205,7 @@ function App() {
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </div>
-    </>
+    </SearchProvider>
   );
 }
 

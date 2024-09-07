@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import BookingBanner from "@/components/ProductPage/BookingBanner";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { setHours, setMinutes } from "date-fns";
+import { setHours, setMinutes, getDay, format, subHours } from "date-fns";
 
 export const ProductPage = () => {
   const { id } = useParams();
@@ -16,18 +16,23 @@ export const ProductPage = () => {
   const [arrivingDateTime, setArrivingDateTime] = useState(
     setHours(setMinutes(new Date(), 0), 12)
   );
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProductData = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/restaurants/restaurant/${id}`
         );
         if (response.data) {
+          console.log("Fetched restaurant data:", response.data);
           setProductData(response.data.data);
         }
       } catch (error) {
         console.error("Error fetching product data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -51,9 +56,11 @@ export const ProductPage = () => {
 
   const handleBookingSubmit = async () => {
     if (!isLogin) {
-      setBookingStatus("Please sign in to make a booking.");
+      setBookingStatus("Error: Please sign in to make a booking.");
       return;
     }
+    const adjustedDateTime = subHours(arrivingDateTime, 7);
+
     const bookingData = {
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
@@ -65,8 +72,12 @@ export const ProductPage = () => {
           menu: [],
         },
       ],
-      checkinTime: arrivingDateTime.getTime(),
+      checkinTime: adjustedDateTime.getTime(),
     };
+
+    console.log("Submitting booking with data:", bookingData);
+    console.log("Original selected time:", format(arrivingDateTime, "d MMMM, yyyy h:mm aa"));
+    console.log("Adjusted time (-7 hours):", format(adjustedDateTime, "d MMMM, yyyy h:mm aa"));
 
     try {
       const response = await axios.post(
@@ -79,13 +90,42 @@ export const ProductPage = () => {
         }
       );
       
+      
+      console.log("Booking response:", response.data);
       setBookingStatus("Booking successful!");
+      
+      const formattedDate = format(adjustedDateTime, "d MMMM, yyyy h:mm aa");
+      console.log("Booking time (formatted):", formattedDate);
 
     } catch (error) {
-      console.log(bookingData);
-      console.error("Error making booking:", error);
-      setBookingStatus("Error making booking. Please try again.");
+      console.error("Error making booking:", error.response?.data.message || error.message);
+      setBookingStatus("Error: Unable to process booking. Please try again.",error.response?.data || error.message);
     }
+  };
+
+  const filterTime = (time) => {
+    if (!productData || !productData.schedule) {
+      console.log("Schedule not available yet");
+      return true;
+    }
+
+    const selectedDay = getDay(time);
+    const schedule = productData.schedule.find(day => day.dayOfWeek === selectedDay);
+    
+    if (!schedule || !schedule.isWorkingDay) {
+      console.log(`Selected day (${selectedDay}) is not a working day`);
+      return false;
+    }
+
+    const hours = time.getHours();
+    const isWithinWorkingHours = hours >= schedule.openTime && hours < schedule.closeTime;
+  
+    return isWithinWorkingHours;
+  };
+
+  const handleDateChange = (date) => {
+    console.log("Selected date changed to:", format(date, "yyyy-MM-dd HH:mm:ss"));
+    setArrivingDateTime(date);
   };
 
   const bookingTable = (
@@ -94,23 +134,27 @@ export const ProductPage = () => {
       <p className="mb-4">Please select your booking details:</p>
       <div className="mb-4">
         <label className="block mb-2">Arriving Date and Time</label>
-        <DatePicker
-          selected={arrivingDateTime}
-          onChange={(date) => setArrivingDateTime(date)}
-          showTimeSelect
-          dateFormat="MMMM d, yyyy h:mm aa"
-          minDate={new Date()}
-          minTime={setHours(setMinutes(new Date(), 0), 0)}
-          maxTime={setHours(setMinutes(new Date(), 59), 23)}
-          className="p-2 border rounded w-full"
-        />
+        {isLoading ? (
+          <p>Loading restaurant schedule...</p>
+        ) : (
+          <DatePicker
+            selected={arrivingDateTime}
+            onChange={handleDateChange}
+            showTimeSelect
+            dateFormat="d MMMM, yyyy h:mm aa"
+            minDate={new Date()}
+            filterTime={filterTime}
+            className="p-2 border rounded w-full"
+          />
+        )}
       </div>
       <div className="mt-2">
         <button
           onClick={handleBookingSubmit}
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          disabled={isLoading}
         >
-          Book now
+          {isLoading ? "Loading..." : "Book now"}
         </button>
       </div>
       {bookingStatus && (

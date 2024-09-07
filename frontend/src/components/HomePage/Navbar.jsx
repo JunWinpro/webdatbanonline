@@ -138,9 +138,7 @@ const Navbar = ({ navItems }) => {
                     Manager Dashboard
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onSelect={() => setIsChangingAvatar(true)}>
-                  Change Avatar
-                </DropdownMenuItem>
+
                 <DropdownMenuItem onSelect={handleSignOut}>
                   Sign Out
                 </DropdownMenuItem>
