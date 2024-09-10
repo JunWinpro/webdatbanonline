@@ -100,7 +100,6 @@ const bookingController = {
             const { restaurantId } = req.params
             const { page, pageSize } = req.query
             const user = req.user
-
             if (user.role === "employee") {
                 const employee = await ModelDb.EmployeeModel.findOne({
                     _id: user.userId,
@@ -110,6 +109,7 @@ const bookingController = {
                 if (!employee) throw new Error("You don't have permission for this action")
             }
             if (user.role === "manager") {
+                console.log(restaurantId);
                 const restaurant = await ModelDb.RestaurantModel.findOne({
                     _id: restaurantId,
                     manager: user.userId,
@@ -133,7 +133,7 @@ const bookingController = {
                 checkinTime: -1
             }
 
-            const bookings = await pageSplit(ModelDb.BookingModel, filterModel, page, pageSize, sortModel, populated)
+            const bookings = await pageSplit(ModelDb.BookingModel, filterModel, page, pageSize, sortModel, undefined)
             if (bookings.length === 0) throw new Error("No booking found")
 
             const message = "Get bookings success"
