@@ -5,12 +5,14 @@ import { Link } from "react-router-dom";
 
 const AdminRestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
+  const [ownedRestaurants, setOwnedRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchRestaurants();
+    fetchOwnedRestaurants();
   }, []);
 
   const fetchRestaurants = async () => {
@@ -21,6 +23,15 @@ const AdminRestaurantList = () => {
     } catch (err) {
       setError("Error fetching restaurants");
       setLoading(false);
+    }
+  };
+
+  const fetchOwnedRestaurants = async () => {
+    try {
+      const response = await axiosInstance.get("/restaurants/owned");
+      setOwnedRestaurants(response.data.data.data.map(restaurant => restaurant._id));
+    } catch (err) {
+      console.error("Error fetching owned restaurants:", err);
     }
   };
 
@@ -66,7 +77,7 @@ const AdminRestaurantList = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-12 w-12">
-                      <img className="h-12 w-12 rounded-full object-cover" src={restaurant.image} alt="" />
+                      <img className="h-12 w-12 rounded-full object-cover" src={restaurant.avatar} alt="" />
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">{restaurant.name}</div>
@@ -82,12 +93,19 @@ const AdminRestaurantList = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {`$${restaurant.minPrice} - $${restaurant.maxPrice}`}
+                  {`$${restaurant.minPrice || 'N/A'} - $${restaurant.maxPrice || 'N/A'}`}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <Link to={`/admin/restaurants/${restaurant._id}/employees`} className="text-indigo-600 hover:text-indigo-900">
-                    Manage Employees
-                  </Link>
+                  {ownedRestaurants.includes(restaurant._id) && (
+                    <>
+                      <Link to={`/admin/restaurants/${restaurant._id}/employees`} className="text-indigo-600 hover:text-indigo-900 mr-4">
+                        Manage Employees
+                      </Link>
+                      <Link to={`/admin/restaurants/${restaurant._id}/bookings`} className="text-green-600 hover:text-green-900">
+                        Bookings
+                      </Link>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}

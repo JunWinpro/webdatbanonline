@@ -30,7 +30,7 @@ const Navbar = ({ navItems }) => {
   const [isChangingAvatar, setIsChangingAvatar] = useState(false);
   const [newAvatarUrl, setNewAvatarUrl] = useState("");
   const [error, setError] = useState("");
-  console.log(userInfo, isLogin);
+
   const handleSignOut = () => {
     dispatch(logout());
     navigate("/");

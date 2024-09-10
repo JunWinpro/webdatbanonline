@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useCallback } from 'react';
 
 const SearchContext = createContext();
 
@@ -7,14 +7,24 @@ export const SearchProvider = ({ children }) => {
   const [results, setResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const resetSearch = () => {
+  const resetSearch = useCallback(() => {
     setSearchTerm('');
     setResults([]);
     setHasSearched(false);
+  }, []);
+
+  const value = {
+    searchTerm,
+    setSearchTerm,
+    results,
+    setResults,
+    hasSearched,
+    setHasSearched,
+    resetSearch
   };
 
   return (
-    <SearchContext.Provider value={{ searchTerm, setSearchTerm, results, setResults, hasSearched, setHasSearched, resetSearch }}>
+    <SearchContext.Provider value={value}>
       {children}
     </SearchContext.Provider>
   );

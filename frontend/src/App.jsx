@@ -28,6 +28,7 @@ import AdminEmployeeList from "./pages/AdminEmployeeList";
 import AdminRestaurantList from "./pages/AdminRestaurantList";
 import CreateRestaurantPage from "./pages/CreateRestaurantPage";
 import { SearchProvider } from "./components/HomePage/SearchContent";
+import RestaurantBookings from "./pages/BookingRestaurant";
 
 function App() {
   const dispatch = useDispatch();
@@ -47,7 +48,7 @@ function App() {
           const { accessToken, userInfo, role } = await authService.renewAccessToken(
             localStorage.getItem("refreshToken")
           );
-          console.log("Token refresh successful:", { accessToken, userInfo, role });
+
           dispatch(login({ accessToken, userInfo, role }));
         } catch (error) {
           console.error("Error refreshing token:", error);
@@ -171,6 +172,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin","manager"]} isLoading={isLoading}>
                 <AdminRestaurantList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/restaurants/:idrestaurant/bookings"
+            element={
+              <ProtectedRoute allowedRoles={["admin","manager"]} isLoading={isLoading}>
+                <RestaurantBookings />
               </ProtectedRoute>
             }
           />

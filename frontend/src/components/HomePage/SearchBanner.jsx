@@ -5,25 +5,26 @@ import { SearchButton } from "../ui/Searchbutton";
 import TitleBar from "./TitleBar";
 import Categorybar from "./Categorybar";
 import { useSearch } from './SearchContent';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const SearchBanner = ({ onSearch }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { searchTerm, setSearchTerm, results, setResults, hasSearched, setHasSearched, resetSearch } = useSearch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSearch = useCallback(async () => {
-    if (!searchTerm) return;
+  const performSearch = useCallback(async (term) => {
+    if (!term) return;
     
     setLoading(true);
     setError(null);
-    onSearch(searchTerm);
+    onSearch(term);
   
     try {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/restaurants`, {
         params: {
-          name: searchTerm,
+          name: term,
           sort: 'minPrice_1'
         }
       });
@@ -39,21 +40,30 @@ const SearchBanner = ({ onSearch }) => {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, onSearch, setResults, setHasSearched]);
+  }, [onSearch, setResults, setHasSearched]);
 
   useEffect(() => {
-    if (location.pathname !== '/') {
-      resetSearch();
-    }
-  }, [location.pathname, resetSearch]);
+    const handleLocationChange = () => {
+      if (location.pathname !== '/') {
+        resetSearch();
+      } else if (location.state?.searchTerm) {
+        const newSearchTerm = location.state.searchTerm;
+        setSearchTerm(newSearchTerm);
+        performSearch(newSearchTerm);
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    };
 
-  useEffect(() => {
-    if (location.state?.searchTerm) {
-      setSearchTerm(location.state.searchTerm);
-      handleSearch();
-    }
-  }, [location.state, setSearchTerm, handleSearch]);
-  
+    handleLocationChange();
+  }, [location, resetSearch, setSearchTerm, performSearch, navigate]);
+
+  const handleSearch = useCallback(() => {
+    performSearch(searchTerm);
+  }, [performSearch, searchTerm]);
+
+  const handleInputChange = useCallback((e) => {
+    setSearchTerm(e.target.value);
+  }, [setSearchTerm]);
 
   return (
     <>
@@ -62,7 +72,7 @@ const SearchBanner = ({ onSearch }) => {
           type="text"
           placeholder="Search restaurants..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={handleInputChange}
           className="flex-grow"
         />
         <SearchButton 
