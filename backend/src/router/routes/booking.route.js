@@ -9,7 +9,7 @@ const bookingRoute = express.Router()
 bookingRoute.post('/', tokenMiddleware.verifyAccessToken, validateData.booking.createBooking,
     bookingController.createBooking
 )
-bookingRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.booking.getBooking, bookingController.getBookings)
+// bookingRoute.get('/', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.booking.getBooking, bookingController.getBookings)
 
 bookingRoute.get('/:id', tokenMiddleware.verifyAccessToken, authorization.employeeOrManager, validateData.objectId, bookingController.getBookings)
 

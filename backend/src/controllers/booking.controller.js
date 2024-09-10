@@ -97,21 +97,21 @@ const bookingController = {
     },
     getBookings: async (req, res) => {
         try {
-            const { restaurantId } = req.params
+            const { id } = req.params
             const { page, pageSize } = req.query
             const user = req.user
-
             if (user.role === "employee") {
                 const employee = await ModelDb.EmployeeModel.findOne({
                     _id: user.userId,
-                    restaurant: restaurantId,
+                    restaurant: id,
                     isDeleted: false
                 }).lean()
                 if (!employee) throw new Error("You don't have permission for this action")
             }
             if (user.role === "manager") {
+                console.log(id);
                 const restaurant = await ModelDb.RestaurantModel.findOne({
-                    _id: restaurantId,
+                    _id: id,
                     manager: user.userId,
                     isDeleted: false
                 }).lean()
@@ -124,7 +124,7 @@ const bookingController = {
                 if (key === 'tableNumber') {
                     filterModel['info.tableNumber'] = req.query[key]
                 }
-                if (key === "restaurantId") {
+                if (key === "id") {
                     filterModel.restaurant = req.query[key]
                 }
                 filterModel[key] = req.query[key]
@@ -133,7 +133,7 @@ const bookingController = {
                 checkinTime: -1
             }
 
-            const bookings = await pageSplit(ModelDb.BookingModel, filterModel, page, pageSize, sortModel, populated)
+            const bookings = await pageSplit(ModelDb.BookingModel, filterModel, page, pageSize, sortModel, undefined)
             if (bookings.length === 0) throw new Error("No booking found")
 
             const message = "Get bookings success"
