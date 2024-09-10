@@ -32,7 +32,7 @@ const authorization = {
     userOrEmployee: (req, res, next) => {
         try {
             const user = req.user
-            if (user.role === role.user || user.role === role.employee) next()
+            if (user.role === role.user && user.role === role.employee) next()
             else throw new Error("You don't have permission for this action")
         } catch (error) {
             returnError(res, 403, error)
@@ -65,7 +65,7 @@ const authorization = {
     managerOrAdmin: (req, res, next) => {
         try {
             const user = req.user
-            if (user.role !== role.admin || user.role !== role.manager) throw new Error("You don't have permission for this action")
+            if (user.role !== role.admin && user.role !== role.manager) throw new Error("You don't have permission for this action")
             next()
         }
         catch (err) {
@@ -75,7 +75,7 @@ const authorization = {
     employeeOrManager: (req, res, next) => {
         try {
             const user = req.user
-            if (user.role !== role.employee || user.role !== role.manager) throw new Error("You don't have permission for this action")
+            if (user.role !== role.employee && user.role !== role.manager) throw new Error("You don't have permission for this action")
             next()
         } catch (error) {
             returnError(res, 403, error)
