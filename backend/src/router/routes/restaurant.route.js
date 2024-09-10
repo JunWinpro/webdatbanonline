@@ -21,7 +21,7 @@ restaurantRoute.post('/upload/avatar/:id', tokenMiddleware.verifyAccessToken, au
 restaurantRoute.post('/', tokenMiddleware.verifyAccessToken, authorization.manager, validateData.restaurant.createRestaurant, restaurantController.createRestaurant)
 
 restaurantRoute.get('/', queryMiddleWare.restaurant, restaurantController.getRestaurants)
-restaurantRoute.get('/restaurant/:restaurantId', validateData.objectId, restaurantController.getRestaurantById)
+restaurantRoute.get('/restaurant/:id', validateData.objectId, restaurantController.getRestaurantById)
 restaurantRoute.get('/owned', tokenMiddleware.verifyAccessToken, authorization.manager, queryMiddleWare.ownedRestaurants, restaurantController.getOwnedRestaurants)
 restaurantRoute.get('/booked-table/:id', validateData.objectId, restaurantController.getEmptyTable)
 
