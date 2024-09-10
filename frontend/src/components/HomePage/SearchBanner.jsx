@@ -18,9 +18,8 @@ const SearchBanner = ({ onSearch }) => {
     
     setLoading(true);
     setError(null);
-    setHasSearched(true);
     onSearch(searchTerm);
-
+  
     try {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/restaurants`, {
         params: {
@@ -30,6 +29,7 @@ const SearchBanner = ({ onSearch }) => {
       });
       if (response.data.success) {
         setResults(response.data.data.data);
+        setHasSearched(true);
       } else {
         setError('Failed to fetch results');
       }
@@ -50,14 +50,10 @@ const SearchBanner = ({ onSearch }) => {
   useEffect(() => {
     if (location.state?.searchTerm) {
       setSearchTerm(location.state.searchTerm);
-    }
-  }, [location.state, setSearchTerm]);
-
-  useEffect(() => {
-    if (location.state?.searchTerm) {
       handleSearch();
     }
-  }, [location.state, handleSearch]);
+  }, [location.state, setSearchTerm, handleSearch]);
+  
 
   return (
     <>

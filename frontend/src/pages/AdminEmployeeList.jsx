@@ -33,7 +33,6 @@ const AdminEmployeeList = () => {
       setLoading(false);
     }
   };
-
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -43,6 +42,7 @@ const AdminEmployeeList = () => {
     try {
       if (editingId) {
         await axiosInstance.put(`/employees/${editingId}`, formData);
+
       } else {
         await axiosInstance.post("/employees/register", { ...formData, restaurantId });
       }
@@ -140,7 +140,7 @@ const AdminEmployeeList = () => {
               type="text"
               name="username"
               value={formData.username}
-              onChange={handleInputChange}
+              onChange={handleInputChange} 
               placeholder="Username"
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />

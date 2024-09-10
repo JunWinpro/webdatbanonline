@@ -134,7 +134,7 @@ const Navbar = ({ navItems }) => {
                   </DropdownMenuItem>
                 )}
                 {userInfo && userInfo.role === "manager" && (
-                  <DropdownMenuItem onSelect={() => navigate("/manager")}>
+                  <DropdownMenuItem onSelect={() => navigate("/admin/restaurants")}>
                     Manager Dashboard
                   </DropdownMenuItem>
                 )}
